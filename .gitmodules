@@ -1,0 +1,3 @@
+[submodule "firmware/stm32-generated"]
+	path = firmware/stm32-generated
+	url = https://github.com/GrangerWeasley/UGVC-Rover-stm32-generated.git
