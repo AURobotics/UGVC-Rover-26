@@ -6,7 +6,7 @@ This is the Console sub-project folder, containing the source code for the remot
 
 ### Project Setup
 
-After cloning the mono-repo, open the `rover_ws/` folder inside your favorite text editor or IDE.
+After cloning the mono-repo, open the `console/` folder inside your favorite text editor or IDE.
 
 ### Pre-requisites
 
