@@ -5,11 +5,12 @@ readme = "README.md"
 platforms = ["linux-64", "win-64", "osx-64", "osx-arm64", "linux-aarch64"]
 channels = ["https://prefix.dev/robostack-jazzy", "https://prefix.dev/conda-forge"]
 
-[tasks]
-
 [dependencies]
 python = ">=3.12.13,<3.13"
 pyside6 = ">=6.10.2,<7"
 ros-jazzy-ros-base = ">=0.11.0,<0.12"
 ros-jazzy-std-msgs = ">=5.3.6,<6"
 ros-jazzy-rclpy = ">=7.1.9,<8"
+
+[tasks]
+console = "python src/console/__main__.py"
