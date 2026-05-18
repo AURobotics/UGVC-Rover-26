@@ -38,17 +38,25 @@ class HomographyBEV:
 
     def _build_extrinsics(self):
 
+        cp = np.cos(self.pitch)
+        sp = np.sin(self.pitch)
+
+        # World-to-camera rotation
         self.R = np.array([
-            [1, 0, 0],
-            [0, np.cos(self.pitch), -np.sin(self.pitch)],
-            [0, np.sin(self.pitch),  np.cos(self.pitch)]
+            [-1, 0, 0],
+            [0, cp, -sp],
+            [0, sp,  cp]
         ], dtype=np.float64)
 
-        self.t = np.array([
+        # Camera position in world frame
+        C = np.array([
             [0],
             [0],
             [self.camera_height]
         ], dtype=np.float64)
+
+        # Proper translation
+        self.t = -self.R @ C
 
     # =========================================================
     # BUILD HOMOGRAPHY
@@ -68,8 +76,8 @@ class HomographyBEV:
     def _build_bev_scaling(self):
 
         corners_px = np.array([
-            [0, self.img_h // 2],
-            [self.img_w - 1, self.img_h // 2],
+            [0, self.img_h *0.5],
+            [self.img_w - 1, self.img_h *0.5],
             [0, self.img_h - 1],
             [self.img_w - 1, self.img_h - 1],
         ], dtype=np.float64)
@@ -184,7 +192,7 @@ class HomographyBEV:
             borderValue=(0, 0, 0)
         )
 
-        bev = cv2.flip(bev, 0)
+        #bev = cv2.flip(bev, 0)
 
         return bev
 
@@ -226,23 +234,22 @@ if __name__ == "__main__":
     h, w = image.shape[:2]
 
     K = np.array([
-        [1000, 0, 960],
-        [0, 1000, 540],
+        [1000, 0, w/2],
+        [0, 1000, h/2],
         [0, 0, 1]
     ], dtype=np.float64)
 
     bev = HomographyBEV(
         K=K,
         camera_height=1.43,
-        pitch_deg=-50,
+        pitch_deg=-45,
         image_size=(w, h)
     )
-
+    print(f"w={w}\nh={h}")
     # =============================================================
     # SINGLE PIXEL
     # =============================================================
-
-    X, Y = bev.pixel_to_ground(700, 700)
+    X, Y = bev.pixel_to_ground(442,620)
 
     print(f"Ground point: X={X:.3f}, Y={Y:.3f}")
 
