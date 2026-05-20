@@ -15,7 +15,9 @@ setup(
     zip_safe=True,
     maintainer='abdelaziz',
     maintainer_email='abdelaziz.islam.galal@gmail.com',
-    description='TODO: Package description',
+    description='TODO: subscribes to video stream, ' \
+    'detects white road lane markings and white pot holes' \
+    ' then publishes the detected markings and potholes as a point clouds for Nav2',
     license='TODO: License declaration',
     extras_require={
         'test': [
