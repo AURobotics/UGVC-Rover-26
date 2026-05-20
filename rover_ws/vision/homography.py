@@ -9,7 +9,9 @@ class HomographyBEV:
         K,
         camera_height,
         pitch_deg,
-        image_size,
+        yaw_deg=0.0,
+        roll_deg=0.0,
+        image_size=None,
         dist_coeffs=None
     ):
 
@@ -23,7 +25,12 @@ class HomographyBEV:
 
         self.camera_height = camera_height
         self.pitch_deg = pitch_deg
+        self.yaw_deg   = yaw_deg
+        self.roll_deg  = roll_deg
+
         self.pitch = np.deg2rad(pitch_deg)
+        self.yaw   = np.deg2rad(yaw_deg)
+        self.roll  = np.deg2rad(roll_deg)
 
         self.img_w = image_size[0]
         self.img_h = image_size[1]
@@ -38,24 +45,40 @@ class HomographyBEV:
 
     def _build_extrinsics(self):
 
-        cp = np.cos(self.pitch)
-        sp = np.sin(self.pitch)
+        cp, sp = np.cos(self.pitch), np.sin(self.pitch)
+        cy, sy = np.cos(self.yaw),   np.sin(self.yaw)
+        cr, sr = np.cos(self.roll),  np.sin(self.roll)
 
-        # World-to-camera rotation
-        self.R = np.array([
-            [-1, 0, 0],
-            [0, cp, -sp],
-            [0, sp,  cp]
+        # Rotation around X-axis (pitch: tilts camera up/down)
+        R_pitch = np.array([
+            [ 1,  0,   0],
+            [ 0,  cp, -sp],
+            [ 0,  sp,  cp]
         ], dtype=np.float64)
+
+        # Rotation around Z-axis (yaw: rotates camera left/right)
+        R_yaw = np.array([
+            [ cy, -sy,  0],
+            [ sy,  cy,  0],
+            [  0,   0,  1]
+        ], dtype=np.float64)
+
+        # Rotation around Y-axis (roll: tilts camera sideways)
+        R_roll = np.array([
+            [ cr,  0,  sr],
+            [  0,  1,   0],
+            [-sr,  0,  cr]
+        ], dtype=np.float64)
+
+        # Full world-to-camera rotation
+        R_world = R_pitch @ R_yaw @ R_roll
+
+        # Mirror X so +X is rightward in the image
+        M = np.diag([-1.0, 1.0, 1.0])
+        self.R = M @ R_world
 
         # Camera position in world frame
-        C = np.array([
-            [0],
-            [0],
-            [self.camera_height]
-        ], dtype=np.float64)
-
-        # Proper translation
+        C = np.array([[0], [0], [self.camera_height]], dtype=np.float64)
         self.t = -self.R @ C
 
     # =========================================================
@@ -76,26 +99,23 @@ class HomographyBEV:
     def _build_bev_scaling(self):
 
         corners_px = np.array([
-            [0, self.img_h *0.5],
-            [self.img_w - 1, self.img_h *0.5],
-            [0, self.img_h - 1],
+            [0,              self.img_h * 0.2],
+            [self.img_w - 1, self.img_h * 0.2],
+            [0,              self.img_h - 1],
             [self.img_w - 1, self.img_h - 1],
         ], dtype=np.float64)
 
         world_pts = []
 
         for (u, v) in corners_px:
-
             ground = self.H_inv @ np.array([u, v, 1.0])
             ground /= ground[2]
-
             world_pts.append((ground[0], ground[1]))
 
         world_pts = np.array(world_pts)
 
         x_min = world_pts[:, 0].min()
         x_max = world_pts[:, 0].max()
-
         y_min = world_pts[:, 1].min()
         y_max = world_pts[:, 1].max()
 
@@ -108,13 +128,12 @@ class HomographyBEV:
         )
 
         self.S = np.array([
-            [scale, 0, -scale * x_min],
-            [0, -scale, scale * y_max],
-            [0, 0, 1]
+            [scale,  0,     -scale * x_min],
+            [0,     -scale,  scale * y_max],
+            [0,      0,      1            ]
         ], dtype=np.float64)
 
         self.S_inv = np.linalg.inv(self.S)
-
         self.H_bev = self.S @ self.H_inv
 
     # =========================================================
@@ -123,8 +142,11 @@ class HomographyBEV:
 
     def pixel_to_ground(self, u, v):
 
-        pixel = np.array([u, v, 1.0], dtype=np.float64)
+        pts = np.array([[[u, v]]], dtype=np.float32)
+        undist = cv2.undistortPoints(pts, self.K, self.dist_coeffs, P=self.K)
+        u2, v2 = undist[0, 0]
 
+        pixel = np.array([u2, v2, 1.0], dtype=np.float64)
         ground = self.H_inv @ pixel
         ground /= ground[2]
 
@@ -136,21 +158,20 @@ class HomographyBEV:
 
     def pixels_to_ground(self, pixels):
 
-        pixels = np.asarray(pixels, dtype=np.float64)
+        pixels = np.asarray(pixels, dtype=np.float32).reshape(-1, 1, 2)
+        undist = cv2.undistortPoints(pixels, self.K, self.dist_coeffs, P=self.K)
+        undist = undist.reshape(-1, 2).astype(np.float64)
 
         px = np.stack([
-            pixels[:, 0],
-            pixels[:, 1],
-            np.ones(len(pixels))
+            undist[:, 0],
+            undist[:, 1],
+            np.ones(len(undist))
         ], axis=0)
 
         ground = self.H_inv @ px
         ground /= ground[2]
 
-        X = ground[0]
-        Y = ground[1]
-
-        return np.stack([X, Y], axis=1)
+        return np.stack([ground[0], ground[1]], axis=1)
 
     # =========================================================
     # MASK -> POINT CLOUD
@@ -160,10 +181,14 @@ class HomographyBEV:
 
         ys, xs = np.where(mask > 0)
 
+        pts = np.stack([xs, ys], axis=1).astype(np.float32).reshape(-1, 1, 2)
+        undist = cv2.undistortPoints(pts, self.K, self.dist_coeffs, P=self.K)
+        undist = undist.reshape(-1, 2).astype(np.float64)
+
         px = np.stack([
-            xs.astype(np.float64),
-            ys.astype(np.float64),
-            np.ones_like(xs, dtype=np.float64)
+            undist[:, 0],
+            undist[:, 1],
+            np.ones(len(undist))
         ], axis=0)
 
         ground = self.H_inv @ px
@@ -173,9 +198,7 @@ class HomographyBEV:
         Y = ground[1]
         Z = np.zeros_like(X)
 
-        points = np.stack([X, Y, Z], axis=1)
-
-        return points
+        return np.stack([X, Y, Z], axis=1)
 
     # =========================================================
     # WARP IMAGE TO BEV
@@ -183,16 +206,16 @@ class HomographyBEV:
 
     def warp_to_bev(self, image):
 
+        undistorted = cv2.undistort(image, self.K, self.dist_coeffs)
+
         bev = cv2.warpPerspective(
-            image,
+            undistorted,
             self.H_bev,
             (self.out_w, self.out_h),
             flags=cv2.INTER_LINEAR,
             borderMode=cv2.BORDER_CONSTANT,
             borderValue=(0, 0, 0)
         )
-
-        #bev = cv2.flip(bev, 0)
 
         return bev
 
@@ -218,7 +241,6 @@ class HomographyBEV:
         )
 
         with open(filename, 'w') as f:
-
             f.write(header)
             np.savetxt(f, points, fmt="%.4f")
 
@@ -229,53 +251,62 @@ class HomographyBEV:
 # EXAMPLE USAGE
 # =============================================================
 if __name__ == "__main__":
-    image = cv2.imread("../data/raw/ground.jpeg")
 
+    image = cv2.imread("../data/raw/ground.jpeg")
     h, w = image.shape[:2]
 
     K = np.array([
-        [1000, 0, w/2],
-        [0, 1000, h/2],
-        [0, 0, 1]
+        [793.79768697,   0,           290.78702859],
+        [  0,          813.96117996,  241.57106901],
+        [  0,            0,             1         ]
     ], dtype=np.float64)
 
     bev = HomographyBEV(
         K=K,
-        camera_height=1.43,
+        camera_height=1.33,
         pitch_deg=-45,
-        image_size=(w, h)
+        yaw_deg=-2,
+        roll_deg=-7,
+        image_size=(w, h),
+        dist_coeffs=np.array([
+            -4.97661814e-01,
+             8.05356640e+00,
+             9.44660547e-03,
+            -2.64434172e-02,
+            -4.33974203e+01
+        ])
     )
-    print(f"w={w}\nh={h}")
-    # =============================================================
-    # SINGLE PIXEL
-    # =============================================================
-    X, Y = bev.pixel_to_ground(442,620)
 
+    print(f"w={w}\nh={h}")
+
+    # =========================================================
+    # SINGLE PIXEL
+    # =========================================================
+
+    X, Y = bev.pixel_to_ground(585, 375)
     print(f"Ground point: X={X:.3f}, Y={Y:.3f}")
 
-    # =============================================================
+    # =========================================================
     # WARP FULL IMAGE
-    # =============================================================
+    # =========================================================
 
     bird_eye = bev.warp_to_bev(image)
 
-    # =============================================================
+    # =========================================================
     # MASK -> POINT CLOUD
-    # =============================================================
+    # =========================================================
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
     _, mask = cv2.threshold(gray, 120, 255, cv2.THRESH_BINARY)
 
     points = bev.mask_to_pointcloud(mask)
-
     print("Point cloud shape:", points.shape)
 
     bev.save_pcd(points, "ground_plane.pcd")
 
-    # =============================================================
+    # =========================================================
     # DISPLAY
-    # =============================================================
+    # =========================================================
 
     cv2.imshow("Original", image)
     cv2.imshow("Mask", mask)
