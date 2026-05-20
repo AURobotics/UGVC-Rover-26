@@ -3,7 +3,11 @@
 <package format="3">
   <name>road_detector</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>TODO: 
+    subscribes to video stream,
+    detects white road lane markings and white pot holes
+    then publishes the detected markings and potholes as a point clouds for Nav2
+  </description>
   <maintainer email="abdelaziz.islam.galal@gmail.com">abdelaziz</maintainer>
   <license>TODO: License declaration</license>
 
