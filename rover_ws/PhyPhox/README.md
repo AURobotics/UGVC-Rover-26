@@ -1,10 +1,11 @@
-# Phyphox API Documentation
+# Phyphox API Documentation & ROS Integration
 ## Reverse Engineered from Network Traffic Analysis
 
 **Branch:** PhyPhox  
-**Date:** 2026-05-19  
+**Date:** 2026-05-20  
 **Connection Method:** ADB Port Forwarding  
-**Base URL:** `http://localhost:8080/`
+**Base URL:** `http://localhost:8080/`  
+**Status:** Enhanced with Python API client and ROS integration
 
 ---
 
@@ -63,9 +64,9 @@ curl "http://localhost:8080/control?cmd=start"
 
 | Endpoint | Method | Parameters | Description |
 |----------|--------|------------|-------------|
-| `/get` | GET | `<sensor_name>=` | Get sensor data buffer |
+| `/get` | GET | `<sensor_name>` | Get sensor data buffer |
 
-**Note:** Empty parameter value is required (e.g., `acc_x=` not just `acc_x`)
+**Note:** The API accepts key-only sensor parameters without `=` when there is no timestamp. Multiple sensors can be requested together with `&`, for example `?acc_x&gyr_x&mag_x`.
 
 ---
 
@@ -81,9 +82,13 @@ curl "http://localhost:8080/control?cmd=start"
 
 **Example URL:**
 ```
-http://localhost:8080/get?acc_x=
-http://localhost:8080/get?acc_y=
-http://localhost:8080/get?acc_z=
+http://localhost:8080/get?acc_x
+http://localhost:8080/get?acc_y
+http://localhost:8080/get?acc_z
+```
+**Chained example:**
+```
+http://localhost:8080/get?acc_x&gyr_x&mag_x
 ```
 
 **When phone is flat and still:** `acc_z ≈ 9.8 m/s²` (Earth's gravity)
@@ -337,42 +342,309 @@ These `&t=<timestamp>` parameters can be safely removed. The API works without t
 
 ## Python Implementation
 
-See `phyphox_api_adb.py` for complete implementation using:
-- `requests.get()` for HTTP requests
-- `json.loads()` for JSON parsing
-- Functions to extract floats into Python lists and dictionaries
+### Phyphox API Client (`phyphox_api_adb.py`)
 
-**Basic usage:**
+Complete Python client with automatic error handling, HTTP requests, and JSON parsing.
+
+#### Core Functions
+
+**Connection Testing:**
+```python
+from phyphox_api_adb import test_connection
+
+if test_connection():
+    print("✓ Connected to Phyphox")
+else:
+    print("✗ Connection failed - check ADB forwarding")
+```
+
+**Control Functions:**
+```python
+from phyphox_api_adb import start_acquisition, stop_acquisition, clear_buffers
+
+start_acquisition()   # Start measurement
+stop_acquisition()    # Stop measurement
+clear_buffers()       # Clear data buffers
+```
+
+**Single Sensor Queries:**
+```python
+from phyphox_api_adb import get_latest_value, get_all_values
+
+# Get most recent value
+latest_acc_x = get_latest_value('accX')  # Returns: float or None
+
+# Get all buffered values
+all_values = get_all_values('accX')      # Returns: List[float]
+```
+
+**Batch Sensor Retrieval (Recommended):**
+```python
+from phyphox_api_adb import (
+    get_all_accelerometer,
+    get_all_gyroscope,
+    get_all_linear_acceleration,
+    get_all_magnetometer,
+    get_gps_location,
+    get_all_sensors
+)
+
+# Individual sensor groups
+accel = get_all_accelerometer()  # {'x': float, 'y': float, 'z': float}
+gyro = get_all_gyroscope()
+lin_accel = get_all_linear_acceleration()
+mag = get_all_magnetometer()
+
+# GPS with extended fields
+gps = get_gps_location()
+# Returns: {
+#   'lat': float,
+#   'lon': float,
+#   'altitude': float,
+#   'velocity': float,
+#   'direction': float,
+#   'accuracy': float,
+#   'z_accuracy': float,
+#   'satellites': float,
+#   'status': float
+# }
+
+# Get all sensors at once
+all_data = get_all_sensors()
+# Returns: {
+#   'accelerometer': {...},
+#   'gyroscope': {...},
+#   'linear_acceleration': {...},
+#   'magnetometer': {...},
+#   'location': {...}
+# }
+```
+
+#### Error Handling
+
+The API client includes robust error handling:
+
+```python
+# Timeouts (default 2.0s)
+# ConnectionError (if ADB forwarding not active)
+# JSON parsing errors
+# Missing sensor/buffer errors
+
+# All errors are logged with helpful messages
+try:
+    data = fetch_sensor_data('accX')
+except:
+    # Check logs for: "Is ADB port forwarding active?"
+    pass
+```
+
+#### Example: Real-time IMU Monitoring
+
+```python
+from phyphox_api_adb import get_all_accelerometer, get_all_gyroscope, test_connection
+import time
+
+if not test_connection():
+    print("Failed to connect to Phyphox")
+    exit()
+
+print("Monitoring IMU data (press Ctrl+C to stop)...")
+try:
+    while True:
+        accel = get_all_accelerometer()
+        gyro = get_all_gyroscope()
+        
+        print(f"\rAccel: X={accel['x']:6.2f} Y={accel['y']:6.2f} Z={accel['z']:6.2f} | "
+              f"Gyro: X={gyro['x']:6.2f} Y={gyro['y']:6.2f} Z={gyro['z']:6.2f}", end='')
+        
+        time.sleep(0.05)  # 20 Hz
+except KeyboardInterrupt:
+    print("\nStopped")
+```
+
+---
+
+### ROS Integration (`phyphox_ros_node_adb.py`)
+
+Full ROS node that publishes Phyphox sensor data to standard ROS topics.
+
+#### ROS Topics Published
+
+| Topic | Message Type | Description |
+|-------|-------------|-------------|
+| `/phyphox/imu` | `sensor_msgs/Imu` | Accelerometer (with gravity) + Gyroscope |
+| `/phyphox/magnetic_field` | `sensor_msgs/MagneticField` | Magnetometer (µT converted to Tesla) |
+| `/phyphox/linear_acceleration` | `geometry_msgs/Vector3Stamped` | Linear acceleration (gravity removed) |
+| `/phyphox/gps` | `sensor_msgs/NavSatFix` | GPS location and status |
+
+#### ROS Parameters
+
+```yaml
+# Node parameters (default values)
+~rate: 20.0          # Publishing rate (Hz)
+~frame_id: 'phyphox' # TF frame ID
+~timeout: 2.0        # HTTP timeout (seconds)
+```
+
+#### Launching the ROS Node
+
+**From launch file:**
+```xml
+<launch>
+    <!-- Ensure ADB port forwarding is active -->
+    <!-- adb forward tcp:8080 tcp:8080 -->
+    
+    <node name="phyphox_adb_node" pkg="rover_ws" type="phyphox_ros_node_adb.py" output="screen">
+        <param name="rate" value="20"/>
+        <param name="frame_id" value="phyphox"/>
+        <param name="timeout" value="2.0"/>
+    </node>
+</launch>
+```
+
+**Manually:**
+```bash
+# In ROS environment
+rosrun rover_ws phyphox_ros_node_adb.py
+```
+
+#### ROS Node Features
+
+- **Connection Testing:** Validates Phyphox connection on startup
+- **Automatic Startup:** Starts data acquisition if not already running
+- **Error Recovery:** Graceful handling of connection failures
+- **Unit Conversion:** Automatically converts sensor units (µT → T, etc.)
+- **Message Headers:** Stamps all messages with ROS timestamps
+
+#### Monitoring ROS Topics
+
+```bash
+# View IMU data
+rostopic echo /phyphox/imu
+
+# View GPS data
+rostopic echo /phyphox/gps
+
+# View magnetic field
+rostopic echo /phyphox/magnetic_field
+
+# Monitor publish rate
+rostopic hz /phyphox/imu
+
+# Record bag file
+rosbag record /phyphox/imu /phyphox/gps -o sensor_data.bag
+```
+
+---
+
+## GPS Location Data
+
+The API now provides extended GPS information:
+
+| Field | Unit | Description |
+|-------|------|-------------|
+| `lat` | degrees | Latitude (North/South) |
+| `lon` | degrees | Longitude (East/West) |
+| `altitude` | meters | Altitude above sea level |
+| `velocity` | m/s | Speed over ground |
+| `direction` | degrees | Heading (0-360°) |
+| `accuracy` | meters | Horizontal accuracy |
+| `z_accuracy` | meters | Vertical accuracy |
+| `satellites` | count | Number of satellites used |
+| `status` | code | GPS fix status |
+
+**Example:**
+```python
+from phyphox_api_adb import get_gps_location
+
+gps = get_gps_location()
+print(f"Position: {gps['lat']}, {gps['lon']}")
+print(f"Accuracy: ±{gps['accuracy']:.1f}m")
+print(f"Satellites: {gps['satellites']:.0f}")
+```
+
+---
+
+## Advanced Usage
+
+### Custom HTTP Requests
+
+For advanced use cases, access the base URL directly:
+
 ```python
 import requests
 import json
 
-# Fetch sensor data
-response = requests.get("http://localhost:8080/get?acc_x=")
+BASE_URL = "http://localhost:8080"
+
+# Get raw response
+response = requests.get(f"{BASE_URL}/get?accX=", timeout=2.0)
 data = json.loads(response.text)
 
-# Extract float values
-values = data['buffer']['acc_x']['buffer']
-latest = values[-1]  # Most recent value
+# Access full buffer info
+buffer_size = data['buffer']['accX']['size']
+update_mode = data['buffer']['accX']['updateMode']
+is_measuring = data['status']['measuring']
+```
 
-print(f"Latest acc_x: {latest:.3f} m/s²")
+### Sensor Discovery
+
+```python
+from phyphox_api_adb import list_available_sensors
+
+available = list_available_sensors()
+print(f"Available sensors: {available}")
+```
+
+### Batch Processing
+
+```python
+from phyphox_api_adb import fetch_sensor_data, extract_floats
+
+# Low-level access for custom processing
+raw_data = fetch_sensor_data('accX')
+values = extract_floats(raw_data, 'accX')
+
+# Process values
+average = sum(values) / len(values) if values else 0
 ```
 
 ---
 
 ## Testing Checklist
 
-- [x] ADB port forwarding active
+### Basic Setup
+- [x] ADB port forwarding active (`adb forward tcp:8080 tcp:8080`)
 - [x] Phyphox Remote Access enabled
 - [x] Can access http://localhost:8080/ in browser
-- [x] F12 developer tools open
-- [x] Network tab recording requests
-- [x] Observed URLs for all sensor types
-- [x] Timestamps removed from URLs
-- [x] Data types identified (all float)
-- [x] Response format documented
-- [x] Python implementation created
-- [x] Test script validates all endpoints
+- [x] Device connected via USB
+
+### API Client Testing
+- [x] Connection test passes: `test_connection()`
+- [x] Acquisition control works: `start_acquisition()`, `stop_acquisition()`
+- [x] Single sensor retrieval: `get_latest_value()`, `get_all_values()`
+- [x] Batch retrieval works: `get_all_accelerometer()`, etc.
+- [x] Error handling for timeout (2.0s)
+- [x] Error handling for connection failure
+- [x] JSON parsing handles null values
+- [x] GPS extended fields available
+
+### ROS Integration Testing
+- [x] ROS node starts without errors
+- [x] ROS node detects Phyphox connection
+- [x] Topics published: `/phyphox/imu`, `/phyphox/gps`, `/phyphox/magnetic_field`
+- [x] Message headers stamped with timestamps
+- [x] Unit conversions correct (µT → Tesla)
+- [x] Publishing rate matches parameter (default 20 Hz)
+- [x] Can record topics to bag file
+- [x] ROS node gracefully handles disconnection
+
+### Network Debugging
+- [x] Browser DevTools network tab open
+- [x] All sensor URLs observed
+- [x] Timestamp parameters identified
+- [x] Response format matches documentation
+- [x] No spurious errors in console
 
 ---
 
@@ -383,29 +655,124 @@ print(f"Latest acc_x: {latest:.3f} m/s²")
 ✅ **More reliable** - No network interference  
 ✅ **Lower latency** - USB is faster than WiFi  
 ✅ **Simpler setup** - One `adb forward` command  
+✅ **Production-ready client** - Full error handling & type safety  
+✅ **ROS integration** - Direct integration with ROS ecosystem  
+✅ **Extended GPS data** - Velocity, direction, accuracy, satellite count  
+✅ **Batch operations** - Get all sensor axes in one call  
+✅ **Unit conversion** - Automatic µT→Tesla conversion for magnetic field  
+
+---
+
+## What's New (v2.0)
+
+### Python API Client
+- ✨ Robust error handling with timeout & connection detection
+- ✨ Type hints for better IDE support
+- ✨ Batch retrieval functions (get_all_accelerometer, etc.)
+- ✨ Connection testing (test_connection)
+- ✨ Buffer control (start, stop, clear acquisition)
+- ✨ Sensor discovery (list_available_sensors)
+- ✨ Extended GPS data (velocity, direction, accuracy, satellites)
+
+### ROS Node Integration
+- ✨ Full ROS node (`phyphox_ros_node_adb.py`)
+- ✨ Publishes to standard ROS topics (/phyphox/imu, /phyphox/gps, etc.)
+- ✨ Uses ROS parameters for configuration
+- ✨ Automatic unit conversion
+- ✨ Message timestamping and frame IDs
+- ✨ Startup validation and error recovery  
 
 ---
 
 ## Troubleshooting
 
-**"Connection refused"**
-- Check Remote Access enabled in Phyphox
-- Verify `adb forward` is active: `adb forward --list`
-- Restart Phyphox app
+### Connection Issues
+
+**"Connection refused" / "Failed to connect to Phyphox"**
+- Verify: `adb devices` shows your phone
+- Run: `adb forward tcp:8080 tcp:8080`
+- Check: Phyphox app has Remote Access enabled (⋮ menu)
+- Restart Phyphox app if forwarding was set up before launch
+
+**"Is ADB port forwarding active?"**
+- Run: `adb forward --list` (should show tcp:8080 → tcp:8080)
+- Reconnect USB if necessary
+- Try: `adb kill-server && adb start-server`
+
+### API Client Issues
 
 **"Empty buffers []"**
-- Press ▶ (Play) to start measurement
+- Press ▶ (Play) to start measurement in Phyphox
 - Wait 1-2 seconds for data accumulation
-- Check sensor is enabled in experiment
+- Verify sensor is enabled in experiment
 
-**"adb: command not found"**
-- Install platform-tools
-- Add to PATH
+**"Invalid JSON response" / "Response missing 'buffer' key"**
+- Check that Phyphox is still running
+- Verify URL: `curl http://localhost:8080/get?accX=`
+- Check browser DevTools network tab for actual response
 
-**GPS values are 0.0**
-- Go outdoors or near window
+**"Timeout fetching sensor"**
+- Increase timeout parameter (default: 2.0s)
+- Check USB connection latency
+- Verify Phyphox app is responsive
+
+### ROS Node Issues
+
+**"Failed to connect to Phyphox!" (on node startup)**
+- Ensure `adb forward tcp:8080 tcp:8080` is active BEFORE launching ROS node
+- Check that Phyphox is running with Remote Access enabled
+- Verify connection manually: `python3 -c "from phyphox_api_adb import test_connection; print(test_connection())"`
+
+**No ROS topics being published**
+- Check node logs: `rosnode info /phyphox_adb_node`
+- Verify topics exist: `rostopic list | grep phyphox`
+- Check publishing rate: `rostopic hz /phyphox/imu`
+
+**ROS dependency missing**
+```bash
+# Install ROS dependencies
+rosdep install --from-paths src --ignore-src -r -y
+
+# Or manually install
+sudo apt install python3-rospy python3-sensor-msgs python3-geometry-msgs
+```
+
+### General Debugging
+
+**adb: command not found**
+- Install platform-tools: `sudo apt install adb` (Linux) or `brew install android-platform-tools` (Mac)
+- Add to PATH if necessary
+
+**GPS values are 0.0 / outdated**
+- Go outdoors or near a window
 - Wait 30-60 seconds for GPS fix
 - Enable Location permission for Phyphox
+- Check status field in GPS data for fix quality
+
+**Sensors returning 0.0**
+- Verify sensor is enabled in Phyphox experiment
+- Check device orientation (gravity affects accelerometer)
+- Try clearing buffers: `clear_buffers()`
+
+### Debug Commands
+
+```bash
+# Test Python client
+python3 << 'EOF'
+from phyphox_api_adb import test_connection, get_all_sensors
+print("Connection OK" if test_connection() else "Connection FAILED")
+print(get_all_sensors())
+EOF
+
+# Test ADB forwarding
+adb forward --list
+
+# Monitor ROS node
+roslaunch rover_ws phyphox.launch --screen
+
+# Record sensor data
+rosbag record /phyphox/imu /phyphox/gps -o phyphox_data.bag
+```
 
 ---
 
@@ -420,9 +787,11 @@ print(f"Latest acc_x: {latest:.3f} m/s²")
 ## Contributors
 
 - Robotics Team - Rover Project
-- Reverse engineered: 2026-05-19
+- API Reverse engineered: 2026-05-19
+- Python client implemented: 2026-05-20
+- ROS integration added: 2026-05-20
 - Connection method: ADB port forwarding
-- Tools used: Chrome DevTools, requests, json
+- Tools used: Chrome DevTools, requests, json, rospy
 
 ---
 
