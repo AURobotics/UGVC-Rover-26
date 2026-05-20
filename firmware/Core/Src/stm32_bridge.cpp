@@ -166,17 +166,7 @@ void STM32Bridge::ToggleDebugMode(bool enable)
     debug_mode = enable;
 }
 
-extern "C"
-{
-    int _write(int file, char *ptr, int len)
-    {
-        if (g_bridge.IsDebugMode())
-        {
-            CDC_Transmit_FS((uint8_t *)ptr, len);
-        }
-        return len;
-    }
-}
+
 extern "C"
 {
 
