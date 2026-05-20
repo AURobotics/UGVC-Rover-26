@@ -31,7 +31,7 @@ HomographyBEV
      ├── pixel_to_ground()   → Single pixel → (X, Y) metric ground coords
      ├── pixels_to_ground()  → Batch pixel projection
      ├── mask_to_pointcloud()→ Full mask → (N, 3) XYZ point cloud
-     └── warp_to_bev()       → Full image perspective warp to top-down view
+     └── warp_to_bev()       → Undistort + perspective warp to top-down view
      │
      ▼
 RoadFeatureBEVPipeline
@@ -47,7 +47,7 @@ RoadFeatureBEVPipeline
 
 | File | Description |
 |---|---|
-| `homography.py` | Camera model, homography computation, ground projection, BEV warping, PCD export |
+| `homography.py` | Camera model, homography computation, lens undistortion, ground projection, BEV warping, PCD export |
 | `road_features_detector.py` | Lane and circle detection pipeline on raw frames |
 | `pipeline.py` | End-to-end orchestration; outputs annotated frames, BEV, and point clouds |
 
@@ -90,19 +90,49 @@ K = np.array([
 ], dtype=np.float64)
 ```
 
+Optionally provide a **distortion coefficient vector** (OpenCV 5-parameter model):
+
+```python
+dist_coeffs = np.array([k1, k2, p1, p2, k3])
+```
+
+If omitted, distortion is assumed to be zero. When provided, lens undistortion is applied automatically before every projection and BEV warp.
+
 And the camera **mounting parameters**:
 
 | Parameter | Description |
 |---|---|
 | `camera_height` | Height of camera above ground plane (metres) |
 | `pitch_deg` | Camera pitch angle (degrees, negative = downward tilt) |
+| `yaw_deg` | Camera yaw angle (degrees, positive = rotated right). Default `0.0` |
+| `roll_deg` | Camera roll angle (degrees, positive = tilted right). Default `0.0` |
 
 Example values used in competition testing:
 
 ```python
-camera_height = 1.43   # metres
-pitch_deg     = -50    # degrees
+camera_height = 1.33   # metres
+pitch_deg     = -45    # degrees
+yaw_deg       = -2     # degrees — small left offset from mount
+roll_deg      = -7     # degrees — slight sideways tilt
 ```
+
+### Rotation Convention
+
+The full world-to-camera rotation is composed as:
+
+```
+R = M · R_pitch · R_yaw · R_roll
+```
+
+where `M = diag(-1, 1, 1)` mirrors the X axis so that +X is rightward in the image. Each angle has an independent, physically meaningful effect:
+
+| Angle | Axis | Effect |
+|---|---|---|
+| `pitch_deg` | X | Tilts camera up/down — primary mounting angle |
+| `yaw_deg` | Z | Rotates camera left/right relative to rover heading |
+| `roll_deg` | Y | Tilts camera sideways — corrects lateral mounting error |
+
+For a perfectly aligned camera only `pitch_deg` is non-zero. In practice, small yaw/roll corrections (±2–7°) compensate for mounting tolerances that would otherwise produce a skewed BEV.
 
 ---
 
@@ -194,6 +224,7 @@ Key parameters to adjust for different environments:
 | Hough `threshold`, `minLineLength`, `maxLineGap` | `detect_lines()` | Lane line sensitivity |
 | `circularity` threshold (0.6) | `_detect_circles()` | Roundness filter for contour fallback |
 | `white_ratio` threshold (0.35) | `_detect_circles()` | Minimum white fill inside detected circle |
+| `yaw_deg` / `roll_deg` | `HomographyBEV.__init__` | Fine-tune mounting misalignment; adjust until BEV lanes appear straight and parallel |
 
 ---
 
@@ -203,3 +234,4 @@ Key parameters to adjust for different environments:
 - BEV warping assumes a **flat, level ground plane**. Uneven terrain will introduce projection errors.
 - Point clouds accumulate across frames (`all_points` list in `pipeline.py`) and are merged on exit — useful for building a local map of the course.
 - For real-time performance, consider downscaling input frames before processing.
+- Lens undistortion is applied on every frame and every pixel projection. If `dist_coeffs` are inaccurate, straight lines will appear curved in the BEV — re-run calibration with a checkerboard to obtain reliable coefficients.
