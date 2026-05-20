@@ -163,27 +163,10 @@ int main(void)
   HAL_NVIC_EnableIRQ(ADC_IRQn);
 
   HAL_ADC_Stop(&hadc1);
-  HAL_Delay(3000);
-  char err[64];
-  sprintf(err, "ADC State: 0x%08lX\r\n", HAL_ADC_GetState(&hadc1));
-  CDC_Transmit_FS((uint8_t *)err, strlen(err));
-
-  // if (dma_status != HAL_OK) {
-  //     char err[] = "DMA FAILED\r\n";
-  //     CDC_Transmit_FS((uint8_t*)err, strlen(err));
-  //     HAL_Delay(500);
-  // }
-  // else {
-  //     char msg[] = "DMA STARTED\r\n";
-  //     CDC_Transmit_FS((uint8_t*)msg, strlen(msg));
-  //     HAL_Delay(500);
-  // }
-
+  
   HAL_Delay(200);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, 6);
-  HAL_Delay(100);
-  CDC_Transmit_FS((uint8_t *)"DMA STARTED\r\n", 13);
-
+  HAL_Delay(200);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -192,18 +175,6 @@ int main(void)
 
   while (1)
   {
-
-    uint16_t raw = adc_buffer[0]; // PA4
-
-    uint32_t awd = __HAL_ADC_GET_FLAG(&hadc1, ADC_FLAG_AWD);
-    __HAL_ADC_CLEAR_FLAG(&hadc1, ADC_FLAG_AWD);
-
-    // if (awd)
-    // {
-    //   char msg[] = "VOLTAGE OUT OF RANGE\r\n";
-    //   CDC_Transmit_FS((uint8_t *)msg, strlen(msg));
-    // }
-
     if (adc_out_of_range)
     {
       char msg[] = "VOLTAGE OUT OF RANGE\r\n";
@@ -213,29 +184,8 @@ int main(void)
       HAL_NVIC_EnableIRQ(ADC_IRQn);
     }
 
-    char buf[128];
-    int len = sprintf(buf, "CH4:%d CH5:%d CH6:%d CH7:%d CH8:%d CH9:%d\r\n",
-                      adc_buffer[0],  // PA4 - CH4
-                      adc_buffer[1],  // PA5 - CH5
-                      adc_buffer[2],  // PA6 - CH6
-                      adc_buffer[3],  // PA7 - CH7
-                      adc_buffer[4],  // PB0 - CH8
-                      adc_buffer[5]); // PB1 - CH9
-    CDC_Transmit_FS((uint8_t *)buf, len);
-    HAL_Delay(500);
-    // float mv = raw_adc_to_voltage(raw);
-    // float current = raw_adc_to_current(raw);
-
-    // int mv_int = (int)mv;
-    // int current_ma = (int)(current * 1000);
-
-    // char buf[64];
-    // int len = sprintf(buf, "Raw: %d  |  Voltage: %d.%03d V  | Current: %d mA\r\n",
-    //                   raw, mv_int / 1000, mv_int % 1000, current_ma);
-    // CDC_Transmit_FS((uint8_t *)buf, len);
-    // HAL_Delay(200);
-
-    // HAL_Delay(500);
+   
+    
   }
   /* USER CODE END 3 */
 }

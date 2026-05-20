@@ -1,4 +1,5 @@
 #include "adc_utils.h"
+//lesa me7taga azabat dool lama ne3raf el tawseela el akheera
 
 float raw_adc_to_current(uint32_t adc_value) {
     int R1 = 2000, R2 = 2200; // voltage divider resistors NEED TO CHANGE THESE VALUES ONCE WE HAVE THE ACTUAL RESISTORS
