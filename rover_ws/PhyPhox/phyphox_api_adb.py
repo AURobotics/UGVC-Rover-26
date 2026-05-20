@@ -1,19 +1,29 @@
 import requests
 import json
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
+from urllib.parse import quote_plus
 
 # Base URL when using ADB port forwarding
 BASE_URL = "http://localhost:8080"
 
 
-def fetch_sensor_data(sensor_name: str) -> Optional[Dict]:
+def fetch_sensor_data(sensor_names: Union[str, List[str]]) -> Optional[Dict]:
 
     url = f"{BASE_URL}/get"
-    params = {sensor_name: ""}  # Empty value required by Phyphox API
+    if isinstance(sensor_names, str):
+        query_parts = [quote_plus(sensor_names)]
+    else:
+        query_parts = [quote_plus(sensor_name) for sensor_name in sensor_names]
+
+    if not query_parts:
+        print("No sensor names provided for fetch_sensor_data")
+        return None
+
+    url = f"{url}?{'&'.join(query_parts)}"
     
     try:
         # Step 1: Make HTTP GET request using requests library
-        response = requests.get(url, params=params, timeout=2.0)
+        response = requests.get(url, timeout=2.0)
         
         # Check for HTTP errors (4xx, 5xx)
         response.raise_for_status()
@@ -24,13 +34,13 @@ def fetch_sensor_data(sensor_name: str) -> Optional[Dict]:
         return data
         
     except requests.exceptions.Timeout:
-        print(f"Timeout fetching {sensor_name}")
+        print(f"Timeout fetching {sensor_names}")
         return None
     except requests.exceptions.ConnectionError:
-        print(f"Connection error fetching {sensor_name}. Is ADB port forwarding active?")
+        print(f"Connection error fetching {sensor_names}. Is ADB port forwarding active?")
         return None
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching {sensor_name}: {e}")
+        print(f"Error fetching {sensor_names}: {e}")
         return None
     except json.JSONDecodeError as e:
         print(f"Invalid JSON response for {sensor_name}: {e}")
