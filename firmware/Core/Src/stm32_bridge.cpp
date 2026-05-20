@@ -223,3 +223,16 @@ extern "C"
         return len;
     }
 }
+
+void Bridge_Init(void) {
+    g_bridge.Init();
+}
+
+void Bridge_Update(void) {
+    g_bridge.CheckWatchdog();
+    g_bridge.read_message();
+}
+
+void STM32Bridge_PushByte(uint8_t byte) {
+    g_bridge.PushByteFromISR(byte);
+}

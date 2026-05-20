@@ -20,6 +20,8 @@
 #include "main.h"
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
+#include "stm32_bridge.hpp"
+
 extern "C"
 {
 #include "adc_utils.h"
@@ -27,7 +29,7 @@ extern "C"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "messages.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -84,22 +86,13 @@ static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM5_Init(void);
 /* USER CODE BEGIN PFP */
-
+void Bridge_Init(void);
+void Bridge_Update(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// int _write(int file, char *ptr, int len) {
-//     CDC_Transmit_FS((uint8_t*)ptr, len);
-//     HAL_Delay(10);  // small delay to let USB flush
-//     return len;
-// }
 
-uint8_t cdc_is_connected(void)
-{
-  extern USBD_HandleTypeDef hUsbDeviceFS;
-  return (hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED);
-}
 /* USER CODE END 0 */
 
 /**
@@ -183,6 +176,7 @@ int main(void)
       HAL_Delay(5000);
       HAL_NVIC_EnableIRQ(ADC_IRQn);
     }
+    Bridge_Update();
 
    
     

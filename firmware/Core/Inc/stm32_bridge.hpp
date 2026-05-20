@@ -4,6 +4,7 @@
 #include "main.h"
 #include "messages.h"
 
+#include <stdint.h>
 class STM32Bridge
 {
 private:
@@ -49,4 +50,15 @@ public:
 
 extern STM32Bridge g_bridge;
 
-#endif // STM32_BRIDGE_HPP
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void Bridge_Init(void);
+void Bridge_Update(void);
+void STM32Bridge_PushByte(uint8_t byte);
+
+#ifdef __cplusplus
+}
+#endif //__cplusplus
+#endif// STM32_BRIDGE_HPP
