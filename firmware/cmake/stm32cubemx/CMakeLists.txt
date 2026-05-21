@@ -39,7 +39,7 @@ set(MX_Application_Src
 		${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/Encoder.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/Motor.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/PWM_expander.cpp
-#		${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/servo.cpp ana 3amlalo comment l7d ma yetzabt
+    	${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/servo.cpp 
 		${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/stm32_bridge.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/nrf_receiver.cpp
 )
