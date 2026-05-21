@@ -29,6 +29,7 @@ enum MessageType : uint8_t
 
     // Bidirectional
     MSG_ACK = 0xA0, // acknowledge READY or other control msgs
+
 };
 
 // ── Upstream payload structs ───────────────────────────────────────────
@@ -71,8 +72,9 @@ struct __attribute__((packed)) StatusPayload
     uint8_t led_state;        // 0=off 1=on
     uint8_t laser_state;      // 0=off 1=on
     uint8_t emergency_active; // 0=normal 1=estop triggered
+    uint8_t remote_connected; // 0=disconnected 1=connected (NRF Heartbeat status)
     uint8_t imu_cal[4];       // BNO055 calibration: sys gyro accel mag (0-3)
-    // Total = 44 bytes  ← fits within MAX_PAYLOAD_SIZE=64
+    // Total = 45 bytes  ← fits within MAX_PAYLOAD_SIZE=64
 };
 
 /*struct __attribute__((packed)) AntennaPayload
