@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/../.." vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/Common" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/ampire480272" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/ampire640480" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/cs43l22" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/dp83848" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/exc7200" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/ft3x67" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/ft6x06" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/i3g4250d" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/ili9325" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/ili9341" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/l3gd20" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/lan8742" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/lis302dl" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/lis3dsh" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/ls016b8uy" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/lsm303agr" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/lsm303dlhc" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/mfxstm32l152" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/n25q128a" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/n25q256a" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/n25q512a" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/nt35510" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/otm8009a" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/ov2640" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/ov5640" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/s25fl512s" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/s5k5cag" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/st7735" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/st7789h2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/stmpe1600" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/stmpe811" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/ts3510" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/Components/wm8994" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM32412G-Discovery" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM32446E_EVAL" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM32469I-Discovery" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM32469I_EVAL" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM324x9I_EVAL" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM324xG_EVAL" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM32F4-Discovery" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM32F401-Discovery" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM32F411E-Discovery" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM32F413H-Discovery" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM32F429I-Discovery" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM32F4xx-Nucleo" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/BSP/STM32F4xx_Nucleo_144" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/CMSIS/Device/ST/STM32F4xx" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Drivers/STM32F4xx_HAL_Driver" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Middlewares/ST/STM32_USB_Device_Library" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Middlewares/ST/STM32_USB_Host_Library" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Middlewares/Third_Party/FatFs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Middlewares/Third_Party/FreeRTOS" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Middlewares/Third_Party/LibJPEG" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Middlewares/Third_Party/LwIP" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../stm32/Middlewares/Third_Party/mbedTLS" vcs="Git" />
+  </component>
+</project>
