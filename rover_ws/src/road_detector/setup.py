@@ -1,17 +1,37 @@
+from glob import glob
+import os
+
 from setuptools import find_packages, setup
 
-package_name = 'road_detector'
+package_name = 'road_detector'  # Must match your package name
 
 setup(
-    name=package_name,
-    version='0.0.0',
-    packages=find_packages(exclude=['test']),
+    name=package_name,  # ROS2 package name
+    version='0.0.1',   # Semantic versioning
+    packages=find_packages(exclude=['test']),  # Auto-discover Python packages
+    
+    # DATA FILES - Critical for ROS2
     data_files=[
+        # Resource index - tells ROS2 this is a package (there by default)
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
+        
+        # package.xml goes here (there by default)
         ('share/' + package_name, ['package.xml']),
-    ],
+        
+        # Launch files directory
+        (os.path.join('share', package_name, 'launch'), 
+            glob('launch/*.py')),
+            
+        # Config files directory  
+        (os.path.join('share', package_name, 'config'),
+            glob('config/*.yaml')),
+        ],
+    
+    # Dependencies
     install_requires=['setuptools'],
+    
+    # Package metadata
     zip_safe=True,
     maintainer='abdelaziz',
     maintainer_email='abdelaziz.islam.galal@gmail.com',
@@ -26,6 +46,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'road_detector_node = road_detector.road_detector:main',
         ],
     },
 )

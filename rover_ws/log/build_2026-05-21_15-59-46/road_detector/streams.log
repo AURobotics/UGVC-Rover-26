@@ -1,0 +1,33 @@
+[2.312s] Invoking command in 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\src\road_detector': PIXI_PROMPT=(rover_ws) PYTHONPATH=D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\prefix_override;D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\.pixi\envs\default\Lib\site-packages\colcon_core\task\python\colcon_distutils_commands;D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\Lib\site-packages;%PYTHONPATH% D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\.pixi\envs\default\python.exe -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ..\..\build\road_detector build --build-base D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build install --record D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\install.log --single-version-externally-managed install_data
+[3.016s] running egg_info
+[3.094s] writing ..\..\build\road_detector\road_detector.egg-info\PKG-INFO
+[3.094s] writing dependency_links to ..\..\build\road_detector\road_detector.egg-info\dependency_links.txt
+[3.094s] writing entry points to ..\..\build\road_detector\road_detector.egg-info\entry_points.txt
+[3.094s] writing requirements to ..\..\build\road_detector\road_detector.egg-info\requires.txt
+[3.094s] writing top-level names to ..\..\build\road_detector\road_detector.egg-info\top_level.txt
+[3.219s] reading manifest file '..\..\build\road_detector\road_detector.egg-info\SOURCES.txt'
+[3.219s] writing manifest file '..\..\build\road_detector\road_detector.egg-info\SOURCES.txt'
+[3.219s] running build
+[3.219s] running build_py
+[3.219s] copying road_detector\homography.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector
+[3.219s] copying road_detector\pipeline.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector
+[3.219s] copying road_detector\road_detector.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector
+[3.219s] copying road_detector\road_features_detector.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector
+[3.219s] copying road_detector\__init__.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector
+[3.219s] running install
+[3.234s] running install_lib
+[3.281s] copying D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector\road_detector.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\Lib\site-packages\road_detector
+[3.297s] byte-compiling D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\Lib\site-packages\road_detector\road_detector.py to road_detector.cpython-312.pyc
+[3.297s] running install_data
+[3.297s] copying resource\road_detector -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\share\ament_index\resource_index\packages
+[3.297s] copying package.xml -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\share\road_detector
+[3.297s] copying launch\road_detector_launch.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\share\road_detector\launch
+[3.297s] copying config\params.yaml -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\share\road_detector\config
+[3.297s] running install_egg_info
+[3.359s] removing 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\Lib\site-packages\road_detector-0.0.1-py3.12.egg-info' (and everything under it)
+[3.359s] Copying ..\..\build\road_detector\road_detector.egg-info to D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\Lib\site-packages\road_detector-0.0.1-py3.12.egg-info
+[3.375s] running install_scripts
+[3.734s] Installing road_detector_node-script.py script to D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\lib\road_detector
+[3.734s] Installing road_detector_node.exe script to D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\lib\road_detector
+[3.734s] writing list of installed files to 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\install.log'
+[3.766s] Invoked command in 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\src\road_detector' returned '0': PIXI_PROMPT=(rover_ws) PYTHONPATH=D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\prefix_override;D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\.pixi\envs\default\Lib\site-packages\colcon_core\task\python\colcon_distutils_commands;D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\Lib\site-packages;%PYTHONPATH% D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\.pixi\envs\default\python.exe -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ..\..\build\road_detector build --build-base D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build install --record D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\install.log --single-version-externally-managed install_data

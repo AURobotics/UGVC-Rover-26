@@ -1,0 +1,2 @@
+[console_scripts]
+road_detector_node = road_detector.road_detector:main
