@@ -181,7 +181,14 @@ int main(void)
       HAL_Delay(5000);
       HAL_NVIC_EnableIRQ(ADC_IRQn);
     }
-    Bridge_Update();
+
+    uint32_t adc_value = adc_buffer[0];
+    char msg[50]; 
+
+    sprintf(msg, "ADC Value: %lu  | Current: %f mA\r\n", adc_value, raw_adc_to_current(adc_value));
+    CDC_Transmit_FS((uint8_t *)msg, strlen(msg));
+    HAL_Delay(200);
+    //Bridge_Update();
 
    
     
