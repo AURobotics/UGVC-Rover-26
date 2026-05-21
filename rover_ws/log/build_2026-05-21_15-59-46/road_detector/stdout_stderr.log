@@ -1,0 +1,31 @@
+running egg_info
+writing ..\..\build\road_detector\road_detector.egg-info\PKG-INFO
+writing dependency_links to ..\..\build\road_detector\road_detector.egg-info\dependency_links.txt
+writing entry points to ..\..\build\road_detector\road_detector.egg-info\entry_points.txt
+writing requirements to ..\..\build\road_detector\road_detector.egg-info\requires.txt
+writing top-level names to ..\..\build\road_detector\road_detector.egg-info\top_level.txt
+reading manifest file '..\..\build\road_detector\road_detector.egg-info\SOURCES.txt'
+writing manifest file '..\..\build\road_detector\road_detector.egg-info\SOURCES.txt'
+running build
+running build_py
+copying road_detector\homography.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector
+copying road_detector\pipeline.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector
+copying road_detector\road_detector.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector
+copying road_detector\road_features_detector.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector
+copying road_detector\__init__.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector
+running install
+running install_lib
+copying D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build\lib\road_detector\road_detector.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\Lib\site-packages\road_detector
+byte-compiling D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\Lib\site-packages\road_detector\road_detector.py to road_detector.cpython-312.pyc
+running install_data
+copying resource\road_detector -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\share\ament_index\resource_index\packages
+copying package.xml -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\share\road_detector
+copying launch\road_detector_launch.py -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\share\road_detector\launch
+copying config\params.yaml -> D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\share\road_detector\config
+running install_egg_info
+removing 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\Lib\site-packages\road_detector-0.0.1-py3.12.egg-info' (and everything under it)
+Copying ..\..\build\road_detector\road_detector.egg-info to D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\Lib\site-packages\road_detector-0.0.1-py3.12.egg-info
+running install_scripts
+Installing road_detector_node-script.py script to D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\lib\road_detector
+Installing road_detector_node.exe script to D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\lib\road_detector
+writing list of installed files to 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\install.log'
