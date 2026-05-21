@@ -99,8 +99,8 @@ class HomographyBEV:
     def _build_bev_scaling(self):
 
         corners_px = np.array([
-            [0,              self.img_h * 0.2],
-            [self.img_w - 1, self.img_h * 0.2],
+            [0,              self.img_h * 0.5],
+            [self.img_w - 1, self.img_h * 0.5],
             [0,              self.img_h - 1],
             [self.img_w - 1, self.img_h - 1],
         ], dtype=np.float64)

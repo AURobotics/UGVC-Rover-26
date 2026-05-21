@@ -6,13 +6,15 @@ from homography import HomographyBEV
 
 class RoadFeatureDetector:
 
-    def __init__(self, K, camera_height, pitch_deg, image_size, dist_coeffs=None,
+    def __init__(self, K, camera_height, pitch_deg,yaw_deg,roll_deg, image_size, dist_coeffs=None,
                  min_radius=10, max_radius=200):
 
         self.bev = HomographyBEV(
             K=np.array(K, dtype=np.float64),
             camera_height=float(camera_height),
             pitch_deg=float(pitch_deg),
+            yaw_deg=float(yaw_deg),
+            roll_deg=float(roll_deg),
             image_size=tuple(image_size),
             dist_coeffs=None if dist_coeffs is None else np.array(dist_coeffs, dtype=np.float64)
         )
@@ -246,7 +248,9 @@ if __name__ == "__main__":
         K=K,
         camera_height=camera_height,
         pitch_deg=pitch_deg,
-        image_size=(img_w, img_h)
+        image_size=(img_w, img_h),
+        yaw_deg=0,
+        roll_deg=0
     )
 
     while True:
