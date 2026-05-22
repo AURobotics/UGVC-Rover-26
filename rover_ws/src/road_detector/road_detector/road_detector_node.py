@@ -294,22 +294,25 @@ class RoadDetectorNode(Node):
             
             # Publish debug images
             if self.publish_debug_images:
-                try:
-                    if lane_mask is not None:
-                        output_msg = self.bridge.cv2_to_imgmsg(lane_mask, "bgr8")
+                if lane_mask is not None:
+                    try:
+                        output_msg = self.bridge.cv2_to_imgmsg(lane_mask, "passthrough")
                         output_msg.header = msg.header
                         self.img_pub.publish(output_msg)
-                    else:
-                        self.get_logger().warn("Lane mask is None, skipping debug image publish")
-                    
-                    if bev_image is not None:
-                        bev_msg = self.bridge.cv2_to_imgmsg(bev_image, "bgr8")
+                    except CvBridgeError as e:
+                        self.get_logger().error(f"CV Bridge error for lane_mask (shape={lane_mask.shape}, dtype={lane_mask.dtype}): {e}")
+                else:
+                    self.get_logger().warn("Lane mask is None, skipping debug image publish")
+
+                if bev_image is not None:
+                    try:
+                        bev_msg = self.bridge.cv2_to_imgmsg(bev_image, "passthrough")
                         bev_msg.header = msg.header
                         self.bev_pub.publish(bev_msg)
-                    else:
-                        self.get_logger().warn("BEV image is None, skipping BEV debug image publish")
-                except CvBridgeError as e:
-                    self.get_logger().error(f"CV Bridge error for debug images: {e}")
+                    except CvBridgeError as e:
+                        self.get_logger().error(f"CV Bridge error for bev_image (shape={bev_image.shape}, dtype={bev_image.dtype}): {e}")
+                else:
+                    self.get_logger().warn("BEV image is None, skipping BEV debug image publish")
             
             # Performance statistics
             if self.publish_performance_stats:

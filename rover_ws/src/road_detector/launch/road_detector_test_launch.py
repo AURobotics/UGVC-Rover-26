@@ -94,6 +94,18 @@ def generate_launch_description():
     )
 
     # =========================================================================
+    # NODE — video_viewer
+    # =========================================================================
+
+    video_viewer_node = Node(
+        package='road_detector',
+        executable='video_viewer_node',
+        name='video_viewer',
+        output='screen',
+        emulate_tty=True,
+    )
+
+    # =========================================================================
     # LAUNCH DESCRIPTION
     # =========================================================================
 
@@ -109,4 +121,5 @@ def generate_launch_description():
         video_publisher_node,
         road_detector_node,
         pointcloud_logger_node,
+        video_viewer_node
     ])
