@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from cv2 import ximgproc
-from road_detector.road_detector.cv_code.homography import HomographyBEV
+from .homography import HomographyBEV
 
 
 class RoadFeatureDetector:

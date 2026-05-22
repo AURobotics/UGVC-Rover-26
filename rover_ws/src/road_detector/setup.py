@@ -49,6 +49,7 @@ setup(
             'road_detector_node = road_detector.road_detector_node:main',
             'video_publisher_node = road_detector.video_publisher_node:main',
             'pointcloud_logger_node = road_detector.pointcloud_logger_node:main',
+            'video_viewer_node = road_detector.video_viewer_node:main',
         ],
     },
 )
