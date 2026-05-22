@@ -222,7 +222,7 @@ if __name__ == "__main__":
     camera_height = 1.2
     pitch_deg = -30
 
-    cap = cv2.VideoCapture("D:\\Software work\\rover 26\\test_lane.mp4")
+    cap = cv2.VideoCapture("../data/raw/test_lane.mp4")
     if not cap.isOpened():
         print("Cannot open video file")
         exit()
