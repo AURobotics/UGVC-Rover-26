@@ -60,7 +60,7 @@ class RoadFeatureDetector:
 
         thin = ximgproc.thinning(mask)
 
-        return thin
+        return thin, mask
 
     # ======================================================
     # HOUGH LINES
@@ -95,23 +95,14 @@ class RoadFeatureDetector:
     # ======================================================
     # CIRCLE DETECTION
     # ======================================================
-    def _detect_circles(self, image):
-
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        lower_white = np.array([0, 0, 200])
-        upper_white = np.array([180, 40, 255])
-
-        white_mask = cv2.inRange(hsv, lower_white, upper_white)
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-        white_mask = cv2.morphologyEx(white_mask, cv2.MORPH_OPEN, kernel)
-        white_mask = cv2.morphologyEx(white_mask, cv2.MORPH_CLOSE, kernel)
+    def _detect_circles(self, image, white_mask):
 
         blurred = cv2.GaussianBlur(white_mask, (9, 9), 2)
         circles = cv2.HoughCircles(
-            blurred, cv2.HOUGH_GRADIENT, dp=1.2, minDist=30,
-            param1=50, param2=30,
-            minRadius=self.min_radius, maxRadius=self.max_radius
-        )
+        blurred, cv2.HOUGH_GRADIENT, dp=1.2, minDist=30,
+        param1=50, param2=30,
+        minRadius=self.min_radius, maxRadius=self.max_radius
+    )
 
         detected = []
         if circles is not None:
@@ -198,12 +189,12 @@ class RoadFeatureDetector:
     def process(self, frame, draw_bev=False):
 
         # --- Lanes ---
-        edges = self.detect_edges(frame)
+        edges, white_mask = self.detect_edges(frame)
         lines = self.detect_lines(edges)
         output = self.draw_lines(frame.copy(), lines)
 
         # --- Circles ---
-        circles = self._detect_circles(frame)
+        circles = self._detect_circles(frame, white_mask)
         ground_circles = [self.circle_to_ground(c) for c in circles]
         circle_clouds  = [self.circle_to_ground_cloud(c) for c in circles]
 
@@ -231,7 +222,7 @@ if __name__ == "__main__":
     camera_height = 1.2
     pitch_deg = -30
 
-    cap = cv2.VideoCapture("../data/raw/test_lane.mp4")
+    cap = cv2.VideoCapture("D:\\Software work\\rover 26\\test_lane.mp4")
     if not cap.isOpened():
         print("Cannot open video file")
         exit()
