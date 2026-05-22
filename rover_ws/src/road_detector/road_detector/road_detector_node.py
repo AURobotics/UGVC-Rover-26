@@ -63,7 +63,7 @@ class RoadDetectorNode(Node):
         self.declare_parameter('camera_topic', '/camera/image_raw')
         self.declare_parameter('camera_info_topic', '/camera/camera_info')
         self.declare_parameter('output_pointcloud_topic', '/road_detector/pointcloud')
-        self.declare_parameter('output_image_topic', '/road_detector/debug/lane_mask')
+        self.declare_parameter('output_lane_mask_topic', '/road_detector/debug/lane_mask')
         self.declare_parameter('output_bev_topic', '/road_detector/debug/bev_image')
         self.declare_parameter('output_stats_topic', '/road_detector/stats')
         
@@ -95,7 +95,7 @@ class RoadDetectorNode(Node):
         self.camera_topic = self.get_parameter('camera_topic').value
         self.camera_info_topic = self.get_parameter('camera_info_topic').value
         self.pc_topic = self.get_parameter('output_pointcloud_topic').value
-        self.lane_mask_topic = self.get_parameter('output_image_topic').value
+        self.lane_mask_topic = self.get_parameter('output_lane_mask_topic').value
         self.bev_topic = self.get_parameter('output_bev_topic').value
         self.stats_topic = self.get_parameter('output_stats_topic').value
         
@@ -295,14 +295,19 @@ class RoadDetectorNode(Node):
             # Publish debug images
             if self.publish_debug_images:
                 try:
-                    output_msg = self.bridge.cv2_to_imgmsg(lane_mask, "bgr8")
-                    output_msg.header = msg.header
-                    self.img_pub.publish(output_msg)
+                    if lane_mask is not None:
+                        output_msg = self.bridge.cv2_to_imgmsg(lane_mask, "bgr8")
+                        output_msg.header = msg.header
+                        self.img_pub.publish(output_msg)
+                    else:
+                        self.get_logger().warn("Lane mask is None, skipping debug image publish")
                     
                     if bev_image is not None:
                         bev_msg = self.bridge.cv2_to_imgmsg(bev_image, "bgr8")
                         bev_msg.header = msg.header
                         self.bev_pub.publish(bev_msg)
+                    else:
+                        self.get_logger().warn("BEV image is None, skipping BEV debug image publish")
                 except CvBridgeError as e:
                     self.get_logger().error(f"CV Bridge error for debug images: {e}")
             
