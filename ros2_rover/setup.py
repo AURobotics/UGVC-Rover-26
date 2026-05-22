@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+		'cmd_mux_node = ros2_rover.cmd_mux_node:main',
         ],
     },
 )
