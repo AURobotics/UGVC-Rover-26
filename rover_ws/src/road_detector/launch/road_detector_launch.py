@@ -77,9 +77,6 @@ def generate_launch_description():
                 'publish_performance_stats': LaunchConfiguration('publish_performance_stats'),
             }
         ],
-        remappings=[
-            ('/road_detector/pointcloud', '/local_costmap/obstacle_points'),
-        ],
     )
 
     return LaunchDescription([
