@@ -7,6 +7,7 @@
 
 :: source chained prefixes
 call:_colcon_prefix_chain_bat_call_script "D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\.pixi\envs\default\Library\local_setup.bat"
+call:_colcon_prefix_chain_bat_call_script "D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\\local_setup.bat"
 
 :: source this prefix
 call:_colcon_prefix_chain_bat_call_script "%%~dp0local_setup.bat"
