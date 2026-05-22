@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
 
-from road_detector.road_detector.cv_code.homography import HomographyBEV
-from road_detector.road_detector.cv_code.road_features_detector import RoadFeatureDetector
+from .road_features_detector import RoadFeatureDetector
 
 
 # =============================================================
