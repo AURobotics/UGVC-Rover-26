@@ -33,3 +33,10 @@ Then, run:
 ```sh
 pixi install
 ```
+
+### Startup
+
+run:
+```sh
+pixi run console
+```
