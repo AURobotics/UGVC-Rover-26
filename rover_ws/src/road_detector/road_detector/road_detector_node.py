@@ -13,11 +13,11 @@ from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs_py import point_cloud2
 
 # Import your custom modules
-from .road_features_detector import RoadFeatureDetector
-from .pipeline import RoadFeatureBEVPipeline
+from .cv_code.road_features_detector import RoadFeatureDetector
+from .cv_code.pipeline import RoadFeatureBEVPipeline
 
 
-class RoadFeatureNode(Node):
+class RoadDetectorNode(Node):
     """ROS2 node for detecting road features (lane markings and potholes) from camera images"""
     
     def __init__(self):
