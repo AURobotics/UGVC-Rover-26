@@ -4,6 +4,7 @@ ros pkgs is to be added in the src folder here
 
 ### Windows Notes
 > - You must used CMD not powershell
+> - You must run CMD as administrator
 > - steps to run code: build, source, run
 
 ### Create a new package
