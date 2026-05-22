@@ -83,7 +83,7 @@ class PointCloudLoggerNode(Node):
         # ── Subscriber ───────────────────────────────────────────────────────
         # road_detector publishes with RELIABLE QoS; match it here
         reliable_qos = QoSProfile(
-            reliability=QoSReliabilityPolicy.RELIABLE,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=10,
         )
@@ -104,13 +104,14 @@ class PointCloudLoggerNode(Node):
 
     # ── Helpers ───────────────────────────────────────────────────────────────
     def _write_header(self):
+        sep = "=" * 70
         self.log_file.write(
-            "=" * 70 + "\n"
-            "PointCloud2 Log — road_detector output verification\n"
-            "=" * 70 + "\n"
-            "Columns: X (m)  Y (m)  Z (m)\n"
-            "Format : one point per line, clouds separated by a blank line\n"
-            "=" * 70 + "\n\n"
+            f"{sep}\n"
+            f"PointCloud2 Log — road_detector output verification\n"
+            f"{sep}\n"
+            f"Columns: X (m)  Y (m)  Z (m)\n"
+            f"Format : one point per line, clouds separated by a blank line\n"
+            f"{sep}\n\n"
         )
 
     def _cloud_callback(self, msg: PointCloud2):

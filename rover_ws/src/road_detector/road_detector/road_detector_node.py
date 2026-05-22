@@ -54,7 +54,6 @@ class RoadDetectorNode(Node):
         self.add_on_set_parameters_callback(self.parameters_callback)
         
         self.get_logger().info("Road Detector Node Initialized Successfully")
-        self.get_logger().info(f"Processing rate: {self.processing_rate} Hz")
         self.get_logger().info(f"Debug images: {self.publish_debug_images}")
     
     def _declare_parameters(self):
@@ -62,6 +61,7 @@ class RoadDetectorNode(Node):
         
         # Topic parameters
         self.declare_parameter('camera_topic', '/camera/image_raw')
+        self.declare_parameter('camera_info_topic', '/camera/camera_info')
         self.declare_parameter('output_pointcloud_topic', '/road_detector/pointcloud')
         self.declare_parameter('output_image_topic', '/road_detector/debug/lane_mask')
         self.declare_parameter('output_bev_topic', '/road_detector/debug/bev_image')
@@ -86,14 +86,8 @@ class RoadDetectorNode(Node):
         self.declare_parameter('publish_performance_stats', False)
         
         # Point cloud parameters
-        self.declare_parameter('publish_lane_cloud', True)
-        self.declare_parameter('publish_circle_clouds', True)
         self.declare_parameter('max_points_per_cloud', 10000)
-        
-        # Processing parameters
-        self.declare_parameter('skip_frames_on_error', 5)
-        self.declare_parameter('min_lane_points', 10)
-    
+            
     def _load_parameters(self):
         """Load all parameters from the parameter server"""
         
@@ -125,13 +119,8 @@ class RoadDetectorNode(Node):
         self.publish_performance_stats = self.get_parameter('publish_performance_stats').value
         
         # Point cloud parameters
-        self.publish_lane_cloud = self.get_parameter('publish_lane_cloud').value
-        self.publish_circle_clouds = self.get_parameter('publish_circle_clouds').value
         self.max_points_per_cloud = self.get_parameter('max_points_per_cloud').value
-        
-        # Processing parameters
-        self.min_lane_points = self.get_parameter('min_lane_points').value
-        
+                
         self.consecutive_error_counter = 0
     
     def _validate_parameters(self):
@@ -238,11 +227,7 @@ class RoadDetectorNode(Node):
             self.get_logger().info("Pipeline initialization complete")
     
     def image_callback(self, msg):
-        """
-        Store the latest image for processing (non-blocking)
-        Actual processing happens in timer callback. This prevents processing from blocking the ROS spin thread.
-        """
-        self.latest_image = msg
+        self._process_image(msg)
     
     def process_latest_image(self):
         """Process the latest image at controlled rate"""
@@ -283,32 +268,29 @@ class RoadDetectorNode(Node):
             except Exception as e:
                 self.get_logger().error(f"Pipeline processing error: {e}")
                 self.consecutive_error_counter += 1
+                return
             
             self.consecutive_error_counter = 0  # Reset error counter on success
             
             # Publish lane points as point cloud
-            if self.publish_lane_cloud and len(lane_points) > self.min_lane_points:
-                # Limit points to avoid large messages
-                if len(lane_points) > self.max_points_per_cloud:
-                    lane_points = lane_points[:self.max_points_per_cloud]
-                
-                pc_msg = self.create_pointcloud2(lane_points, msg.header.frame_id)
-                self.pc_pub.publish(pc_msg)
-                self.get_logger().debug(f"Published {len(lane_points)} lane points")
-            elif len(lane_points) <= self.min_lane_points and len(lane_points) > 0:
-                self.get_logger().debug(f"Few lane points detected: {len(lane_points)} < {self.min_lane_points}")
+            # Limit points to avoid large messages
+            if len(lane_points) > self.max_points_per_cloud:
+                lane_points = lane_points[:self.max_points_per_cloud]
+            
+            pc_msg = self.create_pointcloud2(lane_points, msg.header.frame_id)
+            self.pc_pub.publish(pc_msg)
+            self.get_logger().debug(f"Published {len(lane_points)} lane points")
             
             # Publish circle point clouds
-            if self.publish_circle_clouds:
-                for i, cloud in enumerate(circle_clouds):
-                    if len(cloud) > 0:
-                        # Limit points
-                        if len(cloud) > self.max_points_per_cloud:
-                            cloud = cloud[:self.max_points_per_cloud]
-                        
-                        pc_msg = self.create_pointcloud2(cloud, msg.header.frame_id)
-                        self.pc_pub.publish(pc_msg)
-                        self.get_logger().debug(f"Published circle cloud {i} with {len(cloud)} points")
+            for i, cloud in enumerate(circle_clouds):
+                if len(cloud) > 0:
+                    # Limit points
+                    if len(cloud) > self.max_points_per_cloud:
+                        cloud = cloud[:self.max_points_per_cloud]
+                    
+                    pc_msg = self.create_pointcloud2(cloud, msg.header.frame_id)
+                    self.pc_pub.publish(pc_msg)
+                    self.get_logger().debug(f"Published circle cloud {i} with {len(cloud)} points")
             
             # Publish debug images
             if self.publish_debug_images:
@@ -430,7 +412,7 @@ class RoadDetectorNode(Node):
 def main(args=None):
     """Main entry point for the ROS2 node"""
     rclpy.init(args=args)
-    node = RoadFeatureNode()
+    node = RoadDetectorNode()
     
     try:
         rclpy.spin(node)
