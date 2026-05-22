@@ -24,6 +24,7 @@ function _colcon_prefix_chain_powershell_source_script {
 
 # source chained prefixes
 _colcon_prefix_chain_powershell_source_script "D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\.pixi\envs\default\Library\local_setup.ps1"
+_colcon_prefix_chain_powershell_source_script "D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\\local_setup.ps1"
 
 # source this prefix
 $env:COLCON_CURRENT_PREFIX=(Split-Path $PSCommandPath -Parent)

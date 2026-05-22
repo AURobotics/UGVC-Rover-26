@@ -1,0 +1,188 @@
+[0.377s] [34mcolcon[0m [1;30mDEBUG[0m [32mCommand line arguments: ['D:\\My_Files\\Work\\AU-Robotics\\Rover_2026\\Code\\UGVC-Rover-26\\rover_ws\\.pixi\\envs\\default\\Scripts\\colcon', 'build', '--packages-select', 'road_detector', '--symlink-install'][0m
+[0.377s] [34mcolcon[0m [1;30mDEBUG[0m [32mParsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=True, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=16, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=['road_detector'], packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x000002054218CBC0>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x0000020541F02570>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x0000020541F02570>>)[0m
+[0.447s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(colcon_meta) check parameters
+[0.447s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(recursive) check parameters
+[0.447s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(ignore) check parameters
+[0.447s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(path) check parameters
+[0.447s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(colcon_meta) discover
+[0.447s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(recursive) discover
+[0.447s] [34mcolcon.colcon_core.package_discovery[0m [1;30mINFO[0m Crawling recursively for packages in 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws'
+[0.447s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.447s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'ignore'
+[0.447s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'ignore_ament_install'
+[0.449s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['colcon_pkg']
+[0.449s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'colcon_pkg'
+[0.449s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['colcon_meta']
+[0.449s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'colcon_meta'
+[0.449s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['ros']
+[0.449s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'ros'
+[0.491s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['cmake', 'python']
+[0.491s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'cmake'
+[0.491s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'python'
+[0.491s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['python_setup_py']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'python_setup_py'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(build) by extension 'ignore'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(build) ignored
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extensions ['ignore', 'ignore_ament_install']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extension 'ignore'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extension 'ignore_ament_install'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extensions ['colcon_pkg']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extension 'colcon_pkg'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extensions ['colcon_meta']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extension 'colcon_meta'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extensions ['ros']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extension 'ros'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extensions ['cmake', 'python']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extension 'cmake'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extension 'python'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extensions ['python_setup_py']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data) by extension 'python_setup_py'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extensions ['ignore', 'ignore_ament_install']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extension 'ignore'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extension 'ignore_ament_install'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extensions ['colcon_pkg']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extension 'colcon_pkg'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extensions ['colcon_meta']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extension 'colcon_meta'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extensions ['ros']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extension 'ros'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extensions ['cmake', 'python']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extension 'cmake'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extension 'python'
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extensions ['python_setup_py']
+[0.493s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(data\raw) by extension 'python_setup_py'
+[0.498s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.498s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(install) by extension 'ignore'
+[0.498s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(install) ignored
+[0.498s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.498s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(log) by extension 'ignore'
+[0.498s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(log) ignored
+[0.498s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['ignore', 'ignore_ament_install']
+[0.498s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'ignore'
+[0.498s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'ignore_ament_install'
+[0.498s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['colcon_pkg']
+[0.498s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'colcon_pkg'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['colcon_meta']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'colcon_meta'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['ros']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'ros'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['cmake', 'python']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'cmake'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'python'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['python_setup_py']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'python_setup_py'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src\road_detector) by extensions ['ignore', 'ignore_ament_install']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src\road_detector) by extension 'ignore'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src\road_detector) by extension 'ignore_ament_install'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src\road_detector) by extensions ['colcon_pkg']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src\road_detector) by extension 'colcon_pkg'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src\road_detector) by extensions ['colcon_meta']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src\road_detector) by extension 'colcon_meta'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src\road_detector) by extensions ['ros']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src\road_detector) by extension 'ros'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mDEBUG[0m [32mPackage 'src\road_detector' with type 'ros.ament_python' and name 'road_detector'[0m
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extensions ['ignore', 'ignore_ament_install']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extension 'ignore'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extension 'ignore_ament_install'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extensions ['colcon_pkg']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extension 'colcon_pkg'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extensions ['colcon_meta']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extension 'colcon_meta'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extensions ['ros']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extension 'ros'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extensions ['cmake', 'python']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extension 'cmake'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extension 'python'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extensions ['python_setup_py']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision) by extension 'python_setup_py'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extensions ['ignore', 'ignore_ament_install']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extension 'ignore'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extension 'ignore_ament_install'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extensions ['colcon_pkg']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extension 'colcon_pkg'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extensions ['colcon_meta']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extension 'colcon_meta'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extensions ['ros']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extension 'ros'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extensions ['cmake', 'python']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extension 'cmake'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extension 'python'
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extensions ['python_setup_py']
+[0.501s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(vision\__pycache__) by extension 'python_setup_py'
+[0.501s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(recursive) using defaults
+[0.501s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(ignore) discover
+[0.501s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(ignore) using defaults
+[0.501s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(path) discover
+[0.501s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(path) using defaults
+[0.530s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'road_detector' build argument 'cmake_args' from command line to 'None'
+[0.530s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'road_detector' build argument 'cmake_target' from command line to 'None'
+[0.530s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'road_detector' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.530s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'road_detector' build argument 'cmake_clean_cache' from command line to 'False'
+[0.530s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'road_detector' build argument 'cmake_clean_first' from command line to 'False'
+[0.530s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'road_detector' build argument 'cmake_force_configure' from command line to 'False'
+[0.530s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'road_detector' build argument 'ament_cmake_args' from command line to 'None'
+[0.530s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'road_detector' build argument 'catkin_cmake_args' from command line to 'None'
+[0.530s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'road_detector' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.530s] [34mcolcon.colcon_core.verb[0m [1;30mDEBUG[0m [32mBuilding package 'road_detector' with the following arguments: {'ament_cmake_args': None, 'build_base': 'D:\\My_Files\\Work\\AU-Robotics\\Rover_2026\\Code\\UGVC-Rover-26\\rover_ws\\build\\road_detector', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': 'D:\\My_Files\\Work\\AU-Robotics\\Rover_2026\\Code\\UGVC-Rover-26\\rover_ws\\install\\road_detector', 'merge_install': False, 'path': 'D:\\My_Files\\Work\\AU-Robotics\\Rover_2026\\Code\\UGVC-Rover-26\\rover_ws\\src\\road_detector', 'symlink_install': True, 'test_result_base': None}[0m
+[0.530s] [34mcolcon.colcon_core.executor[0m [1;30mINFO[0m Executing jobs using 'parallel' executor
+[0.530s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mrun_until_complete[0m
+[0.530s] [34mcolcon.colcon_ros.task.ament_python.build[0m [1;30mINFO[0m Building ROS package in 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\src\road_detector' with build type 'ament_python'
+[0.530s] [34mcolcon.colcon_core.shell[0m [1;30mLevel 1[0m create_environment_hook('road_detector', 'ament_prefix_path')
+[0.530s] [34mcolcon.colcon_core.plugin_system[0m [1;30mINFO[0m Skipping extension 'colcon_core.shell.sh': Not used on Windows systems
+[0.530s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\hook\ament_prefix_path.ps1'
+[0.530s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\hook\ament_prefix_path.bat'
+[0.530s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment descriptor 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\hook\ament_prefix_path.dsv'
+[0.530s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.088s] [34mcolcon.colcon_core.task.python.build[0m [1;30mINFO[0m Building Python package in 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\src\road_detector'
+[1.088s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\ament_index\resource_index\packages\road_detector[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\package.xml[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\launch\road_detector_launch.py[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\launch\road_detector_test_launch.py[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\config\params.yaml[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\config\pointcloud_logger_params.yaml[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\config\video_publisher_params.yaml[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\lib\road_detector\pointcloud_logger_node-script.py[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\lib\road_detector\pointcloud_logger_node.exe[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\lib\road_detector\road_detector_node-script.py[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\lib\road_detector\road_detector_node.exe[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\lib\road_detector\video_publisher_node-script.py[0m
+[2.455s] [34mcolcon.colcon_core.task.python.build[0m [1;30mDEBUG[0m [32mWhile undoing a previous installation files outside the Python library path are being ignored: D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\lib\road_detector\video_publisher_node.exe[0m
+[2.472s] [34mcolcon.colcon_core.event_handler.log_command[0m [1;30mDEBUG[0m [32mInvoking command in 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector': PIXI_PROMPT=(rover_ws) PYTHONPATH=D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\prefix_override;D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\.pixi\envs\default\Lib\site-packages\colcon_core\task\python\colcon_distutils_commands;D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\Lib\site-packages;%PYTHONPATH% D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\.pixi\envs\default\python.exe -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build --no-deps symlink_data --force[0m
+[4.587s] [34mcolcon.colcon_core.shell[0m [1;30mLevel 1[0m create_environment_hook('road_detector', 'pythonpath_develop')
+[4.588s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\share\road_detector\hook\pythonpath_develop.ps1'
+[4.588s] [34mcolcon.colcon_core.event_handler.log_command[0m [1;30mDEBUG[0m [32mInvoked command in 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector' returned '0': PIXI_PROMPT=(rover_ws) PYTHONPATH=D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\prefix_override;D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\.pixi\envs\default\Lib\site-packages\colcon_core\task\python\colcon_distutils_commands;D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\Lib\site-packages;%PYTHONPATH% D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\.pixi\envs\default\python.exe -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\build --no-deps symlink_data --force[0m
+[4.590s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\share\road_detector\hook\pythonpath_develop.bat'
+[4.594s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment descriptor 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\build\road_detector\share\road_detector\hook\pythonpath_develop.dsv'
+[4.605s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector' for CMake module files
+[4.609s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector' for CMake config files
+[4.617s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\bin'
+[4.617s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\bin'
+[4.618s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\lib\pkgconfig\road_detector.pc'
+[4.618s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\Lib\site-packages'
+[4.618s] [34mcolcon.colcon_core.shell[0m [1;30mLevel 1[0m create_environment_hook('road_detector', 'pythonpath')
+[4.619s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\hook\pythonpath.ps1'
+[4.621s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\hook\pythonpath.bat'
+[4.623s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment descriptor 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\hook\pythonpath.dsv'
+[4.624s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\Scripts'
+[4.624s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m create_environment_scripts_only(road_detector)
+[4.625s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package script 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\package.ps1'
+[4.630s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package script 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\package.bat'
+[4.632s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package descriptor 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\road_detector\package.dsv'
+[4.634s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m create_file_with_runtime_dependencies(D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\road_detector\share\colcon-core\packages\road_detector)
+[4.635s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mclosing loop[0m
+[4.635s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mloop closed[0m
+[4.636s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mrun_until_complete finished with '0'[0m
+[4.636s] [34mcolcon.colcon_core.event_reactor[0m [1;30mDEBUG[0m [32mjoining thread[0m
+[4.644s] [34mcolcon.colcon_core.plugin_system[0m [1;30mINFO[0m Skipping extension 'colcon_notification.desktop_notification.notify2': 'notify2' not found
+[4.645s] [34mcolcon.colcon_core.plugin_system[0m [1;30mINFO[0m Skipping extension 'colcon_notification.desktop_notification.notify_send': Not used on non-Linux systems
+[4.645s] [34mcolcon.colcon_core.plugin_system[0m [1;30mINFO[0m Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[4.645s] [34mcolcon.colcon_notification.desktop_notification[0m [1;30mINFO[0m Sending desktop notification using 'win32'
+[9.710s] [34mcolcon.colcon_core.event_reactor[0m [1;30mDEBUG[0m [32mjoined thread[0m
+[9.710s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix script 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\local_setup.ps1'
+[9.710s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix util module 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\_local_setup_util_ps1.py'
+[9.710s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix chain script 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\setup.ps1'
+[9.710s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix script 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\local_setup.bat'
+[9.710s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix util module 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\_local_setup_util_bat.py'
+[9.710s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix chain script 'D:\My_Files\Work\AU-Robotics\Rover_2026\Code\UGVC-Rover-26\rover_ws\install\setup.bat'

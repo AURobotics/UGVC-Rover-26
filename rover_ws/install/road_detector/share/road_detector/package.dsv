@@ -1,0 +1,9 @@
+source;share\road_detector\hook\pythonpath.ps1
+source;share\road_detector\hook\pythonpath.bat
+source;share\road_detector\hook\pythonpath.dsv
+source;share\road_detector\hook\ament_prefix_path.ps1
+source;share\road_detector\hook\ament_prefix_path.bat
+source;share\road_detector\hook\ament_prefix_path.dsv
+source;..\..\build\road_detector\share\road_detector\hook\pythonpath_develop.ps1
+source;..\..\build\road_detector\share\road_detector\hook\pythonpath_develop.bat
+source;..\..\build\road_detector\share\road_detector\hook\pythonpath_develop.dsv
