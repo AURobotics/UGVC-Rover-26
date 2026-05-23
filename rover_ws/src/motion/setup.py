@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'ros2_rover'
+package_name = 'motion'
 
 setup(
     name=package_name,
@@ -13,8 +13,8 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='abdullah',
-    maintainer_email='abdullh.kasem@gmail.com',
+    maintainer='habibarezq',
+    maintainer_email='habibarezq30@gmail.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     extras_require={
@@ -24,7 +24,6 @@ setup(
     },
     entry_points={
         'console_scripts': [
-		'cmd_mux_node = ros2_rover.cmd_mux_node:main',
         ],
     },
 )
