@@ -33,7 +33,7 @@ extern "C"
 
 
 #include "messages.h"
-
+#include "bridge_c_api.h"
 
 /* USER CODE END Includes */
 
@@ -165,6 +165,8 @@ int main(void)
   HAL_Delay(200);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, 6);
   HAL_Delay(200);
+  Bridge_Init();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -188,7 +190,7 @@ int main(void)
     sprintf(msg, "ADC Value: %lu  | Current: %f mA\r\n", adc_value, raw_adc_to_current(adc_value));
     CDC_Transmit_FS((uint8_t *)msg, strlen(msg));
     HAL_Delay(200);
-    //Bridge_Update();
+    Bridge_Update();
 
    
     

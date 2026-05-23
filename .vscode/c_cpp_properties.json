@@ -12,7 +12,7 @@
             ],
             "cStandard": "c17",
             "cppStandard": "gnu++17",
-            "intelliSenseMode": "windows-gcc-x64"
+            "intelliSenseMode": "windows-gcc-arm64"
         }
     ],
     "version": 4
