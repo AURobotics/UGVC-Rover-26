@@ -2,28 +2,12 @@
 
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import (
-    QoSProfile,
-    QoSReliabilityPolicy,
-    QoSHistoryPolicy
-)
 
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
-from ugvc_msgs.msg import Speed
+from std_msgs.msg import Float64MultiArray
+from sensor_msgs.msg import Joy
 
-# QoS Profiles
-BEST_EFFORT = QoSProfile(
-    reliability=QoSReliabilityPolicy.BEST_EFFORT,
-    history=QoSHistoryPolicy.KEEP_LAST,
-    depth=1
-)
-
-RELIABLE = QoSProfile(
-    reliability=QoSReliabilityPolicy.RELIABLE,
-    history=QoSHistoryPolicy.KEEP_LAST,
-    depth=1
-)
 
 # Mission State Mapping
 STATE_MAP = {
@@ -32,7 +16,7 @@ STATE_MAP = {
     'WP': '/cmd_vel/waypoint',
     'SEARCH': '/cmd_vel/pothole',
     'DONE': None,
-    'MANUAL': '/cmd_vel/teleop',
+    'MANUAL': None,
 }
 
 class CmdMuxNode(Node):
@@ -45,211 +29,141 @@ class CmdMuxNode(Node):
         self.declare_parameter('wheelbase', 0.50)          # meters
         self.declare_parameter('max_wheel_speed', 10.0)    # rad/s
         self.declare_parameter('publish_rate', 50.0)       # Hz
-        self.declare_parameter('cmd_timeout', 0.5)         # seconds
+        self.declare_parameter('joy_linear_axis',  1)     # axes index
+        self.declare_parameter('joy_angular_axis', 0)     # axes index
+        self.declare_parameter('joy_max_linear',   1.0)   # m/s
+        self.declare_parameter('joy_max_angular',  2.0)   # rad/s
+        self.declare_parameter('joy_deadzone',     0.1)   # 0.0 – 1.0
 
-        self.wheel_radius = float(
-            self.get_parameter('wheel_radius').value
-        )
-
-        self.wheelbase = float(
-            self.get_parameter('wheelbase').value
-        )
-
-        self.max_wheel_speed = float(
-            self.get_parameter('max_wheel_speed').value
-        )
-
-        self.publish_rate = float(
-            self.get_parameter('publish_rate').value
-        )
-
-        self.cmd_timeout = float(
-            self.get_parameter('cmd_timeout').value
-        )
+        self.wheel_radius = self.get_parameter('wheel_radius').value
+        self.wheelbase = self.get_parameter('wheelbase').value
+        self.max_wheel_speed = self.get_parameter('max_wheel_speed').value
+        self.publish_rate = self.get_parameter('publish_rate').value
+        self.joy_linear_axis = self.get_parameter('joy_linear_axis').value
+        self.joy_angular_axis = self.get_parameter('joy_angular_axis').value
+        self.joy_max_linear = self.get_parameter('joy_max_linear').value
+        self.joy_max_angular = self.get_parameter('joy_max_angular').value
+        self.joy_deadzone = self.get_parameter('joy_deadzone').value
 
         # Internal Variables
         self.state = 'IDLE'
 
         self.latest_cmds = {
-            topic: None
-            for topic in STATE_MAP.values()
-            if topic is not None
+            '/cmd_vel/waypoint': None,
+            '/cmd_vel/lane_pid': None,
+            '/cmd_vel/pothole':  None,
         }
-
-        self.latest_times = {
-            topic: None
-            for topic in STATE_MAP.values()
-            if topic is not None
-        }
-
-        self.tick_counter = 0
-        self._timeout_warned = False
+ 
+        self.joy_msg = None
 
         # Publisher
-        self.speed_pub = self.create_publisher(
-            Speed,
-            '/cmd_speed',
-            RELIABLE
-        )
+        self.speed_pub = self.create_publisher(Float64MultiArray,'/cmd_speed',10)
 
         # Subscribers
-        for topic in self.latest_cmds.keys():
+        self.create_subscription(Twist,'/cmd_vel/waypoint', self.waypoint_callback, 10)
+        self.create_subscription(Twist,'/cmd_vel/lane_pid', self.lane_pid_callback, 10)
+        self.create_subscription(Twist,'/cmd_vel/pothole', self.pothole_callback, 10)
+        self.create_subscription(Joy,'/joy', self.joy_callback, 10)
 
-            self.create_subscription(
-                Twist,
-                topic,
-                self.create_twist_callback(topic),
-                BEST_EFFORT
-            )
-
-        self.create_subscription(
-            String,
-            '/mission/active_state',
-            self.state_callback,
-            RELIABLE
-        )
+        self.create_subscription(String,'/mission/active_state',self.state_callback,10)
 
         # Main Timer
-        self.create_timer(
-            1.0 / self.publish_rate,
-            self.publish_speed
-        )
+        self.create_timer(1.0 / self.publish_rate,self.publish_speed)
 
-        self.get_logger().info('Cmd Mux Node Started with Teleop Override')
+        self.get_logger().info('Cmd Mux Node Started')
 
     # Twist Callback
-    def create_twist_callback(self, topic):
-
-        def callback(msg):
-
-            self.latest_cmds[topic] = msg
-
-            self.latest_times[topic] = (
-                self.get_clock().now()
-            )
-
-        return callback
+    def waypoint_callback(self, msg: Twist):
+        self.latest_cmds['/cmd_vel/waypoint'] = msg
+ 
+    def lane_pid_callback(self, msg: Twist):
+        self.latest_cmds['/cmd_vel/lane_pid'] = msg
+ 
+    def pothole_callback(self, msg: Twist):
+        self.latest_cmds['/cmd_vel/pothole'] = msg
+ 
+    def joy_callback(self, msg: Joy):
+        self.joy_msg = msg
 
     # Mission State Callback
-    def state_callback(self, msg):
-
+    def state_callback(self, msg: String):
         new_state = msg.data.strip()
-
+ 
         if new_state not in STATE_MAP:
-            self.get_logger().warn(
-                f'Unknown mission state: {new_state}'
-            )
+            self.get_logger().warn(f'Unknown state: {new_state}')
             return
-
+ 
         if new_state != self.state:
-            self.get_logger().info(
-                f'State changed: {self.state} -> {new_state}'
-            )
-
+            self.get_logger().info(f'State changed: {self.state} → {new_state}')
+ 
         self.state = new_state
 
-    # Check Command Timeout
-    def is_cmd_valid(self, topic):
+    def get_active_command(self):
+ 
+        # MANUAL: compute v/ω from joystick axes
+        if self.state == 'MANUAL':
+            if self.joy_msg is None:
+                self.get_logger().warn(
+                    'MANUAL state but no joy message received, outputting zero.',
+                    throttle_duration_sec=1.0
+                )
+                return 0.0, 0.0
+ 
+            linear_val  = self.joy_msg.axes[self.joy_linear_axis]
+            angular_val = self.joy_msg.axes[self.joy_angular_axis]
+ 
+            # Apply deadzone
+            if abs(linear_val)  < self.joy_deadzone:
+                linear_val  = 0.0
+            if abs(angular_val) < self.joy_deadzone:
+                angular_val = 0.0
+ 
+            v = linear_val  * self.joy_max_linear
+            w = angular_val * self.joy_max_angular
+            return v, w
+ 
+        # All other states: look up topic from STATE_MAP
+        active_topic = STATE_MAP.get(self.state)
+ 
+        if active_topic is not None:
+            cmd = self.latest_cmds[active_topic]
+            if cmd is not None:
+                return cmd.linear.x, cmd.angular.z
+ 
+        # IDLE / DONE / no message yet → zero
+        return 0.0, 0.0
 
-        if self.latest_cmds[topic] is None:
-            return False
-
-        if self.latest_times[topic] is None:
-            return False
-
-        now = self.get_clock().now()
-
-        age = (
-            now - self.latest_times[topic]
-        ).nanoseconds / 1e9
-
-        return age <= self.cmd_timeout
-
-    # Clamp Function
-    def clamp(self, value):
-        return max(
-            -self.max_wheel_speed,
-            min(self.max_wheel_speed, value)
-        )
+    # Kinematics
+    def compute_wheel_speeds(self, v, w):
+        half_L = self.wheelbase / 2.0
+ 
+        v_left  = (v - w * half_L) / self.wheel_radius
+        v_right = (v + w * half_L) / self.wheel_radius
+ 
+        v_left  = max(-self.max_wheel_speed, min(self.max_wheel_speed, v_left))
+        v_right = max(-self.max_wheel_speed, min(self.max_wheel_speed, v_right))
+ 
+        return v_left, v_right
 
     # Publish Loop
     def publish_speed(self):
-        # Safe default
-        linear_v = 0.0
-        angular_w = 0.0
-        source = 'ZERO'
-
-        # TELEOP OVERRIDE (Highest Priority)
-        teleop_topic = '/cmd_vel/teleop'
+        v, w = self.get_active_command()
+        v_left, v_right = self.compute_wheel_speeds(v, w)
+ 
+        speed_msg = Float64MultiArray()
         
-        if self.is_cmd_valid(teleop_topic):
-            # Teleop overrides EVERYTHING
-            teleop_msg = self.latest_cmds[teleop_topic]
-            linear_v = float(teleop_msg.linear.x)
-            angular_w = float(teleop_msg.angular.z)
-            source = 'TELEOP_OVERRIDE'
-            
-        else:
-            # Normal State-Based Selection
-            active_topic = STATE_MAP.get(self.state)
-
-            if active_topic is not None:
-                if self.is_cmd_valid(active_topic):
-                    cmd_msg = self.latest_cmds[active_topic]
-                    linear_v = float(cmd_msg.linear.x)
-                    angular_w = float(cmd_msg.angular.z)
-                    source = active_topic
-                    
-                else:
-                    # Timeout warning (once per timeout event)
-                    if not self._timeout_warned:
-                        self.get_logger().warn(
-                            f'Command timeout on {active_topic}, '
-                            f'no valid command for {self.cmd_timeout}s'
-                        )
-                        self._timeout_warned = True
-            else:
-                # IDLE or DONE state
-                source = self.state
-
-        # Reset timeout warning flag if we got a valid command
-        if source !='ZERO':
-            self._timeout_warned = False
-
-        # Differential Drive Kinematics
-        v_left = (
-            linear_v -
-            (angular_w * self.wheelbase / 2.0)
-        ) / self.wheel_radius
-
-        v_right = (
-            linear_v +
-            (angular_w * self.wheelbase / 2.0)
-        ) / self.wheel_radius
-
-        # Clamp wheel speeds
-        v_left = self.clamp(v_left)
-        v_right = self.clamp(v_right)
-
-        # Publish Output
-        speed_msg = Speed()
-        speed_msg.vL = float(v_left)
-        speed_msg.vR = float(v_right)
+        speed_msg.data = [v_left,v_right]
+        
         self.speed_pub.publish(speed_msg)
-
-        # Debug Logging
-        self.tick_counter += 1
-        if self.tick_counter >= int(self.publish_rate):
-            self.tick_counter = 0
-            self.get_logger().info(
-                f'[{self.state}] src={source} | '
-                f'vL={v_left:.2f} rad/s | '
-                f'vR={v_right:.2f} rad/s'
-            )
+ 
+        self.get_logger().info(
+            f'[{self.state}] v={v:.2f} w={w:.2f} → '
+            f'vL={v_left:.2f} vR={v_right:.2f} rad/s',
+        )
 
     # Safe Shutdown
     def stop_robot(self):
-        stop_msg = Speed()
+        stop_msg = Float64MultiArray()
         stop_msg.vL = 0.0
         stop_msg.vR = 0.0
         self.speed_pub.publish(stop_msg)
