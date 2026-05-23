@@ -1,94 +1,98 @@
 #!/usr/bin/env python3
 """
-Simple cmd_mux_node - No external dependencies
-Just copy and run this file
+test_cmd_mux.py - Simple test node for cmd_mux_node
+Publishes test commands to verify functionality
 """
 
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
-from std_msgs.msg import Float64MultiArray
+import time
 
-class SimpleCmdMux(Node):
+class TestCmdMux(Node):
     def __init__(self):
-        super().__init__('cmd_mux_node')
+        super().__init__('test_cmd_mux')
         
-        # Parameters
-        self.wheel_radius = 0.10
-        self.wheelbase = 0.50
-        self.max_speed = 10.0
+        # Publishers
+        self.twist_pub = self.create_publisher(Twist, '/cmd_vel/lane_pid', 10)
+        self.state_pub = self.create_publisher(String, '/mission/active_state', 10)
         
-        # State
-        self.state = 'IDLE'
-        self.latest_cmd = None
+        self.get_logger().info('Test Node Started')
         
-        # Publisher
-        self.pub = self.create_publisher(Float64MultiArray, '/cmd_speed', 10)
+        # Run tests after 1 second
+        self.timer = self.create_timer(1.0, self.run_tests)
         
-        # Subscribers
-        self.create_subscription(Twist, '/cmd_vel/lane_pid', self.lane_callback, 10)
-        self.create_subscription(Twist, '/cmd_vel/waypoint', self.wp_callback, 10)
-        self.create_subscription(Twist, '/cmd_vel/teleop', self.teleop_callback, 10)
-        self.create_subscription(String, '/mission/active_state', self.state_callback, 10)
-        
-        # Timer (50Hz)
-        self.create_timer(0.02, self.publish_loop)
-        
-        self.get_logger().info('Simple Cmd Mux Node Started')
-        self.get_logger().info(f'Parameters: r={self.wheel_radius}, L={self.wheelbase}')
+    def publish_twist(self, v, w):
+        """Publish a Twist message"""
+        msg = Twist()
+        msg.linear.x = v
+        msg.angular.z = w
+        self.twist_pub.publish(msg)
+        self.get_logger().info(f'Published: v={v}, w={w}')
     
-    def lane_callback(self, msg):
-        if self.state == 'LANE':
-            self.latest_cmd = msg
-            self.get_logger().debug(f'LANE cmd: v={msg.linear.x}, w={msg.angular.z}')
+    def publish_state(self, state):
+        """Publish mission state"""
+        msg = String()
+        msg.data = state
+        self.state_pub.publish(msg)
+        self.get_logger().info(f'State: {state}')
     
-    def wp_callback(self, msg):
-        if self.state == 'WP':
-            self.latest_cmd = msg
-            self.get_logger().debug(f'WP cmd: v={msg.linear.x}, w={msg.angular.z}')
-    
-    def teleop_callback(self, msg):
-        # Teleop always overrides!
-        self.latest_cmd = msg
-        self.get_logger().debug(f'TELEOP cmd: v={msg.linear.x}, w={msg.angular.z}')
-    
-    def state_callback(self, msg):
-        old_state = self.state
-        self.state = msg.data
-        self.get_logger().info(f'State: {old_state} -> {self.state}')
+    def run_tests(self):
+        self.get_logger().info('=' * 50)
+        self.get_logger().info('Starting Tests...')
+        self.get_logger().info('=' * 50)
         
-        # Clear command when entering IDLE
-        if self.state == 'IDLE':
-            self.latest_cmd = None
-    
-    def publish_loop(self):
-        v = 0.0
-        w = 0.0
+        # Test 1: LANE state with linear motion
+        self.get_logger().info('\n--- Test 1: LANE + Linear Motion ---')
+        self.publish_state('LANE')
+        time.sleep(0.5)
+        self.publish_twist(0.5, 0.0)
+        time.sleep(2)
         
-        # Use latest command if available
-        if self.latest_cmd is not None:
-            v = self.latest_cmd.linear.x
-            w = self.latest_cmd.angular.z
+        # Test 2: LANE state with rotation
+        self.get_logger().info('\n--- Test 2: LANE + Rotation ---')
+        self.publish_twist(0.0, 1.0)
+        time.sleep(2)
         
-        # Kinematics
-        v_left = (v - w * self.wheelbase / 2.0) / self.wheel_radius
-        v_right = (v + w * self.wheelbase / 2.0) / self.wheel_radius
+        # Test 3: LANE state with combined motion
+        self.get_logger().info('\n--- Test 3: LANE + Combined Motion ---')
+        self.publish_twist(0.5, 0.5)
+        time.sleep(2)
         
-        # Clamp
-        v_left = max(-self.max_speed, min(self.max_speed, v_left))
-        v_right = max(-self.max_speed, min(self.max_speed, v_right))
+        # Test 4: Switch to WP state
+        self.get_logger().info('\n--- Test 4: WP State ---')
+        self.publish_state('WP')
+        time.sleep(0.5)
+        self.publish_twist(0.3, 0.0)
+        time.sleep(2)
         
-        # Publish
-        msg = Float64MultiArray()
-        msg.data = [v_left, v_right]
-        self.pub.publish(msg)
+        # Test 5: IDLE state (should output zero)
+        self.get_logger().info('\n--- Test 5: IDLE State (Zero Output) ---')
+        self.publish_state('IDLE')
+        time.sleep(0.5)
+        self.publish_twist(0.5, 0.0)
+        time.sleep(2)
+        
+        # Test 6: Back to LANE
+        self.get_logger().info('\n--- Test 6: Back to LANE ---')
+        self.publish_state('LANE')
+        time.sleep(0.5)
+        self.publish_twist(0.5, 0.0)
+        time.sleep(2)
+        
+        self.get_logger().info('\n' + '=' * 50)
+        self.get_logger().info('Tests Complete!')
+        self.get_logger().info('=' * 50)
+        
+        # Shutdown after tests
+        self.destroy_timer(self.timer)
+        rclpy.shutdown()
 
 def main(args=None):
     rclpy.init(args=args)
-    node = SimpleCmdMux()
+    node = TestCmdMux()
     rclpy.spin(node)
-    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
