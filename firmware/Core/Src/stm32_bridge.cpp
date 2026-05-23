@@ -8,21 +8,21 @@
 #include "usbd_cdc_if.h"
 #include <string.h>
 
-/* ── Global instance ─────────────────────────────────────────────────── */
-STM32Bridge g_bridge;
+/* global instance -> mesh 3aref leh */
+STM32Bridge g_bridge; 
 
 /* ── CRC8 table and crc8() unchanged ─────────────────────────────────── */
-static const uint8_t CRC8_TABLE[256] = {
-    // ... (existing table) ...
-};
+// static const uint8_t CRC8_TABLE[256] = {
+//     // ... (existing table) ...
+// };
 
-extern "C" uint8_t crc8(const uint8_t *data, uint8_t len)
-{
-    uint8_t crc = 0x00;
-    while (len--)
-        crc = CRC8_TABLE[crc ^ *data++];
-    return crc;
-}
+// extern "C" uint8_t crc8(const uint8_t *data, uint8_t len)
+// {
+//     uint8_t crc = 0x00;
+//     while (len--)
+//         crc = CRC8_TABLE[crc ^ *data++];
+//     return crc;
+// }
 
 /* ══════════════════════════════════════════════════════════════════════
  * Constructor — initialise all members, including ack_received
@@ -34,10 +34,10 @@ STM32Bridge::STM32Bridge()
       active_msg_id(0),
       active_msg_len(0),
       payload_index(0),
-      last_heartbeat_tick(0),
-      estop_active(false),
+    //   last_heartbeat_tick(0),
+    //   estop_active(false),
       debug_mode(false),
-      ack_received(false) // <-- ADDED
+    //   ack_received(false) // <-- ADDED
 {
     memset(rx_buffer, 0, sizeof(rx_buffer));
     memset(payload_buffer, 0, sizeof(payload_buffer));
@@ -49,7 +49,6 @@ STM32Bridge::STM32Bridge()
 void STM32Bridge::Init()
 {
     last_heartbeat_tick = HAL_GetTick();
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -77,7 +76,7 @@ void STM32Bridge::read_message()
     {
         uint8_t byte = rx_buffer[tail];
         tail = (uint16_t)((tail + 1u) % BUFFER_SIZE);
-
+        //current_sate = msg.state
         switch (current_state)
         {
         case STATE_SYNC:
@@ -209,12 +208,12 @@ void STM32Bridge::ExecuteSafeStop()
 /* ══════════════════════════════════════════════════════════════════════
  * ClearEStop — unchanged
  * ══════════════════════════════════════════════════════════════════════ */
-void STM32Bridge::ClearEStop()
-{
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
-    estop_active = false;
-    last_heartbeat_tick = HAL_GetTick();
-}
+// void STM32Bridge::ClearEStop()
+// {
+//     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
+//     estop_active = false;
+//     last_heartbeat_tick = HAL_GetTick();
+// }
 
 /* ══════════════════════════════════════════════════════════════════════
  * SendPacket — unchanged
@@ -237,7 +236,7 @@ void STM32Bridge::SendPacket(uint8_t msg_type, const void *payload, uint8_t leng
 /* ══════════════════════════════════════════════════════════════════════
  * ToggleDebugMode — unchanged
  * ══════════════════════════════════════════════════════════════════════ */
-void STM32Bridge::ToggleDebugMode(bool enable)
+void STM32Bridge::ToggleDebugMode(bool enable) //set_debug_mode
 {
     debug_mode = enable;
 }
