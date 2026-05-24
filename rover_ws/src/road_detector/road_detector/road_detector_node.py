@@ -39,7 +39,6 @@ class RoadDetectorNode(Node):
         # Initialize state variables
         self.pipeline = None
         self.detector = None
-        self.bev = None
         self.image_size = (1920, 1080)  # Will be updated from first frame
         self.latest_image = None
         
@@ -70,6 +69,8 @@ class RoadDetectorNode(Node):
         # Camera parameters (extrinsic)
         self.declare_parameter('camera_height', 1.43)
         self.declare_parameter('pitch_deg', -50.0)
+        self.declare_parameter('yaw_deg', 0.0)
+        self.declare_parameter('roll_deg', 0.0)
         
         # Camera parameters (intrinsic)
         self.declare_parameter('fx', 1000.0)
@@ -102,6 +103,8 @@ class RoadDetectorNode(Node):
         # Camera parameters
         self.camera_height = self.get_parameter('camera_height').value
         self.pitch_deg = self.get_parameter('pitch_deg').value
+        self.yaw_deg = self.get_parameter('yaw_deg').value
+        self.roll_deg = self.get_parameter('roll_deg').value
         
         # Camera intrinsic matrix
         fx = self.get_parameter('fx').value
@@ -205,24 +208,19 @@ class RoadDetectorNode(Node):
         if self.pipeline is None:
             self.get_logger().info(f"Initializing pipeline with image size: {image_width}x{image_height}")
             
-            # Create detector and pipeline
-            self.detector = RoadFeatureDetector(
+            # Create road detector and pipeline
+            self.pipeline = RoadFeatureBEVPipeline(
                 K=self.K,
                 camera_height=self.camera_height,
                 pitch_deg=self.pitch_deg,
+                yaw_deg=self.yaw_deg,
+                roll_deg=self.roll_deg,
+                dist_coeffs=np.zeros((5, 1)),  # Assuming no distortion for now
                 image_size=(image_width, image_height),
                 min_radius=self.min_radius,
                 max_radius=self.max_radius
             )
             
-            self.pipeline = RoadFeatureBEVPipeline(
-                K=self.K,
-                camera_height=self.camera_height,
-                pitch_deg=self.pitch_deg,
-                image_size=(image_width, image_height)
-            )
-            
-            self.bev = self.detector.bev
             self.image_size = (image_width, image_height)
             self.get_logger().info("Pipeline initialization complete")
     
@@ -379,27 +377,18 @@ class RoadDetectorNode(Node):
         """Handle dynamic parameter updates"""
         result = rclpy.node.SetParametersResult(successful=True)
         
-        for param in params:
-            if param.name == 'min_radius' and self.detector:
-                self.detector.min_radius = param.value
-                self.get_logger().info(f"Updated min_radius to {param.value}")
-            
-            elif param.name == 'max_radius' and self.detector:
-                self.detector.max_radius = param.value
-                self.get_logger().info(f"Updated max_radius to {param.value}")
-            
-            elif param.name == 'processing_rate':
-                self.processing_rate = param.value
-                self.min_interval_ns = int(1.0 / self.processing_rate * 1e9) if self.processing_rate > 0 else 0
-                self.get_logger().info(f"Updated processing_rate to {self.processing_rate} Hz")
-            
-            elif param.name == 'publish_debug_images':
+        for param in params:                       
+            if param.name == 'publish_debug_images':
                 self.publish_debug_images = param.value
                 self.get_logger().info(f"Updated publish_debug_images to {self.publish_debug_images}")
             
             elif param.name == 'publish_performance_stats':
                 self.publish_performance_stats = param.value
                 self.get_logger().info(f"Updated publish_performance_stats to {self.publish_performance_stats}")
+            
+            elif param.name == 'max_points_per_cloud':
+                self.max_points_per_cloud = param.value
+                self.get_logger().info(f"Updated max_points_per_cloud to {self.max_points_per_cloud}")
         
         return result
     

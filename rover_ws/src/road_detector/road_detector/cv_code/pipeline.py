@@ -29,13 +29,18 @@ def mask_to_pixels(mask):
 
 class RoadFeatureBEVPipeline:
 
-    def __init__(self, K, camera_height, pitch_deg, image_size):
+    def __init__(self, K, camera_height, pitch_deg,yaw_deg,roll_deg,dist_coeffs, image_size, min_radius=10, max_radius=200):
 
         self.detector = RoadFeatureDetector(
             K=K,
             camera_height=camera_height,
             pitch_deg=pitch_deg,
+            yaw_deg=yaw_deg,
+            roll_deg=roll_deg,
+            dist_coeffs=dist_coeffs,
             image_size=image_size,
+            min_radius=min_radius,
+            max_radius=max_radius
         )
 
         self.bev = self.detector.bev  # reuse same HomographyBEV instance
@@ -93,8 +98,8 @@ class RoadFeatureBEVPipeline:
 def main():
 
     K = np.array([
-        [1000,    0, 960],
-        [   0, 1000, 540],
+        [793.79768697,    0, 290.78702859],
+        [   0, 813.96117996, 241.57106901],
         [   0,    0,   1],
     ], dtype=np.float64)
 
@@ -114,11 +119,19 @@ def main():
 
     pipeline = RoadFeatureBEVPipeline(
         K=K,
-        camera_height=1.43,
-        pitch_deg=-50,
+        camera_height=1.33,
+        pitch_deg=-45,
+        yaw_deg=-2,
+        roll_deg=-7,
         image_size=(w, h),
+        dist_coeffs=np.array([
+            -4.97661814e-01,
+             8.05356640e+00,
+             9.44660547e-03,
+            -2.64434172e-02,
+            -4.33974203e+01
+        ])
     )
-
     frame_idx  = 0
     all_points = []
 
