@@ -16,7 +16,7 @@ It is **not** recommended to directly open the monorepo root folder in your text
 
 | Project                 | Base Branch        | Description                                                             |
 |-------------------------|--------------------|-------------------------------------------------------------------------|
-| Monorepo Root           | `main` & `staging` | Structuring of the monorepo                                             |
+| [Monorepo](./)           | `main` | structuring of the monorepo                                             |
 | [console](./console/)   | `console/dev`      | GUI for remote control                                                  |
 | [firmware](./firmware/) | `firmware/dev`     | firmware for the on-board MCUs                                          |
 | [network](./network/)   | `network/dev`      | configuration and scripts for network setup                             |
@@ -32,47 +32,40 @@ Below is a graph demonstrating the branch strategies for the each of the subproj
 ```mermaid
 graph TD
 
-    subgraph AdminTrack ["Maintainers"]
-        direction TB
-        MainStart1["main"] --> |Branch Off| MainFeature["repo/&lt;FEATURE&gt;"]
-        MainFeature --> |Merge Into| Staging1["staging"]
-        Staging1 -->|Merge Into| MainEnd1["main"]
-    end
-
-    subgraph ProjectTrack ["Contributions"]
+    subgraph ProjectTrack ["Contributions Pipeline"]
         direction TB
         subgraph ReviewerSyncSub ["Maintainers + Reviewers"]
-            MainStart2["main"] -->|Branch Off &lpar;Maintainers&rpar; or Sync &lpar;Reviewers&rpar;| ProjDev1["&lt;project&gt;/dev"]
+            MainStart2["main"] -->|New Branch &lpar;Maintainers&rpar; or Sync &lpar;Reviewers&rpar;| ProjDev1["&lt;project&gt;/dev"]
         end
-        ProjDev1 -->|Branch Off| ProjFeature["&lt;project&gt;/&lt;FEATURE&gt;"]
-        ProjFeature -->|Open| PRStep["Pull Request"]
+        ProjDev1 -->|New Feature Branch| ProjFeature["&lt;project&gt;/&lt;FEATURE&gt;"]
+        ProjFeature -->|Open| PRStep["Feature PR"]
         
         subgraph ReviewerPrSub ["Reviewers"]
             direction TB
-            ReviewStep["Code Review"] -->|Approve & Merge| ProjDev2["&lt;project&gt;/dev"]
-        end
+            ReviewStep["Feature Code Review"] -->|Approve & Merge| ProjDev2["&lt;project&gt;/dev"]
+            IntegrationPR["Integration PR"]
+        end ReviewerPrSub
         
         subgraph DevMaintainers ["Maintainers"]
             direction TB
-            StagingPR["Integration PR"] -->|Trigger| StagingReview["Staging Review"]
-            StagingReview -->|Approve & Merge| Staging2["staging"]
-            Staging2 -->|Merge Into| MainEnd2["main"]
+            IntegrationPR -->|Trigger| FinalReview["Final Review"]
+            FinalReview -->|Approve & Final Merge| MainEnd2["main"]
         end
 
         PRStep -->|Trigger| ReviewStep
-        ProjDev2 -->|Open PR to Staging| StagingPR
+        
+        %% Flow from project dev branch into the main integration pipeline
+        ProjDev2 -->|Open PR to main| IntegrationPR
     end
 
     classDef mainBranch fill:#070707,stroke:#373737,stroke-width:2px,color:#EDEFF0;
-    classDef stagingBranch fill:#383B3D,stroke:#191B1C,stroke-width:2px,color:#EDEFF0;
     classDef devBranch fill:#FA5F6C,stroke:#DD1F44,stroke-width:2px,color:#FEDFDF;
     classDef reviewNode fill:#FCA6A7,stroke:#FEDFDF,stroke-width:2px,color:#070707;
 
-    class MainStart1,MainEnd1,MainStart2,MainEnd2 mainBranch
-    class Staging1,Staging2 stagingBranch
+    class MainStart2,MainEnd2 mainBranch
     class ProjDev1,ProjDev2 devBranch
-    class MainFeature,ProjFeature featureBranch
-    class PRStep,ReviewStep,StagingPR,StagingReview reviewNode
+    class ProjFeature featureBranch
+    class PRStep,ReviewStep,IntegrationPR,FinalReview reviewNode
 ```
 
 #### Merge Strategy
@@ -84,7 +77,7 @@ This can be best achieved by rebasing on `<base>` before merging:
 (on <feature>)$ git rebase <base>
 ```
 
-According to the previous branch strategy diagram, you should follow these guidelines when merging from `<project>/<FEATURE>` into `<project>/dev` and when merging from `<project>/dev` into `staging`.
+According to the previous branch strategy diagram, you should follow these guidelines when merging from `<project>/<FEATURE>` into `<project>/dev` and when merging from `<project>/dev` into `main`.
 
 Here is a detailed merge workflow that accounts for the processes of pull request reviewing, resolving conflicts and rebasing before merging:
 
@@ -135,13 +128,13 @@ graph TD
 
     %% Styles matched to your README definitions
     classDef mainBranch fill:#070707,stroke:#373737,stroke-width:2px,color:#EDEFF0;
-    classDef stagingBranch fill:#383B3D,stroke:#191B1C,stroke-width:2px,color:#EDEFF0;
+    classDef modificationBranch fill:#383B3D,stroke:#191B1C,stroke-width:2px,color:#EDEFF0;
     classDef devBranch fill:#FA5F6C,stroke:#DD1F44,stroke-width:2px,color:#FEDFDF;
     classDef reviewNode fill:#FCA6A7,stroke:#FEDFDF,stroke-width:2px,color:#070707;
     classDef logicGate fill:#383B3D,stroke:#FA5F6C,stroke-width:1px,color:#EDEFF0;
 
     class Start,FinalMerge mainBranch;
-    class SyncBranch,FixConflicts,ForcePush,DevEdits stagingBranch;
+    class SyncBranch,FixConflicts,ForcePush,DevEdits modificationBranch;
     class AskReview devBranch;
     class CheckOutofDate,DetectConflicts,CheckApproval logicGate;
 ```
