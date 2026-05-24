@@ -1,9 +1,4 @@
-/*
- * cdc_driver.cpp
- *
- *  Created on: Feb 10, 2026
- *      Author: habib
- */
+
 
 #include "cdc_driver.h"
 #include "usbd_cdc_if.h"
@@ -49,26 +44,9 @@ bool CdcDriver::sendMessage(const Message *msg)
     return (result == USBD_OK);
 }
 
-void CdcDriver::print(const char *format, ...)
-{
-    char buffer[128];       // char array to hold the final formatted string
-    va_list args;           // acts as container for all extra arguments passed after format
-    va_start(args, format); // initalize the container
-    int len = vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args); // required after the va_start to clean up the va_list
 
-    uint32_t start_time = HAL_GetTick();
-    if (len > 0)
-    {
-        while (CDC_Transmit_FS((uint8_t *)buffer, len) == USBD_BUSY)
-        {
-            if (HAL_GetTick() - start_time > 10)
-                break; // give up after 10 ms if the bus is busy
-        }
-    }
-}
 
-bool CdcDriver::receiveMessage(Message *msg)
+bool CdcDriver::read_Message(Message *msg)
 {
 
     if (!data_received)
@@ -76,13 +54,6 @@ bool CdcDriver::receiveMessage(Message *msg)
         return false; // No data, return immediately
     }
 
-    // uint32_t start_time = HAL_GetTick();
-
-    // while (!data_received) {
-    //     if ((HAL_GetTick() - start_time) > m_timeout_ms) {
-    //         return false; // timeout
-    //     }
-    // }
 
     uint16_t start_index = 0;
     bool found_start = false;

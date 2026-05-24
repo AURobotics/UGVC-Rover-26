@@ -97,14 +97,21 @@ void Bridge_Update(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+```cpp extern "C" int _write(int file, char *ptr, int len)
+{
+  CDC_Transmit_FS((uint8_t *)ptr, len);
+  return len;
+}
+```
 
-/* USER CODE END 0 */
+    /* USER CODE END 0 */
 
-/**
- * @brief  The application entry point.
- * @retval int
- */
-int main(void)
+    /**
+     * @brief  The application entry point.
+     * @retval int
+     */
+    int
+    main(void)
 {
 
   /* USER CODE BEGIN 1 */
