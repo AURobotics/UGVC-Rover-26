@@ -6,13 +6,15 @@ from .homography import HomographyBEV
 
 class RoadFeatureDetector:
 
-    def __init__(self, K, camera_height, pitch_deg, image_size, dist_coeffs=None,
+    def __init__(self, K, camera_height, pitch_deg,yaw_deg,roll_deg, image_size, dist_coeffs=None,
                  min_radius=10, max_radius=200):
 
         self.bev = HomographyBEV(
             K=np.array(K, dtype=np.float64),
             camera_height=float(camera_height),
             pitch_deg=float(pitch_deg),
+            yaw_deg=float(yaw_deg),
+            roll_deg=float(roll_deg),
             image_size=tuple(image_size),
             dist_coeffs=None if dist_coeffs is None else np.array(dist_coeffs, dtype=np.float64)
         )
@@ -58,7 +60,7 @@ class RoadFeatureDetector:
 
         thin = ximgproc.thinning(mask)
 
-        return thin
+        return thin, mask
 
     # ======================================================
     # HOUGH LINES
@@ -93,23 +95,14 @@ class RoadFeatureDetector:
     # ======================================================
     # CIRCLE DETECTION
     # ======================================================
-    def _detect_circles(self, image):
-
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        lower_white = np.array([0, 0, 200])
-        upper_white = np.array([180, 40, 255])
-
-        white_mask = cv2.inRange(hsv, lower_white, upper_white)
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-        white_mask = cv2.morphologyEx(white_mask, cv2.MORPH_OPEN, kernel)
-        white_mask = cv2.morphologyEx(white_mask, cv2.MORPH_CLOSE, kernel)
+    def _detect_circles(self, image, white_mask):
 
         blurred = cv2.GaussianBlur(white_mask, (9, 9), 2)
         circles = cv2.HoughCircles(
-            blurred, cv2.HOUGH_GRADIENT, dp=1.2, minDist=30,
-            param1=50, param2=30,
-            minRadius=self.min_radius, maxRadius=self.max_radius
-        )
+        blurred, cv2.HOUGH_GRADIENT, dp=1.2, minDist=30,
+        param1=50, param2=30,
+        minRadius=self.min_radius, maxRadius=self.max_radius
+    )
 
         detected = []
         if circles is not None:
@@ -196,12 +189,12 @@ class RoadFeatureDetector:
     def process(self, frame, draw_bev=False):
 
         # --- Lanes ---
-        edges = self.detect_edges(frame)
+        edges, white_mask = self.detect_edges(frame)
         lines = self.detect_lines(edges)
         output = self.draw_lines(frame.copy(), lines)
 
         # --- Circles ---
-        circles = self._detect_circles(frame)
+        circles = self._detect_circles(frame, white_mask)
         ground_circles = [self.circle_to_ground(c) for c in circles]
         circle_clouds  = [self.circle_to_ground_cloud(c) for c in circles]
 
@@ -246,7 +239,9 @@ if __name__ == "__main__":
         K=K,
         camera_height=camera_height,
         pitch_deg=pitch_deg,
-        image_size=(img_w, img_h)
+        image_size=(img_w, img_h),
+        yaw_deg=0,
+        roll_deg=0
     )
 
     while True:

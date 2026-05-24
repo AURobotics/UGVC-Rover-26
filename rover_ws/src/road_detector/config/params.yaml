@@ -10,6 +10,8 @@ road_detector:
     # Camera calibration
     camera_height: 1.43
     pitch_deg: -50.0
+    yaw_deg: 0.0
+    roll_deg: 0.0
     fx: 1000.0
     fy: 1000.0
     cx: 960.0
