@@ -25,15 +25,14 @@
 extern "C"
 {
 #include "adc_utils.h"
+#include "servo.h"
+#include "PWM_expander.h"
 }
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-
-
 #include "messages.h"
-
 
 /* USER CODE END Includes */
 
@@ -161,10 +160,37 @@ int main(void)
   HAL_NVIC_EnableIRQ(ADC_IRQn);
 
   HAL_ADC_Stop(&hadc1);
-  
-  HAL_Delay(200);
+
+  HAL_Delay(100);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, 6);
-  HAL_Delay(200);
+  HAL_Delay(1000);
+
+  char msg[50];
+  sprintf(msg, "Scanning I2C bus...\r\n");
+  CDC_Transmit_FS((uint8_t *)msg, strlen(msg));
+
+  for (uint8_t addr = 0x10; addr < 0xF0; addr += 2)
+  {
+    if (HAL_I2C_IsDeviceReady(&hi2c2, addr, 3, 50) == HAL_OK)
+    {
+      sprintf(msg, "Device found at 0x%02X\r\n", addr);
+      CDC_Transmit_FS((uint8_t *)msg, strlen(msg));
+    }
+  }
+  sprintf(msg, "Done scanning \r\n");
+  CDC_Transmit_FS((uint8_t *)msg, strlen(msg));
+  HAL_Delay(100);
+  char msg0[50] = "before expander\r\n";
+  CDC_Transmit_FS((uint8_t *)msg0, strlen(msg0));
+  HAL_Delay(1);
+
+  PWM_expander pca(&hi2c1, 0x80);
+  Servo servo0(pca, PWM_channel::ch_15);
+  HAL_Delay(1);
+  servo0.setAngle(0);
+  sprintf(msg0, "after expander\r\n");
+  CDC_Transmit_FS((uint8_t *)msg0, strlen(msg0));
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -183,15 +209,26 @@ int main(void)
     }
 
     uint32_t adc_value = adc_buffer[0];
-    char msg[50]; 
+    char msg[50];
 
-    sprintf(msg, "ADC Value: %lu  | Current: %f mA\r\n", adc_value, raw_adc_to_current(adc_value));
-    CDC_Transmit_FS((uint8_t *)msg, strlen(msg));
-    HAL_Delay(200);
-    //Bridge_Update();
+    for (int i = 0; i <= 180; i++)
+    {
+      servo0.setAngle(i);
+      HAL_Delay(1);
+    }
 
-   
-    
+    char msg1[] = "loop is running\r\n";
+    CDC_Transmit_FS((uint8_t *)msg1, strlen(msg1));
+    HAL_Delay(2000);
+
+   for (int i = 180; i >=0; i--)
+    {
+      servo0.setAngle(i);
+      HAL_Delay(1);
+    }
+    HAL_Delay(2000);
+
+    // Bridge_Update();
   }
   /* USER CODE END 3 */
 }

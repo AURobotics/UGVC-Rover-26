@@ -1,0 +1,6 @@
+C:/Users/fzoba/UGVC-Rover-26/firmware/Core/Src/nrf_receiver.cpp:23:13:void NRF_Select()	8	static
+C:/Users/fzoba/UGVC-Rover-26/firmware/Core/Src/nrf_receiver.cpp:28:13:void NRF_Unselect()	8	static
+C:/Users/fzoba/UGVC-Rover-26/firmware/Core/Src/nrf_receiver.cpp:33:13:void NRF_CE_Control(uint8_t)	16	static
+C:/Users/fzoba/UGVC-Rover-26/firmware/Core/Src/nrf_receiver.cpp:38:16:uint8_t SPI2_WriteRead(uint8_t)	32	static
+C:/Users/fzoba/UGVC-Rover-26/firmware/Core/Src/nrf_receiver.cpp:45:6:void NRF24_Init_Receiver()	24	static
+C:/Users/fzoba/UGVC-Rover-26/firmware/Core/Src/nrf_receiver.cpp:83:9:uint8_t Handle_Manual_Remote_Input(Motor*, Motor*, Motor*, Motor*)	48	static

@@ -30,14 +30,14 @@ class PWM_expander {
     public:
         I2C_HandleTypeDef* _hi2c;
         uint8_t _address;
-        uint8_t reg_buffer[62] = {0};
+        uint8_t reg_buffer[64] = {0};
 
 
         PWM_expander(I2C_HandleTypeDef* hi2c, uint8_t address);
         PWM_expander(const PWM_expander&) = delete;
-        void set_channel(PWM_channel ch, int value);
-        void write();
-        int set_frequency();
+        void set_channel(PWM_channel ch, uint16_t value);
+        HAL_StatusTypeDef write();
+        void set_frequency();
         void enable_output();
         void disable_output();
 };
