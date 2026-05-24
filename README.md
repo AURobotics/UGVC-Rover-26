@@ -41,8 +41,8 @@ graph TD
 
     subgraph ProjectTrack ["Contributions"]
         direction TB
-        subgraph ReviewerSyncSub ["Reviewers"]
-            MainStart2["main"] -->|Branch Off or Sync| ProjDev1["&lt;project&gt;/dev"]
+        subgraph ReviewerSyncSub ["Maintainers + Reviewers"]
+            MainStart2["main"] -->|Branch Off &lpar;Maintainers&rpar; or Sync &lpar;Reviewers&rpar;| ProjDev1["&lt;project&gt;/dev"]
         end
         ProjDev1 -->|Branch Off| ProjFeature["&lt;project&gt;/&lt;FEATURE&gt;"]
         ProjFeature -->|Open| PRStep["Pull Request"]
@@ -54,11 +54,13 @@ graph TD
         
         subgraph DevMaintainers ["Maintainers"]
             direction TB
-            Staging2["staging"] -->|Merge Into| MainEnd2["main"]
+            StagingPR["Integration PR"] -->|Trigger| StagingReview["Staging Review"]
+            StagingReview -->|Approve & Merge| Staging2["staging"]
+            Staging2 -->|Merge Into| MainEnd2["main"]
         end
 
         PRStep -->|Trigger| ReviewStep
-        ProjDev2 -->|Merge Into| Staging2
+        ProjDev2 -->|Open PR to Staging| StagingPR
     end
 
     classDef mainBranch fill:#070707,stroke:#373737,stroke-width:2px,color:#EDEFF0;
@@ -70,7 +72,7 @@ graph TD
     class Staging1,Staging2 stagingBranch
     class ProjDev1,ProjDev2 devBranch
     class MainFeature,ProjFeature featureBranch
-    class PRStep,ReviewStep reviewNode
+    class PRStep,ReviewStep,StagingPR,StagingReview reviewNode
 ```
 
 #### Merge Strategy
