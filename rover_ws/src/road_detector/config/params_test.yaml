@@ -12,13 +12,13 @@ road_detector:
     pitch_deg: -50.0
     yaw_deg: 0.0
     roll_deg: 0.0
-    fx: 793.79768697 # final
-    fy: 813.96117996 # final
-    cx: 290.78702859 # final
-    cy: 241.57106901 # final
+    fx: 1000.0
+    fy: 1000.0
+    cx: 960.0
+    cy: 540.0
     
     # Detection parameters
-    min_radius: 5
+    min_radius: 10
     max_radius: 200
     
     # Debug Options
