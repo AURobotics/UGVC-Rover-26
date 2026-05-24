@@ -15,7 +15,7 @@ def generate_launch_description():
         default_value=PathJoinSubstitution([
             FindPackageShare('road_detector'),
             'config',
-            'params.yaml',
+            'params_test.yaml',
         ]),
         description='Path to road_detector YAML parameter file',
     )
