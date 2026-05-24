@@ -38,7 +38,6 @@ class RoadDetectorNode(Node):
         
         # Initialize state variables
         self.pipeline = None
-        self.detector = None
         self.image_size = (1920, 1080)  # Will be updated from first frame
         self.latest_image = None
         
@@ -105,7 +104,7 @@ class RoadDetectorNode(Node):
         self.pitch_deg = self.get_parameter('pitch_deg').value
         self.yaw_deg = self.get_parameter('yaw_deg').value
         self.roll_deg = self.get_parameter('roll_deg').value
-        
+
         # Camera intrinsic matrix
         fx = self.get_parameter('fx').value
         fy = self.get_parameter('fy').value
@@ -389,7 +388,35 @@ class RoadDetectorNode(Node):
             elif param.name == 'max_points_per_cloud':
                 self.max_points_per_cloud = param.value
                 self.get_logger().info(f"Updated max_points_per_cloud to {self.max_points_per_cloud}")
-        
+
+            elif param.name == 'camera_height' and self.pipeline is not None:
+                self.pipeline.set_camera_height(param.value)
+                self.get_logger().info(f"Updated camera_height to {self.camera_height}")
+            
+            elif param.name == 'pitch_deg' and self.pipeline is not None:
+                self.pipeline.set_pitch_deg(param.value)
+                self.get_logger().info(f"Updated pitch_deg to {self.pitch_deg}")
+
+            elif param.name == 'yaw_deg' and self.pipeline is not None:
+                self.pipeline.set_yaw_deg(param.value)
+                self.get_logger().info(f"Updated yaw_deg to {self.yaw_deg}")
+
+            elif param.name == 'roll_deg' and self.pipeline is not None:
+                self.pipeline.set_roll_deg(param.value)
+                self.get_logger().info(f"Updated roll_deg to {self.roll_deg}")
+
+            elif param.name == 'min_radius' and self.pipeline is not None:
+                self.pipeline.set_min_radius(param.value)
+                self.get_logger().info(f"Updated min_radius to {self.min_radius}")
+
+            elif param.name == 'max_radius' and self.pipeline is not None:
+                self.pipeline.set_max_radius(param.value)
+                self.get_logger().info(f"Updated max_radius to {self.max_radius}")
+
+            # elif param.name == 'dist_coeffs' and self.pipeline is not None:
+            #     self.pipeline.set_dist_coeffs(param.value)
+            #     self.get_logger().info(f"Updated dist_coeffs to {self.dist_coeffs}")
+
         return result
     
     def get_statistics(self):

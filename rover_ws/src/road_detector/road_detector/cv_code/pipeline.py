@@ -90,6 +90,28 @@ class RoadFeatureBEVPipeline:
     def save_pcd(self, points, filename="lane_cloud.pcd"):
         self.bev.save_pcd(points, filename)
 
+    # setters to allow dynamic reconfigure
+    def set_camera_height(self, value):
+        self.bev.camera_height = value # same object shared with detector, so no need to update there
+
+    def set_pitch_deg(self, value):
+        self.bev.pitch_deg = value
+
+    def set_yaw_deg(self, value):
+        self.bev.yaw_deg = value
+
+    def set_roll_deg(self, value):
+        self.bev.roll_deg = value
+
+    def set_dist_coeffs(self, value):
+        self.bev.dist_coeffs = value
+
+    def set_min_radius(self, value):
+        self.detector.min_radius = value
+
+    def set_max_radius(self, value):
+        self.detector.max_radius = value
+
 
 # =============================================================
 # MAIN LOOP
