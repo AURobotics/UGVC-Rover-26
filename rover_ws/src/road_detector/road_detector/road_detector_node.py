@@ -76,6 +76,7 @@ class RoadDetectorNode(Node):
         self.declare_parameter('fy', 1000.0)
         self.declare_parameter('cx', 960.0)
         self.declare_parameter('cy', 540.0)
+        self.declare_parameter('dist_coeffs', [0, 0, 0, 0, 0])  # Assuming no distortion by default
         
         # Detection parameters
         self.declare_parameter('min_radius', 10)
@@ -110,6 +111,7 @@ class RoadDetectorNode(Node):
         fy = self.get_parameter('fy').value
         cx = self.get_parameter('cx').value
         cy = self.get_parameter('cy').value
+        self.dist_coeffs = self.get_parameter('dist_coeffs').value
         self.K = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]], dtype=np.float64)
         
         # Detection parameters
@@ -214,7 +216,7 @@ class RoadDetectorNode(Node):
                 pitch_deg=self.pitch_deg,
                 yaw_deg=self.yaw_deg,
                 roll_deg=self.roll_deg,
-                dist_coeffs=np.zeros((5, 1)),  # Assuming no distortion for now
+                dist_coeffs=np.array(self.dist_coeffs).reshape(-1, 1),
                 image_size=(image_width, image_height),
                 min_radius=self.min_radius,
                 max_radius=self.max_radius
@@ -413,9 +415,9 @@ class RoadDetectorNode(Node):
                 self.pipeline.set_max_radius(param.value)
                 self.get_logger().info(f"Updated max_radius to {self.max_radius}")
 
-            # elif param.name == 'dist_coeffs' and self.pipeline is not None:
-            #     self.pipeline.set_dist_coeffs(param.value)
-            #     self.get_logger().info(f"Updated dist_coeffs to {self.dist_coeffs}")
+            elif param.name == 'dist_coeffs' and self.pipeline is not None:
+                self.pipeline.set_dist_coeffs(param.value)
+                self.get_logger().info(f"Updated dist_coeffs to {self.dist_coeffs}")
 
         return result
     

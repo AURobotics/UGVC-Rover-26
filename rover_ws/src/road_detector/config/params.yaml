@@ -16,6 +16,7 @@ road_detector:
     fy: 813.96117996 # final
     cx: 290.78702859 # final
     cy: 241.57106901 # final
+    dist_coeffs: [-4.97661814e-01, 8.05356640e+00, 9.44660547e-03, -2.64434172e-02, -4.33974203e+01]
     
     # Detection parameters
     min_radius: 5
