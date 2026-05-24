@@ -11,16 +11,17 @@
   - [Usful Topic commands](#usful-topic-commands)
 
 ---
+
 ## Useful Commands
 
 ### Windows Notes
-> - You must used CMD not powershell
-> - You must run CMD as administrator
+> - your path to the repo must have **no spaces**
+> - You must used **CMD** not powershell
 > - steps to run code: build, source, run
 
 ### Create a new package
 
-> - make sure you are inside the src folder 
+> - make sure you are **inside the src folder** 
 > - change my_package with your pkg name
 
 C++ pkg
