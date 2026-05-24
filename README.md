@@ -1,42 +1,171 @@
 # UGVC-Rover-26
 
-This is the mono-repo for our participation in the UGVC 2026 competition organized by ICMTC in Egypt.
+This is the monorepo for our participation in the UGVC 2026 competition organized by ICMTC in Egypt.
 
 ## Contributing
 
 ### Project Navigation
 
-This is a mono-repo. Every folder at the mono-repo root level is considered a separate sub-project.
+This is a monorepo. Every folder at the monorepo root level is considered a separate subproject.
 
 #### Opening a project
 
-It is **not** recommended to directly open the mono-repo root folder in your text editor or IDE. Please open the sub-project folder for the project you are working on.
+It is **not** recommended to directly open the monorepo root folder in your text editor or IDE. Please open the subproject folder for the project you are working on.
 
 #### Project list
 
-| Project  | Description                                                                  |
-|----------|------------------------------------------------------------------------------|
-| console  | GUI for remote control                                                       |
-| firmware | firmware for the on-board MCUs                                               |
-| network  | configuration and scripts for network setup                                  |
-| reports  | deliverable documents required by the competition                            |
-| rover_ws | ROS2 project for on-board control, navigation, vision and communication |
-| station  | router configuration and firmware for the direction controller               |
+| Project                 | Base Branch        | Description                                                             |
+|-------------------------|--------------------|-------------------------------------------------------------------------|
+| Monorepo Root           | `main` & `staging` | Structuring of the monorepo                                             |
+| [console](./console/)   | `console/dev`      | GUI for remote control                                                  |
+| [firmware](./firmware/) | `firmware/dev`     | firmware for the on-board MCUs                                          |
+| [network](./network/)   | `network/dev`      | configuration and scripts for network setup                             |
+| [reports](./reports/)   | `reports/dev`      | deliverable documents required by the competition                       |
+| [rover_ws](./rover_ws/) | `ros/dev`          | ROS2 project for on-board control, navigation, vision and communication |
+| [station](./station/)   | `station/dev`      | router configuration and firmware for the direction controller          |
+
+
+### Branch Strategies
+
+Below is a graph demonstrating the branch strategies for the each of the subprojects as `<project>` and for the root-level changes. 
+
+```mermaid
+graph TD
+
+    subgraph AdminTrack ["Maintainers"]
+        direction TB
+        MainStart1["main"] --> |Branch Off| MainFeature["repo/&lt;FEATURE&gt;"]
+        MainFeature --> |Merge Into| Staging1["staging"]
+        Staging1 -->|Merge Into| MainEnd1["main"]
+    end
+
+    subgraph ProjectTrack ["Contributions"]
+        direction TB
+        subgraph ReviewerSyncSub ["Reviewers"]
+            MainStart2["main"] -->|Branch Off or Sync| ProjDev1["&lt;project&gt;/dev"]
+        end
+        ProjDev1 -->|Branch Off| ProjFeature["&lt;project&gt;/&lt;FEATURE&gt;"]
+        ProjFeature -->|Open| PRStep["Pull Request"]
+        
+        subgraph ReviewerPrSub ["Reviewers"]
+            direction TB
+            ReviewStep["Code Review"] -->|Approve & Merge| ProjDev2["&lt;project&gt;/dev"]
+        end
+        
+        subgraph DevMaintainers ["Maintainers"]
+            direction TB
+            Staging2["staging"] -->|Merge Into| MainEnd2["main"]
+        end
+
+        PRStep -->|Trigger| ReviewStep
+        ProjDev2 -->|Merge Into| Staging2
+    end
+
+    classDef mainBranch fill:#070707,stroke:#373737,stroke-width:2px,color:#EDEFF0;
+    classDef stagingBranch fill:#383B3D,stroke:#191B1C,stroke-width:2px,color:#EDEFF0;
+    classDef devBranch fill:#FA5F6C,stroke:#DD1F44,stroke-width:2px,color:#FEDFDF;
+    classDef reviewNode fill:#FCA6A7,stroke:#FEDFDF,stroke-width:2px,color:#070707;
+
+    class MainStart1,MainEnd1,MainStart2,MainEnd2 mainBranch
+    class Staging1,Staging2 stagingBranch
+    class ProjDev1,ProjDev2 devBranch
+    class MainFeature,ProjFeature featureBranch
+    class PRStep,ReviewStep reviewNode
+```
+
+#### Merge Strategy
+
+When merging from `<feature>` into `<base>` ensure linear history.
+
+This can be best achieved by rebasing on `<base>` before merging:
+```sh
+(on <feature>)$ git rebase <base>
+```
+
+According to the previous branch strategy diagram, you should follow these guidelines when merging from `<project>/<FEATURE>` into `<project>/dev` and when merging from `<project>/dev` into `staging`.
+
+Here is a detailed merge workflow that accounts for the processes of pull request reviewing, resolving conflicts and rebasing before merging:
+
+```mermaid
+graph TD
+    %% Define Workflow Nodes
+    Start([1. Ready to Merge]) --> CheckOutofDate{2. Is Branch Out of Date?}
+    
+    CheckOutofDate -->|Yes: PR shows 'Branch is out-of-date'| SyncBranch["3. Sync & Rebase Base Branch
+    ───
+    git checkout &lt;base&gt;
+    git pull
+    git checkout &lt;feature&gt;
+    git rebase &lt;base&gt"]
+    
+    CheckOutofDate -->|No: PR shows 'All checks passed'| AskReview[4. Wait for Maintainer Review]
+    
+    SyncBranch --> DetectConflicts{3a. Conflicts Detected?}
+    
+    DetectConflicts -->|Yes: Git pauses rebase| FixConflicts["3b. Resolve Conflicts Locally
+    ───
+    (Fix file markers in IDE)
+    git add &lt;files&gt;
+    git rebase --continue"]
+    
+    FixConflicts --> SyncBranch
+    
+    DetectConflicts -->|No: Rebase successful| ForcePush["3c. Push to Remote Safely
+    ───
+    git push origin &lt;feature&gt; --force-with-lease"]
+    
+    ForcePush --> AskReview
+    
+    %% Review & Finalization
+    AskReview --> CheckApproval{5. Review Approved?}
+    
+    CheckApproval -->|No: Changes Requested| DevEdits["5a. Make Code Edits Locally
+    ───
+    (Edit files)
+    git add &lt;files&gt;
+    git commit -m 'address feedback'"]
+    
+    DevEdits --> CheckOutofDate
+    
+    CheckApproval -->|Yes| FinalMerge(["6. Maintainer/Reviewer Finishes Merge
+    ───
+    GitHub Web UI: 'Rebase and merge'"])
+
+    %% Styles matched to your README definitions
+    classDef mainBranch fill:#070707,stroke:#373737,stroke-width:2px,color:#EDEFF0;
+    classDef stagingBranch fill:#383B3D,stroke:#191B1C,stroke-width:2px,color:#EDEFF0;
+    classDef devBranch fill:#FA5F6C,stroke:#DD1F44,stroke-width:2px,color:#FEDFDF;
+    classDef reviewNode fill:#FCA6A7,stroke:#FEDFDF,stroke-width:2px,color:#070707;
+    classDef logicGate fill:#383B3D,stroke:#FA5F6C,stroke-width:1px,color:#EDEFF0;
+
+    class Start,FinalMerge mainBranch;
+    class SyncBranch,FixConflicts,ForcePush,DevEdits stagingBranch;
+    class AskReview devBranch;
+    class CheckOutofDate,DetectConflicts,CheckApproval logicGate;
+```
 
 
 ### Cross-project Work
 
-Since this is a mono-repo, simultaneously updating different sub-projects (e.g `rover_ws` and `console`) will require working with more than one branch at a time.
+Since this is a monorepo, simultaneously updating different subprojects (e.g `rover_ws` and `console`) will require pulling and merging more than one branch at a time.
 
-#### Git Worktrees [↗️](https://git-scm.com/docs/git-worktree)
+To follow the branch and merge strategies, use the following method to help in doing so.
 
-Git worktrees work as a direct alternative to cloning the repo twice to work on it in parallel.
+#### Multiple Clones | Git Worktrees [↗️](https://git-scm.com/docs/git-worktree)
 
-Under the mono-repo root folder `UGVC-Rover-26` run:
+You can clone the repo more than once if you are a reviewer or maintainer working on more than one branch at a time.
+
+Git worktrees work as a direct alternative to cloning the repo twice to work on multiple branches in parallel.
+
+Under the monorepo root folder `UGVC-Rover-26` run:
 ```sh
 git worktree add ../UGVC-Rover-26-WT-[Reason] <branch-name>
 ```
 
 Replace `[Reason]` with a short, descriptive name you can refer to later. Replace `<branch-name>` with the other branch you want to work on in parallel. Append `-b` to the command if you want to create a new branch with name `branch-name`.
 
-You can now treat `UGVC-Rover-26-WT-[Reason]` as a new clone of the mono-repo, and open the sub-project folder from it in your favorite text editor or IDE.
+You can now treat `UGVC-Rover-26-WT-[Reason]` as a new clone of the monorepo, and open the subproject folder from it in your favorite text editor or IDE.
+
+#### Single Feature Branch for Multiple Subprojects (Discouraged)
+
+When time is tight, you may create a branch called `feature/<FEATURE>` from one of the subprojects you are working on. Then start a pull request for that subproject and inform the reviewers of the other subprojects to review and `git cherry-pick` your relevant commits into their branch.
