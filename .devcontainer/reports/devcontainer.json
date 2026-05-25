@@ -18,5 +18,5 @@
             ]
         }
     },
-    "postCreateCommand": "bash .devcontainer/reports/post-install.sh"
+    "postCreateCommand": "bash /workspaces/${localWorkspaceFolderBasename}/.devcontainer/reports/post-install.sh"
 }
