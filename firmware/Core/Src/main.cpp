@@ -21,7 +21,7 @@
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
 #include "stm32_bridge.hpp"
-
+#include "nrf_receiver.h"
 extern "C"
 {
 #include "adc_utils.h"
@@ -143,11 +143,24 @@ int main(void)
   MX_I2C2_Init();
   MX_USART2_UART_Init();
   MX_SPI2_Init();
+  HAL_Delay(500);
   MX_TIM1_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_TIM5_Init();
   MX_USB_DEVICE_Init();
+
+  // // Raw loopback test — does SPI even work?
+  // HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET); // CSN low
+  // uint8_t tx = 0xFF;  // NOP
+  // uint8_t rx = 0;
+  // HAL_SPI_TransmitReceive(&hspi2, &tx, &rx, 1, 100);
+  // HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);   // CSN high
+  //
+  // char buf[40];
+  // sprintf(buf, "SPI loopback NOP response: 0x%02X\r\n", rx);
+  // CDC_Transmit_FS((uint8_t*)buf, strlen(buf));
+
   /* USER CODE BEGIN 2 */
 
   ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
@@ -165,29 +178,43 @@ int main(void)
   HAL_Delay(200);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, 6);
   HAL_Delay(200);
+  NRF24_Init_Receiver();
+  HAL_Delay(3000);
+  NRF24_PrintRegisters();
+  HAL_Delay(2000);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   /* USER CODE BEGIN 2 */
 
-  while (1)
-  {
-    if (adc_out_of_range)
-    {
-      char msg[] = "VOLTAGE OUT OF RANGE\r\n";
-      CDC_Transmit_FS((uint8_t *)msg, strlen(msg));
-      adc_out_of_range = 0;
-      HAL_Delay(5000);
-      HAL_NVIC_EnableIRQ(ADC_IRQn);
-    }
-    Bridge_Update();
+  // while (1) {
+  //   // Step 1: Read STATUS
+  //   Handle_Manual_Remote_Input(nullptr,nullptr,nullptr,nullptr);
+  //   HAL_Delay(200);
+  // }
+
+  while (1) {
+    // uint8_t s = NRF_ReadStatus();  // but this is internal...
+    //
+    // // Instead, directly test:
+    // HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
+    // uint8_t tx = 0xFF, rx = 0;
+    // HAL_SPI_TransmitReceive(&hspi2, &tx, &rx, 1, 100);
+    // HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
+    //
+    // char buf[48];
+    // sprintf(buf, "RAW NOP: 0x%02X\r\n", rx);
+    // CDC_Transmit_FS((uint8_t*)buf, strlen(buf));
+    Handle_Manual_Remote_Input(nullptr,nullptr,nullptr,nullptr);
+    HAL_Delay(1000);
+  }
 
    
     
   }
   /* USER CODE END 3 */
-}
 
 /**
  * @brief System Clock Configuration
@@ -418,7 +445,7 @@ static void MX_SPI2_Init(void)
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -437,6 +464,24 @@ static void MX_SPI2_Init(void)
  * @param None
  * @retval None
  */
+//
+// void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
+// {
+//   GPIO_InitTypeDef GPIO_InitStruct = {0};
+//   if(hspi->Instance == SPI2)
+//   {
+//     __HAL_RCC_SPI2_CLK_ENABLE();
+//     __HAL_RCC_GPIOB_CLK_ENABLE();
+//
+//     GPIO_InitStruct.Pin       = GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
+//     GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+//     GPIO_InitStruct.Pull      = GPIO_PULLUP;
+//     GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
+//     GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
+//     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+//   }
+// }
+
 static void MX_TIM1_Init(void)
 {
 
@@ -715,12 +760,20 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_15;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  // /*Configure GPIO pin : PA15 */
+  // GPIO_InitStruct.Pin = GPIO_PIN_15;
+  // GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  // GPIO_InitStruct.Pull = GPIO_NOPULL;
+  // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  // HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  // PB1 — NRF CSN, must start HIGH
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
+  GPIO_InitStruct.Pin   = GPIO_PIN_1;
+  GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull  = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
