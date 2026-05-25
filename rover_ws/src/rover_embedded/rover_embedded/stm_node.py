@@ -17,7 +17,7 @@ from .stm_msgs import PacketType, PAYLOAD_FMT
 START_BYTE    = 0xAA
 SYNC_BYTE = 0XFF # ready
 WHEEL_BASE    = 0.30
-PORT          = '/dev/ttyUSB0'
+PORT          = '/dev/ttyACM0'
 
 class STM32Node(Node):
 
