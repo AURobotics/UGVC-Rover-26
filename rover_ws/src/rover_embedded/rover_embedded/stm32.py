@@ -46,16 +46,13 @@ class STM32:
     def connect(self, port: str):
         self._serial.close()
         self._connection_in_progress = True
-        print("hello 1")
-
+        
         def _connection_thread():
             try:
                 # ...handelling the rfc2217 port connection missing
-                print("inside try")
                 self._serial.port = port
                 self._serial.open()
                 self._connected = True
-                print("im here just after flag")
                 self._port = port
                 time.sleep(0.1) # Small delay for Arduino to boot
                 self.clean()
@@ -67,13 +64,11 @@ class STM32:
                 self._connected = False
             finally:
                 self._connection_in_progress = False
-                print("im here 2")
 
 
         connection_thread = threading.Thread(target=_connection_thread, daemon=True)
-        print("hello 3")
+        
         connection_thread.start()
-        print("hello 4")
 
     def disconnect(self):
         if not self.connected:  # disconnect only when connected
