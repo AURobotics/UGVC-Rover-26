@@ -1,0 +1,4 @@
+{
+    "latex-workshop.latex.outDir": "%DIR%/output",
+    "latex-workshop.latex.auxDir": "%OUTDIR%/aux"
+}
