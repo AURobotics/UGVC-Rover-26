@@ -6,11 +6,14 @@
     "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/reports",
     "features": {
         "ghcr.io/devcontainers/features/common-utils:latest": {
-            "configureZshAsDefaultShell": true
+            "configureZshAsDefaultShell": true,
+            "username": "miktex"
         }
     },
-    // drop from root user in dockerfile
     "remoteUser": "miktex",
+    "mounts": [
+        "source=miktex-packages-cache,target=/var/lib/miktex,type=volume"
+    ],
     "customizations": {
         "vscode": {
             "extensions": [
