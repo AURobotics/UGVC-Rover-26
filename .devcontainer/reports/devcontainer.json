@@ -9,13 +9,6 @@
             "configureZshAsDefaultShell": true
         }
     },
-    "mounts": [
-        {
-            "source": "miktex-cache",
-            "target": "/var/lib/miktex/.miktex/texmfs/install",
-            "type": "volume"
-        }
-    ],
     // drop from root user in dockerfile
     "remoteUser": "miktex",
     "customizations": {
