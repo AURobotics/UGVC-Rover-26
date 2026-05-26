@@ -1,0 +1,36 @@
+{
+    "name": "Console (Python on Pixi)",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/console",
+
+    "securityOpt": [
+        "label=disable"
+    ],
+    "containerEnv": {
+        "PIXI_CACHE_DIR": "/home/vscode/.cache/pixi"
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:latest": {
+            "configureZshAsDefaultShell": true
+        }
+    },
+    
+    "mounts": [
+        "source=pixi-cache,target=/home/vscode/.cache/pixi,type=volume",
+        "target=/home/vscode/.pixi,type=volume"
+    ],
+    "updateContentCommand": [
+        "/bin/bash",
+        "-c",
+        "if [ ! -f /home/vscode/.pixi/bin/pixi ]; then curl -fsSL https://pixi.sh/install.sh | bash; fi && for rc in .bashrc .zshrc; do grep -q 'pixi shell-hook' /home/vscode/$rc || echo 'eval \"$(pixi shell-hook)\"' >> /home/vscode/$rc; grep -q '.pixi/bin' /home/vscode/$rc || echo 'export PATH=\"$HOME/.pixi/bin:$PATH\"' >> /home/vscode/$rc; done"
+    ],
+    
+    "postCreateCommand": "/home/vscode/.pixi/bin/pixi install",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python"
+            ]
+        }
+    }
+}
