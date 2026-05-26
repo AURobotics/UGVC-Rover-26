@@ -1,4 +1,4 @@
-FROM miktex/miktex:basic
+FROM docker.io/miktex/miktex:basic
 
 USER root
 
