@@ -5,6 +5,7 @@ from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import Image, Imu, NavSatFix
 from std_msgs.msg import Float32MultiArray, String
+from joystick_node import JoystickNode
 
 class RoverSignals(QObject):
     telemetry_received = Signal(dict)
@@ -137,8 +138,7 @@ class WorkerNode(Node):
                 }
             )
 
-
-class ROS2RoverWorker(QThread):
+class ROS2Worker(QThread):
     def __init__(self, parent: QObject | None = None):
         super().__init__(parent)
         self.signals = RoverSignals()
@@ -149,21 +149,34 @@ class ROS2RoverWorker(QThread):
         if not rclpy.ok():
             rclpy.init()
 
-        self._node = WorkerNode(self.signals)
+        self._node = WorkerNode(self.signals)        
+        self._joystick_node = JoystickNode()
+
         self._executor = SingleThreadedExecutor()
         self._executor.add_node(self._node)
+        self._executor.add_node(self._joystick_node)
 
         try:
             self._executor.spin()
         except Exception as exc:
             print(f"ROS2 thread exception: {exc}")
         finally:
-            if self._executor is not None and self._node is not None:
-                self._executor.remove_node(self._node)
+
+            if self._executor is not None:
+                if self._node is not None:
+                    self._executor.remove_node(self._node)
+                if hasattr(self, '_joystick_node') and self._joystick_node is not None:
+                    self._executor.remove_node(self._joystick_node)
+            
             if self._node is not None:
                 self._node.destroy_node()
-                self._node = None
+            if hasattr(self, '_joystick_node') and self._joystick_node is not None:
+                self._joystick_node.destroy_node()
+                
+            self._node = None
+            self._joystick_node = None
             self._executor = None
+            
             if rclpy.ok():
                 rclpy.shutdown()
 
