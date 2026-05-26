@@ -1,4 +1,5 @@
 # Console
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&repo=1162024079&skip_quickstart=true&ref=console/dev&devcontainer_path=.devcontainer/console/devcontainer.json)
 
 This is the Console sub-project folder, containing the source code for the remote-control GUI.
 
@@ -40,3 +41,12 @@ run:
 ```sh
 pixi run console
 ```
+
+### Devcontainer
+
+To open this project's devcontainer locally, navigate to the [monorepo root](../) and choose the configuration under [`.devcontainer/console/`](../.devcontainer/console/).
+
+You can also open the devcontainer via [GitHub Codespaces ↗️](https://github.com/codespaces/new?hide_repo_select=true&repo=1162024079&skip_quickstart=true&ref=console/dev&devcontainer_path=.devcontainer/console/devcontainer.json).
+
+> [!WARNING]
+> Note that GitHub Codespaces will be very difficult to configure for desktop UI application development, joystick device input, and ROS2-based communication. For these tasks, please use develop locally even if using the devcontainer.
