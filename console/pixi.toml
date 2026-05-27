@@ -12,7 +12,10 @@ ros-jazzy-ros-base = ">=0.11.0,<0.12"
 ros-jazzy-std-msgs = ">=5.3.6,<6"
 ros-jazzy-rclpy = ">=7.1.9,<8"
 ros-jazzy-cv-bridge = ">=4.1.0,<5"
+ros-jazzy-joy = ">=3.3.0,<4"
 
 [tasks]
-console = "python src/console/__main__.py"
 vid_test = "python src/testing/video_stream_node.py"
+
+[pypi-dependencies]
+console = { path = ".", editable = true }
