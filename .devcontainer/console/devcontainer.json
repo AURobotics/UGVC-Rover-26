@@ -1,5 +1,6 @@
 {
-    "name": "Console (Python on Pixi)",
+    "name": "Console (Generic)",
+
     "build": {
         "dockerfile": "Dockerfile"
     },
