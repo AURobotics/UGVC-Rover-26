@@ -1,0 +1,3 @@
+C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/Core/lib/Encoder/Encoder.cpp:7:1:Encoder::Encoder(TIM_HandleTypeDef*, float)	24	static
+C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/Core/lib/Encoder/Encoder.cpp:11:6:long int Encoder::get_ticks()	16	static
+C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/Core/lib/Encoder/Encoder.cpp:15:9:int16_t Encoder::get_velocity()	48	static

@@ -179,7 +179,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "c:/Users/fzoba/UGVC-Rover-26/build"
+			"value" : "c:/Users/fzoba/Desktop/UGVC-Rover-26/build"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -679,7 +679,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/fzoba/UGVC-Rover-26/build/CMakeFiles/pkgRedirects"
+			"value" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/build/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -739,7 +739,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "C:/Users/fzoba/UGVC-Rover-26/firmware"
+			"value" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -1255,7 +1255,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "C:/Users/fzoba/UGVC-Rover-26/firmware/cmake/gcc-arm-none-eabi.cmake"
+			"value" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/cmake/gcc-arm-none-eabi.cmake"
 		},
 		{
 			"name" : "CMAKE_VERBOSE_MAKEFILE",
@@ -1283,7 +1283,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/fzoba/UGVC-Rover-26/build"
+			"value" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/build"
 		},
 		{
 			"name" : "Rover_IS_TOP_LEVEL",
@@ -1307,7 +1307,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/fzoba/UGVC-Rover-26/firmware"
+			"value" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware"
 		}
 	],
 	"kind" : "cache",

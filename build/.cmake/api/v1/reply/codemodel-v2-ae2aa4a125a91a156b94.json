@@ -7,7 +7,7 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "stm32cubemx::@768a070a0fe75716b479",
-					"jsonFile" : "target-stm32cubemx-Debug-1511a3624c5c29bafc95.json",
+					"jsonFile" : "target-stm32cubemx-Debug-a5ae9abcc186d4dddd17.json",
 					"name" : "stm32cubemx",
 					"projectIndex" : 0
 				}
@@ -80,21 +80,21 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "Rover::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Rover-Debug-d124902b2c493f35b5b7.json",
+					"jsonFile" : "target-Rover-Debug-dafa56ad18de498b1d92.json",
 					"name" : "Rover",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "STM32_Drivers::@768a070a0fe75716b479",
-					"jsonFile" : "target-STM32_Drivers-Debug-b711abe976da45786046.json",
+					"jsonFile" : "target-STM32_Drivers-Debug-5daa94f23f5f2c50eaf0.json",
 					"name" : "STM32_Drivers",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "USB_Device_Library::@768a070a0fe75716b479",
-					"jsonFile" : "target-USB_Device_Library-Debug-de4a7664180968237add.json",
+					"jsonFile" : "target-USB_Device_Library-Debug-143cc85b5db8c1f75155.json",
 					"name" : "USB_Device_Library",
 					"projectIndex" : 0
 				}
@@ -104,8 +104,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/fzoba/UGVC-Rover-26/build",
-		"source" : "C:/Users/fzoba/UGVC-Rover-26/firmware"
+		"build" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/build",
+		"source" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware"
 	},
 	"version" : 
 	{

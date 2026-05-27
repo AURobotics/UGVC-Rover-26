@@ -36,8 +36,8 @@ enable_language(C ASM)
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME}
-        Core/Inc/nrf_receiver.h
-        Core/Src/nrf_receiver.cpp)
+        # Add user defined sources
+)
 
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
@@ -49,13 +49,26 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-        Core/Src/main.cpp
-        Core/Src/stm32_bridge.cpp
+    Core/Src/main.cpp
+    Core/lib/Servo/Servo.cpp
+    Core/lib/PWM_expander/PWM_expander.cpp
+    Core/lib/adc_utils/adc_utils.c 
+    Core/lib/Encoder/Encoder.cpp 
+    Core/lib/Motor/Motor.cpp
+    Core/lib/nrf_receiver/nrf_receiver.cpp  
+    Core/lib/stm32_bridge/stm32_bridge.cpp
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         # Add user defined include paths
+        Core/lib/nrf_receiver
+        Core/lib/PWM_expander
+        Core/lib/Servo
+        Core/lib/Encoder
+        Core/lib/Motor
+        Core/lib/adc_utils
+        Core/lib/stm32_bridge
 )
 
 # Add project symbols (macros)

@@ -19,7 +19,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "C:/Users/fzoba/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeSystem.cmake"
+			"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeSystem.cmake"
 		},
 		{
 			"path" : "cmake/gcc-arm-none-eabi.cmake"
@@ -541,7 +541,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "C:/Users/fzoba/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeCCompiler.cmake"
+			"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeCCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -1020,7 +1020,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "C:/Users/fzoba/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeCXXCompiler.cmake"
+			"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeCXXCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -1139,7 +1139,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "C:/Users/fzoba/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeCCompiler.cmake"
+			"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeCCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -1258,7 +1258,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "C:/Users/fzoba/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeCXXCompiler.cmake"
+			"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeCXXCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -1317,7 +1317,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "C:/Users/fzoba/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeASMCompiler.cmake"
+			"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/build/CMakeFiles/4.3.2/CMakeASMCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -1361,8 +1361,8 @@
 	"kind" : "cmakeFiles",
 	"paths" : 
 	{
-		"build" : "C:/Users/fzoba/UGVC-Rover-26/build",
-		"source" : "C:/Users/fzoba/UGVC-Rover-26/firmware"
+		"build" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/build",
+		"source" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware"
 	},
 	"version" : 
 	{

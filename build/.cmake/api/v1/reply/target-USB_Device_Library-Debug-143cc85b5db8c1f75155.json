@@ -35,19 +35,19 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 105,
+				"line" : 102,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 107,
+				"line" : 104,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 106,
+				"line" : 103,
 				"parent" : 0
 			}
 		]
@@ -92,39 +92,43 @@
 			[
 				{
 					"backtrace" : 2,
-					"path" : "C:/Users/fzoba/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../USB_DEVICE/App"
+					"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../USB_DEVICE/App"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "C:/Users/fzoba/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../USB_DEVICE/Target"
+					"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../USB_DEVICE/Target"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "C:/Users/fzoba/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../Core/Inc"
+					"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../Core/Inc"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "C:/Users/fzoba/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Drivers/STM32F4xx_HAL_Driver/Inc"
+					"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../Core/lib"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "C:/Users/fzoba/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy"
+					"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Drivers/STM32F4xx_HAL_Driver/Inc"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "C:/Users/fzoba/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Middlewares/ST/STM32_USB_Device_Library/Core/Inc"
+					"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "C:/Users/fzoba/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc"
+					"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Middlewares/ST/STM32_USB_Device_Library/Core/Inc"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "C:/Users/fzoba/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Drivers/CMSIS/Device/ST/STM32F4xx/Include"
+					"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "C:/Users/fzoba/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Drivers/CMSIS/Include"
+					"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Drivers/CMSIS/Device/ST/STM32F4xx/Include"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/cmake/stm32cubemx/../../stm32/Drivers/CMSIS/Include"
 				}
 			],
 			"language" : "C",

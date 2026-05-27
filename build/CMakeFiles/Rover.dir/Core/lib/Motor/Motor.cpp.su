@@ -1,0 +1,5 @@
+C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/Core/lib/Motor/Motor.cpp:7:1:Motor::Motor(Encoder*, PWM_expander*, PWM_channel, PWM_channel, pid_constants*)	24	static
+C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/Core/lib/Motor/Motor.cpp:9:6:void Motor::set_pid_constants(pid_constants*)	16	static
+C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/Core/lib/Motor/Motor.cpp:13:9:int16_t Motor::update_pid(int16_t, long unsigned int)	48	static
+C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/Core/lib/Motor/Motor.cpp:34:6:void Motor::move(int16_t)	16	static
+C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware/Core/lib/Motor/Motor.cpp:45:6:void Motor::stop()	16	static

@@ -15,6 +15,7 @@ set(MX_Include_Dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/../../USB_DEVICE/App
     ${CMAKE_CURRENT_SOURCE_DIR}/../../USB_DEVICE/Target
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/lib
     ${CMAKE_CURRENT_SOURCE_DIR}/../../stm32/Drivers/STM32F4xx_HAL_Driver/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../../stm32/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
     ${CMAKE_CURRENT_SOURCE_DIR}/../../stm32/Middlewares/ST/STM32_USB_Device_Library/Core/Inc
@@ -29,16 +30,12 @@ set(MX_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../USB_DEVICE/App/usb_device.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../USB_DEVICE/App/usbd_desc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../USB_DEVICE/App/usbd_cdc_if.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/PWM_expander.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/Servo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/stm32f4xx_it.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/stm32f4xx_hal_msp.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/sysmem.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/syscalls.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../startup_stm32f401xc.s
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/adc_utils.c 
-)
+    )
 
 # STM32 HAL/LL Drivers
 set(STM32_Drivers_Src

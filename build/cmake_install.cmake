@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/fzoba/UGVC-Rover-26/firmware
+# Install script for directory: C:/Users/fzoba/Desktop/UGVC-Rover-26/firmware
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,13 +39,13 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/fzoba/UGVC-Rover-26/build/cmake/stm32cubemx/cmake_install.cmake")
+  include("C:/Users/fzoba/Desktop/UGVC-Rover-26/build/cmake/stm32cubemx/cmake_install.cmake")
 endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/fzoba/UGVC-Rover-26/build/install_local_manifest.txt"
+  file(WRITE "C:/Users/fzoba/Desktop/UGVC-Rover-26/build/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
 if(CMAKE_INSTALL_COMPONENT)
@@ -61,6 +61,6 @@ else()
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/fzoba/UGVC-Rover-26/build/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "C:/Users/fzoba/Desktop/UGVC-Rover-26/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
