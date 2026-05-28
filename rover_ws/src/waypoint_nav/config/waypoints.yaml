@@ -1,0 +1,13 @@
+waypoints:
+  - latitude: 30.0001
+    longitude: 31.0001
+    label: "wp1"
+  - latitude: 30.00015    # حدفنا يمين شوية (قللنا الـ latitude عن المسار المستقيم)
+    longitude: 31.00025   # وزودنا الـ longitude لقدام
+    label: "wp2"
+  - latitude: 30.00035    # كسرنا شمال جامد (زودنا الـ latitude)
+    longitude: 31.0003
+    label: "wp3"
+  - latitude: 30.0004
+    longitude: 31.0004
+    label: "goal"
