@@ -1,7 +1,7 @@
 video_publisher:
   ros__parameters:
     # Path to the video file to stream — REQUIRED, update before running
-    video_path: "D:/My_Files/Work/AU-Robotics/Rover_2026/Code/UGVC-Rover-26/rover_ws/data/raw/test_lane.mp4"
+    video_path: "D:/My_Files/Work/AU-Robotics/Rover_2026/Code/rover-vision/rover_ws/data/raw/test_lane.mp4"
 
     # Topic to publish frames on — must match road_detector's camera_topic
     image_topic: "/camera/image_raw"
