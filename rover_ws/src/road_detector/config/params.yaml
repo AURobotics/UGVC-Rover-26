@@ -23,8 +23,8 @@ road_detector:
     max_radius: 200
     
     # Debug Options
-    publish_debug_images: True
-    publish_performance_stats: True
+    publish_debug_images: False
+    publish_performance_stats: False
 
     # Point cloud parameters
     max_points_per_cloud: 10000
