@@ -163,25 +163,25 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
-  ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
-  AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_SINGLE_REG;
-  AnalogWDGConfig.Channel = ADC_CHANNEL_4;
-  AnalogWDGConfig.ITMode = ENABLE;
-  AnalogWDGConfig.HighThreshold = 4033;
-  AnalogWDGConfig.LowThreshold = 0;
-  HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig);
-  HAL_NVIC_SetPriority(ADC_IRQn, 7, 0); // lower priority than USB(6)
-  HAL_NVIC_EnableIRQ(ADC_IRQn);
-
-  HAL_ADC_Stop(&hadc1);
-  
-  HAL_Delay(200);
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, 6);
-  HAL_Delay(200);
-  NRF24_Init_Receiver();
-  HAL_Delay(3000);
-  NRF24_PrintRegisters();
-  HAL_Delay(2000);
+  // ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
+  // AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_SINGLE_REG;
+  // AnalogWDGConfig.Channel = ADC_CHANNEL_4;
+  // AnalogWDGConfig.ITMode = ENABLE;
+  // AnalogWDGConfig.HighThreshold = 4033;
+  // AnalogWDGConfig.LowThreshold = 0;
+  // HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig);
+  // HAL_NVIC_SetPriority(ADC_IRQn, 7, 0); // lower priority than USB(6)
+  // HAL_NVIC_EnableIRQ(ADC_IRQn);
+  //
+  // HAL_ADC_Stop(&hadc1);
+  //
+  // HAL_Delay(200);
+  // HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, 6);
+  // HAL_Delay(200);
+  // NRF24_Init_Receiver();
+  // HAL_Delay(3000);
+  // NRF24_PrintRegisters();
+  // HAL_Delay(2000);
 
   /* USER CODE END 2 */
 
@@ -207,13 +207,16 @@ int main(void)
     // char buf[48];
     // sprintf(buf, "RAW NOP: 0x%02X\r\n", rx);
     // CDC_Transmit_FS((uint8_t*)buf, strlen(buf));
-    Handle_Manual_Remote_Input(nullptr,nullptr,nullptr,nullptr);
-    HAL_Delay(1000);
+    // Handle_Manual_Remote_Input(nullptr,nullptr,nullptr,nullptr);
+    // uint8_t rx = 0;
+    // uint8_t data = 0;
+    // for (data = 0; data < 6; data++) {
+    //   HAL_SPI_TransmitReceive(&hspi2, &data, &rx, 1, HAL_MAX_DELAY);
+    //   HAL_Delay(1000);
+    NRF24_Init_Receiver();
+    }
   }
 
-   
-    
-  }
   /* USER CODE END 3 */
 
 /**
@@ -772,7 +775,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin   = GPIO_PIN_1;
   GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull  = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */

@@ -15,8 +15,14 @@ struct __attribute__((packed)) RadioPacket {
     uint8_t estop_pressed;   // 1 if active emergency mushroom compression, 0 if nominal
 };
 
+struct  __attribute__((packed)) RegWrite {
+  uint8_t reg;
+    uint8_t value;
+};
+
 extern uint8_t remote_link_active;
 extern RadioPacket rxData;
+extern RegWrite regWrite;
 
 void NRF24_Init_Receiver(void);
 void NRF24_PrintRegisters();
