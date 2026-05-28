@@ -5,15 +5,17 @@
 This package contains a ROS2 face recognition demo using OpenCV and `cv_bridge`.
 
 - `face_recognition_node.py`
+  - Main ROS2 node for face recognition
   - Subscribes to `/camera/image_raw`
   - Converts incoming ROS `sensor_msgs/Image` to OpenCV using `CvBridge`
   - Calls `FaceRecognition.recognize_frame()`
-  - Displays the annotated frame in an OpenCV window
+  - Publishes recognition outputs and displays the annotated result
 
 - `camera_publisher_node.py`
-  - Captures webcam frames with OpenCV (`cv2.VideoCapture(0)`)
+  - Test/demo node that captures webcam frames with OpenCV (`cv2.VideoCapture(0)`)
   - Converts frames to ROS images with `CvBridge`
   - Publishes to `/camera/image_raw` at ~30 FPS
+  - Intended as a simple test input source, not required for production use
 
 - `cv_code/face_recognition.py`
   - Loads the YuNet face detector and SFace recognizer
@@ -78,19 +80,49 @@ Also add these runtime dependencies to `package.xml`:
    - Opens the webcam
    - Converts frames to ROS `Image`
    - Publishes to `/camera/image_raw`
+   - This node is a demo/test publisher and can be replaced by any camera publisher that writes `/camera/image_raw`
 
 2. `face_recognition_node.py`
    - Creates a ROS2 node `face_recognition`
    - Subscribes to `/camera/image_raw`
    - Converts ROS `Image` back to OpenCV BGR image
    - Runs face detection and recognition
-   - Shows the result in an OpenCV window
+   - Publishes recognition outputs
+   - Shows the annotated result in an OpenCV window
 
 3. `cv_code/face_recognition.py`
    - Loads ONNX models for detection and recognition
    - Uses `cv2.FaceDetectorYN` and `cv2.FaceRecognizerSF`
    - If `target_feature.npy` exists, loads it
    - Otherwise reads `./assets/target.jpg`, extracts the target face, computes its feature, and caches it
+
+## Output topics and message types
+
+The main recognition node publishes the following topics:
+
+- `/face_recognition/result_image`
+  - message type: `sensor_msgs/Image`
+  - content: annotated camera frame with face box, label, and score
+
+- `/face_recognition/is_faces`
+  - message type: `std_msgs/Bool`
+  - content: `true` if any face is detected in the frame, otherwise `false`
+
+- `/face_recognition/is_detected`
+  - message type: `std_msgs/Bool`
+  - content: `true` if the target face is recognized, otherwise `false`
+
+- `/face_recognition/offset`
+  - message type: `std_msgs/Float32MultiArray`
+  - content: horizontal pixel offset from image center to the detected target face center
+  - note: this is published only when the target face is detected and contains one numeric value
+  - positive offset means the target is to the right of center, negative means left of center
+
+The camera test node publishes:
+
+- `/camera/image_raw`
+  - message type: `sensor_msgs/Image`
+  - content: raw webcam frames for the recognition node to consume
 
 ## Run instructions
 
