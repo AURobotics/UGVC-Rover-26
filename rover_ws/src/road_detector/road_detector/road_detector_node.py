@@ -76,7 +76,7 @@ class RoadDetectorNode(Node):
         self.declare_parameter('fy', 1000.0)
         self.declare_parameter('cx', 960.0)
         self.declare_parameter('cy', 540.0)
-        self.declare_parameter('dist_coeffs', [0, 0, 0, 0, 0])  # Assuming no distortion by default
+        self.declare_parameter('dist_coeffs', [0.0, 0.0, 0.0, 0.0, 0.0])  # Assuming no distortion by default
         
         # Detection parameters
         self.declare_parameter('min_radius', 10)
