@@ -92,7 +92,7 @@ run main launch file
 ros2 launch road_detector road_detector_launch.py
 ```
 
->depends on param.yaml (road detector node only)
+>depends on params.yaml (**road detector node only**)
 
 ---
 
@@ -103,9 +103,9 @@ run test launch file
 ros2 launch road_detector road_detector_test_launch.py
 ```
 
->depends on all three yaml files (all nodes)
+>depends on all other three yaml files (depends on all nodes)
 
-it will view 2 debug camera feeds (bev and lane mask) and the raw camera feed
+it will view 2 debug camera feeds (bev and lane mask) and the raw camera feed as windows
 +
 data from point cloud topic is saved in a file specified in the config/ parameter files
 
