@@ -19,14 +19,16 @@
 
     "mounts": [
         "source=pixi-cache,target=/home/vscode/.cache/pixi,type=volume",
-        "source=${localEnv:XDG_RUNTIME_DIR}/${localEnv:WAYLAND_DISPLAY},target=${localEnv:XDG_RUNTIME_DIR}/${localEnv:WAYLAND_DISPLAY},type=bind"
+        "source=${localEnv:XDG_RUNTIME_DIR}/${localEnv:WAYLAND_DISPLAY},target=${localEnv:XDG_RUNTIME_DIR}/${localEnv:WAYLAND_DISPLAY},type=bind",
+        "source=/run/udev,target=/run/udev,type=bind,readonly",
+        "source=/dev/input,target=/dev/input,type=bind"
     ],
 
     "runArgs": [
-        "--device",
-        "/dev/input",
         "--security-opt",
         "label=disable",
+        "--security-opt",
+        "no-new-privileges:false",
         "--userns=keep-id",
         "--group-add",
         "keep-groups"
