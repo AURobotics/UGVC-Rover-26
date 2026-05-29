@@ -10,14 +10,15 @@
 // ── Message type enum ──────────────────────────────────────────────────
 // Upstream  = STM32 → ROS
 // Downstream = ROS → STM32
-enum MessageType : uint8_t
+enum Message_Type : uint8_t
 {
+
+    READY_MSG = 0x00,    // flow control — no payload
     // Upstream
     MSG_IMU = 0x01,      // 50 Hz  — quaternion + euler + accel
     MSG_GPS = 0x02,      // 10 Hz  — lat + lon + altitude
     MSG_ENCODERS = 0x03, // 50 Hz  — 4-wheel speeds
     MSG_STATUS = 0x04,   // 10 Hz  — battery + current + servo + flags
-    MSG_READY = 0x05,    // flow control — no payload
     //MSG_ANTENNA = 0x06,  // as needed — station position
 
     // Downstream
@@ -31,11 +32,19 @@ enum MessageType : uint8_t
     MSG_ACK = 0xA0, // acknowledge READY or other control msgs
 };
 
+struct __attribute__((packed)) Ready_msg
+{
+    uint8_t sync_byte;
+    uint8_t msg_type;
+};
+
 // ── Upstream payload structs ───────────────────────────────────────────
 
 struct __attribute__((packed)) IMUPayload
 {
     // Fused orientation from BNO055 (NOT raw magnetometer)
+    uint8_t sync_byte;
+    uint8_t msg_type;
     float q1, q2, q3, q4;            // quaternion — 16 bytes
     float alpha, beta, Psi;          // euler angles (rad) — 12 bytes
     float accel_x, accel_y, accel_z; // linear accel m/s² — 12 bytes
@@ -44,6 +53,8 @@ struct __attribute__((packed)) IMUPayload
 
 struct __attribute__((packed)) GPSPayload
 {
+    uint8_t sync_byte;
+    uint8_t msg_type;
     float latitude;            // degrees
     float longitude;           // degrees
     float position_covariance; // m² — required by ROS NavSatFix
@@ -53,6 +64,8 @@ struct __attribute__((packed)) GPSPayload
 struct __attribute__((packed)) EncodersPayload
 {
     // Four wheels — matches rover geometry: FL BL FR BR
+    uint8_t sync_byte;
+    uint8_t msg_type;
     float front_left;  // m/s
     float back_left;   // m/s
     float front_right; // m/s
@@ -63,6 +76,8 @@ struct __attribute__((packed)) EncodersPayload
 
 struct __attribute__((packed)) StatusPayload
 {
+    uint8_t sync_byte;
+    uint8_t msg_type;
     float bat_voltage_1;      // volts
     float bat_voltage_2;      // volts
     float motor_current[4];   // amps: FL BL FR BR
@@ -88,6 +103,8 @@ struct __attribute__((packed)) CmdVelPayload
 {
     // Pre-converted by ROS node from cmd_vel Twist
     // STM32 receives wheel speeds directly — no kinematics needed here
+    uint8_t sync_byte;
+    uint8_t msg_type;
     float left_wheel_vel;  // m/s
     float right_wheel_vel; // m/s
     // Total = 8 bytes
@@ -95,6 +112,8 @@ struct __attribute__((packed)) CmdVelPayload
 
 struct __attribute__((packed)) ServoPayload
 {
+    uint8_t sync_byte;
+    uint8_t msg_type;
     float servo1_angle; // degrees
     float servo2_angle; // degrees
     // Total = 8 bytes
@@ -102,18 +121,24 @@ struct __attribute__((packed)) ServoPayload
 
 struct __attribute__((packed)) LaserPayload
 {
+    uint8_t sync_byte;
+    uint8_t msg_type;
     uint8_t status; // 0=off 1=on
     // Total = 1 byte
 };
 
 struct __attribute__((packed)) ModePayload
 {
+    uint8_t sync_byte;
+    uint8_t msg_type;
     uint8_t mode; // 0=manual 1=autonomous
     // Total = 1 byte
 };
 
 struct __attribute__((packed)) HeartbeatPayload
 {
+    uint8_t sync_byte;
+    uint8_t msg_type;
     uint8_t sequence; // increments each send — detect missed beats
     // Total = 1 byte
 };
@@ -127,18 +152,6 @@ uint8_t crc8(const uint8_t *data, uint8_t len);
 // Do NOT use a fixed-size MessageFrame struct on the wire.
 // Call this to build a frame into a caller-supplied buffer.
 // Returns total frame length (3 + payload_len + 1).
-inline uint8_t build_frame(uint8_t *out_buf,
-                           MessageType msg_type,
-                           const void *payload,
-                           uint8_t payload_len)
-{
-    out_buf[0] = PROTOCOL_SYNC_BYTE;
-    out_buf[1] = static_cast<uint8_t>(msg_type);
-    out_buf[2] = payload_len;
-    if (payload && payload_len > 0)
-        __builtin_memcpy(&out_buf[3], payload, payload_len);
-    out_buf[3 + payload_len] = crc8(&out_buf[1], 2 + payload_len);
-    return 4 + payload_len;
-}
+
 
 #endif // MESSAGES_H

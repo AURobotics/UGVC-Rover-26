@@ -19,22 +19,24 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
-
-
+#include "Cdc_driver.h"
+#include "usbd_cdc_if.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "messages.h"
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+extern "C" int _write(int file, char* ptr, int len) {
+  CDC_Transmit_FS((uint8_t*)ptr, len);
+  return len;
+}
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+Cdc_driver cdc(20);
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -60,6 +62,8 @@ UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
 
+
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -78,8 +82,7 @@ static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM5_Init(void);
 /* USER CODE BEGIN PFP */
-void Bridge_Init(void);
-void Bridge_Update(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -128,17 +131,31 @@ int main(void)
   MX_TIM5_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-  Bridge_Init();
+
+  cdc.setup();
+  Generic_msg received_msg{};
+
+  Ready_msg ready_msg{.sync_byte = 255, .msg_type = READY_MSG};
+
+  while (!cdc.available()) {
+    cdc.write_msg(ready_msg);
+    HAL_Delay(100);
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    Bridge_Update();
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
+    if (cdc.available()) {
+      cdc.read_msg(received_msg);
+      HAL_Delay(5);
+      cdc.write_msg(ready_msg);
+    }
+
+    cdc.write_msg(received_msg);
   }
   /* USER CODE END 3 */
 }

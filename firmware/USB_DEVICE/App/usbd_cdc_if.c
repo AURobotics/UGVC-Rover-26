@@ -260,12 +260,9 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   */
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
-  extern void STM32Bridge_PushByte(uint8_t byte); // Link to C++
+//  extern void STM32Bridge_PushByte(uint8_t byte); // Link to C++
 
-  for (uint32_t i = 0; i < *Len; i++)//
-  {
-    STM32Bridge_PushByte(Buf[i]); // Push into ring buffer fast
-  }
+  on_cdc_isr(Buf, *Len);
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);

@@ -29,6 +29,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc.h"
+#include "Cdc_driver.h"
+
 
 /* USER CODE BEGIN INCLUDE */
 
