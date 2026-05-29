@@ -113,9 +113,9 @@ The main recognition node publishes the following topics:
   - content: `true` if the target face is recognized, otherwise `false`
 
 - `/face_recognition/offset`
-  - message type: `std_msgs/Float32MultiArray`
+  - message type: `std_msgs/Int32`
   - content: horizontal pixel offset from image center to the detected target face center
-  - note: this is published only when the target face is detected and contains one numeric value
+  - note: this is published only when the target face is detected and contains one integer value
   - positive offset means the target is to the right of center, negative means left of center
 
 The camera test node publishes:
