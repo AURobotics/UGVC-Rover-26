@@ -22,10 +22,10 @@ def gps_to_xy(lat, lon, origin_lat, origin_lon):
     x = math.radians(lon - origin_lon) * math.cos(math.radians(origin_lat)) * EARTH_RADIUS_M
     y = math.radians(lat - origin_lat) * EARTH_RADIUS_M
     return np.array([x, y])
-
+    
 
 class BezierCurve:
-    def __init__(self, control_scale=0.3, min_control_dist=0.2, points_per_meter=15):
+    def __init__(self, control_scale=0.3, min_control_dist=0.2, points_per_meter=5): #####
         self.control_scale    = control_scale
         self.min_control_dist = min_control_dist
         self.points_per_meter = points_per_meter
@@ -131,7 +131,7 @@ class TrajectoryNode(Node):
         y = msg.pose.pose.position.y
         self.robot_pose = np.array([x, y])
         
-        self.get_logger().info(f"📍 Odom received! Robot at: ({x:.2f}, {y:.2f}). Building path...")
+        self.get_logger().info(f" Odom received! Robot at: ({x:.2f}, {y:.2f}). Building path...")
       
         try:
             yaml_wps, yaml_labels = self._load_waypoints_relative_to_robot(self.wf, x, y)
