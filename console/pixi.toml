@@ -19,3 +19,4 @@ vid_test = "python src/testing/video_stream_node.py"
 
 [pypi-dependencies]
 console = { path = ".", editable = true }
+pyglet = "==3.0.dev3"
