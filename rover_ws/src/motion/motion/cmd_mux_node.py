@@ -5,7 +5,7 @@ from rclpy.node import Node
 
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
-from std_msgs.msg import Float64MultiArray
+from ugvc_msgs.msg import Speed
 from sensor_msgs.msg import Joy
 
 
@@ -57,7 +57,7 @@ class CmdMuxNode(Node):
         self.joy_msg = None
 
         # Publisher
-        self.speed_pub = self.create_publisher(Float64MultiArray,'/cmd_speed',10)
+        self.speed_pub = self.create_publisher(Speed,'/cmd_speed',10)
 
         # Subscribers
         self.create_subscription(Twist,'/cmd_vel/waypoint', self.waypoint_callback, 10)
@@ -122,16 +122,39 @@ class CmdMuxNode(Node):
             w = angular_val * self.joy_max_angular
             return v, w
  
-        # All other states: look up topic from STATE_MAP
-        active_topic = STATE_MAP.get(self.state)
- 
-        if active_topic is not None:
-            cmd = self.latest_cmds[active_topic]
-            if cmd is not None:
-                return cmd.linear.x, cmd.angular.z
- 
+        elif self.state == 'LANE' :
+            cmd = self.latest_cmds.get('/cmd_vel/lane_pid')
+            if cmd is None:
+                self.get_logger().warn(
+                    'LANE state but no lane_pid command received, outputting zero.',
+                    throttle_duration_sec=1.0
+                )
+                return 0.0, 0.0
+            return cmd.linear.x, cmd.angular.z
+    
+        elif self.state == 'WP':
+            cmd = self.latest_cmds.get('/cmd_vel/waypoint')
+            if cmd is None:
+                self.get_logger().warn(
+                    'WP state but no waypoint command received, outputting zero.',
+                    throttle_duration_sec=1.0
+                )
+                return 0.0, 0.0
+            return cmd.linear.x, cmd.angular.z
+
+        elif self.state == 'SEARCH':
+            cmd = self.latest_cmds.get('/cmd_vel/pothole')
+            if cmd is None:
+                self.get_logger().warn(
+                    'SEARCH state but no pothole command received, outputting zero.',
+                    throttle_duration_sec=1.0
+                )
+                return 0.0, 0.0
+            return cmd.linear.x, cmd.angular.z
+
+        else:
         # IDLE / DONE / no message yet → zero
-        return 0.0, 0.0
+            return 0.0, 0.0
 
     # Kinematics
     def compute_wheel_speeds(self, v, w):
@@ -150,22 +173,22 @@ class CmdMuxNode(Node):
         v, w = self.get_active_command()
         v_left, v_right = self.compute_wheel_speeds(v, w)
  
-        speed_msg = Float64MultiArray()
-        
-        speed_msg.data = [v_left,v_right]
-        
+        speed_msg = Speed()
+        speed_msg.left  = float(v_left)   
+        speed_msg.right = float(v_right)
         self.speed_pub.publish(speed_msg)
  
         self.get_logger().info(
             f'[{self.state}] v={v:.2f} w={w:.2f} → '
             f'vL={v_left:.2f} vR={v_right:.2f} rad/s',
         )
+        
 
     # Safe Shutdown
     def stop_robot(self):
-        stop_msg = Float64MultiArray()
-        stop_msg.vL = 0.0
-        stop_msg.vR = 0.0
+        stop_msg = Speed()
+        stop_msg.left = 0.0
+        stop_msg.right = 0.0
         self.speed_pub.publish(stop_msg)
         self.get_logger().info('Robot stopped safely')
 
