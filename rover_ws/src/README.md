@@ -1,6 +1,9 @@
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
+- [Running pkgs with cmake](#running-pkgs-with-cmake)
+  - [Cmake file changes:](#cmake-file-changes)
+  - [For windows users](#for-windows-users)
 - [Useful Commands](#useful-commands)
   - [Windows Notes](#windows-notes)
   - [Create a new package](#create-a-new-package)
@@ -11,6 +14,42 @@
   - [Usful Topic commands](#usful-topic-commands)
 
 ---
+
+## Running pkgs with cmake
+
+### Cmake file changes:
+- add this to the begining of the cmake file:
+```Cmake
+cmake_minimum_required(VERSION 3.12...3.25)
+```
+
+- Dependencies should be grouped as the following example:
+```Cmake
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Speed.msg"
+  "msg/WheelVel.msg"
+  "msg/RoverStatus.msg"
+  "srv/MyService.srv"
+  # ... other custome interfaces you made
+  DEPENDENCIES 
+    std_msgs
+    geometry_msgs
+    # ... other dependencies 
+)
+```
+
+### For windows users
+> part in development
+
+run:
+```powershell
+winget install --id Microsoft.VisualStudio.BuildTools
+```
+
+then install desktop development with c++ workload and the following components:
+- MSVC v143 - VS 2022 C++ x64/x86 build tools (latest)
+- Windows 11 SDK (10.0.26100.7705 or later)
+
 
 ## Useful Commands
 
