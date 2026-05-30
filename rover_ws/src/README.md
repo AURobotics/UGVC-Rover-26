@@ -20,7 +20,7 @@
 ### Cmake file changes:
 - add this to the begining of the cmake file:
 ```Cmake
-cmake_minimum_required(VERSION 3.12...3.25)
+cmake_minimum_required(VERSION 3.12...3.40)
 ```
 
 - Dependencies should be grouped as the following example:
