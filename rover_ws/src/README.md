@@ -1,14 +1,27 @@
-ros pkgs is to be added in the src folder here
+## Table of contents
+
+- [Table of contents](#table-of-contents)
+- [Useful Commands](#useful-commands)
+  - [Windows Notes](#windows-notes)
+  - [Create a new package](#create-a-new-package)
+  - [Build pkg](#build-pkg)
+  - [Source pkg](#source-pkg)
+  - [Run a Node](#run-a-node)
+  - [Run a launch file](#run-a-launch-file)
+  - [Usful Topic commands](#usful-topic-commands)
+
+---
 
 ## Useful Commands
 
 ### Windows Notes
-> - You must used CMD not powershell
+> - your path to the repo must have **no spaces**
+> - You must used **CMD** not powershell
 > - steps to run code: build, source, run
 
 ### Create a new package
 
-> - make sure you are inside the src folder 
+> - make sure you are **inside the src folder** 
 > - change my_package with your pkg name
 
 C++ pkg
@@ -69,4 +82,15 @@ with args:
 ```bash
 ros2 launch pkg_name launch_file.py arg_name1:=arg_data1 arg_name2:=arg_data2
 ```
+
+### Usful Topic commands
+
+| Command                                  | Function                                                         | Example |
+| :--------------------------------------- | :--------------------------------------------------------------- | :------ |
+| **`ros2 topic list`**                    | List all active topics.                                          |
+| **`ros2 topic list -t`**                 | List all active topics with their data types                     |
+| **`ros2 topic echo /topic/name`**        | Print messages from a /topic/name to the console.                |
+| **`ros2 topic echo /topic/name --once`** | Print one meesage from /topic/name to the console.               |
+| **`ros2 topic info /topic/name`**        | Show publisher & subscriber count and topic type of /topic/name. |
+| **`ros2 topic hz /topic/name`**          | Report the average publishing rate of /topic/name.               |
 
