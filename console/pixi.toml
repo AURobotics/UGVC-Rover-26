@@ -14,5 +14,5 @@ ros-jazzy-rclpy = ">=7.1.9,<8"
 ros-jazzy-cv-bridge = ">=4.1.0,<5"
 
 [tasks]
-console = { cmd = "python -m console", env = { PYTHONPATH = "src" } }
+console = "python src/console/__main__.py"
 vid_test = "python src/testing/video_stream_node.py"
