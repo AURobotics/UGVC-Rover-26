@@ -5,7 +5,7 @@
   - [Windows Notes](#windows-notes)
   - [Create a new package](#create-a-new-package)
   - [Build pkg](#build-pkg)
-  - [Source pkg](#source-pkg)
+  - [Source](#source)
   - [Run a Node](#run-a-node)
   - [Run a launch file](#run-a-launch-file)
   - [Usful Topic commands](#usful-topic-commands)
@@ -16,8 +16,7 @@
 
 ### Windows Notes
 > - your path to the repo must have **no spaces**
-> - You must used **CMD** not powershell
-> - steps to run code: build, source, run
+> - steps to run code: build, run; no longer needs to source (automated by pixi.toml)
 
 ### Create a new package
 
@@ -46,7 +45,9 @@ build specific pkgs
 colcon build --packages-select package1 package2 package3
 ```
 
-### Source pkg
+> **for windows write `pixi run` before colcon even if you are in the shell**
+
+### Source
 
 ubuntu
 ```bash
@@ -57,6 +58,7 @@ windows
 ```cmd
 call install\setup.bat
 ```
+> windows no longer needs to source, automatically done by pixi
 
 ### Run a Node
 
