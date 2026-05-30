@@ -16,7 +16,7 @@ road_detector:
     fy: 1000.0
     cx: 960.0
     cy: 540.0
-    dist_coeffs: [0,0,0,0,0]
+    dist_coeffs: [0.0,0.0,0.0,0.0,0.0]
     
     # Detection parameters
     min_radius: 10
