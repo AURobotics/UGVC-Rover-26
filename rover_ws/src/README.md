@@ -1,23 +1,61 @@
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
+- [Running pkgs with cmake](#running-pkgs-with-cmake)
+  - [Cmake file changes:](#cmake-file-changes)
+  - [For windows users](#for-windows-users)
 - [Useful Commands](#useful-commands)
   - [Windows Notes](#windows-notes)
   - [Create a new package](#create-a-new-package)
   - [Build pkg](#build-pkg)
-  - [Source pkg](#source-pkg)
+  - [Source](#source)
   - [Run a Node](#run-a-node)
   - [Run a launch file](#run-a-launch-file)
   - [Usful Topic commands](#usful-topic-commands)
 
 ---
 
+## Running pkgs with cmake
+
+### Cmake file changes:
+- add this to the begining of the cmake file:
+```Cmake
+cmake_minimum_required(VERSION 3.12...3.40)
+```
+
+- Dependencies should be grouped as the following example:
+```Cmake
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Speed.msg"
+  "msg/WheelVel.msg"
+  "msg/RoverStatus.msg"
+  "srv/MyService.srv"
+  # ... other custome interfaces you made
+  DEPENDENCIES 
+    std_msgs
+    geometry_msgs
+    # ... other dependencies 
+)
+```
+
+### For windows users
+> part in development
+
+run:
+```powershell
+winget install --id Microsoft.VisualStudio.BuildTools
+```
+
+then install desktop development with c++ workload and the following components:
+- MSVC v143 - VS 2022 C++ x64/x86 build tools (latest)
+- Windows 11 SDK (10.0.26100.7705 or later)
+
+
 ## Useful Commands
 
 ### Windows Notes
 > - your path to the repo must have **no spaces**
-> - You must used **CMD** not powershell
-> - steps to run code: build, source, run
+> - steps to run code: build, run; no longer needs to source (automated by pixi.toml)
 
 ### Create a new package
 
@@ -46,7 +84,9 @@ build specific pkgs
 colcon build --packages-select package1 package2 package3
 ```
 
-### Source pkg
+> **for windows write `pixi run` before colcon even if you are in the shell**
+
+### Source
 
 ubuntu
 ```bash
@@ -57,6 +97,7 @@ windows
 ```cmd
 call install\setup.bat
 ```
+> windows no longer needs to source, automatically done by pixi
 
 ### Run a Node
 
