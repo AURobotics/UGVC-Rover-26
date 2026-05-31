@@ -19,9 +19,9 @@ gz_client = "gz sim -g"
 [dependencies]
 python = ">=3.12,<3.13"
 ros-jazzy-turtlesim = ">=1.8.3,<2"
-ros-jazzy-desktop = ">=0.11.0,<0.12" # <-- This already gives you RViz2!
+ros-jazzy-desktop = ">=0.11.0,<0.12"
 compilers = ">=1.11.0,<2"
-cmake = ">=4.3.2,<5"
+cmake = "3.31.*"
 pkg-config = ">=0.29.2,<0.30"
 make = ">=4.4.1,<5"
 ninja = ">=1.13.2,<2"
