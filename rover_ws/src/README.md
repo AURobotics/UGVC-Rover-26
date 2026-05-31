@@ -4,6 +4,7 @@
 - [Running pkgs with cmake](#running-pkgs-with-cmake)
   - [Cmake file changes:](#cmake-file-changes)
   - [For windows users](#for-windows-users)
+- [Running Gazebo with pixi](#running-gazebo-with-pixi)
 - [Useful Commands](#useful-commands)
   - [Windows Notes](#windows-notes)
   - [Create a new package](#create-a-new-package)
@@ -50,6 +51,26 @@ then install desktop development with c++ workload and the following components:
 - MSVC v143 - VS 2022 C++ x64/x86 build tools (latest)
 - Windows 11 SDK (10.0.26100.7705 or later)
 
+---
+
+## Running Gazebo with pixi
+
+1- Terminal 1 (RViz):
+```Bash
+pixi run rviz
+```
+
+2-Terminal 2 (Gazebo Backend Engine):
+``` Bash
+pixi run gz_server
+```
+
+3-Terminal 3 (Gazebo Frontend Visuals):
+``` Bash
+pixi run gz_client
+```
+
+---
 
 ## Useful Commands
 
