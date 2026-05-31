@@ -372,7 +372,13 @@ class RoadDetectorNode(Node):
         if len(points_float32) == 0:
             return point_cloud2.create_cloud_xyz32(header, np.zeros((0, 3)))
         
-        return point_cloud2.create_cloud_xyz32(header, points_float32)
+        # Swap x and y, and set z to -height (or modify as needed)
+        modified_points = np.zeros_like(points_float32)
+        modified_points[:, 0] = points_float32[:, 1]  # x becomes original y
+        modified_points[:, 1] = points_float32[:, 0]  # y becomes original x
+        modified_points[:, 2] = -self.camera_height  # set z to -camera_height (change this as needed)
+        
+        return point_cloud2.create_cloud_xyz32(header, modified_points)
     
     def parameters_callback(self, params):
         """Handle dynamic parameter updates"""
