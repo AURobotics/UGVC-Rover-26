@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+import traceback
 from PySide6.QtCore import QObject, QThread, Signal
 import rclpy
 from rclpy.executors import SingleThreadedExecutor
@@ -155,11 +156,14 @@ class ROS2Worker(QThread):
         self._executor = SingleThreadedExecutor()
         self._executor.add_node(self._node)
         self._executor.add_node(self._joystick_node)
+        print("ROS2 worker spinning (nodes: worker_node, joystick_node)")
 
         try:
             self._executor.spin()
         except Exception as exc:
             print(f"ROS2 thread exception: {exc}")
+            # CHANGE: full traceback when worker dies — /joy won't exist if this prints
+            traceback.print_exc()
         finally:
 
             if self._executor is not None:
