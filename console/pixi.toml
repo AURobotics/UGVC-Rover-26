@@ -17,7 +17,6 @@ ros-jazzy-joy = ">=3.3.0,<4"
 [tasks]
 vid_test = "python src/testing/video_stream_node.py"
 joy_echo = "ros2 topic echo /joy sensor_msgs/msg/Joy"
-joy_list = "ros2 topic list"
 joy_monitor = "python src/testing/joy_monitor.py"
 
 
