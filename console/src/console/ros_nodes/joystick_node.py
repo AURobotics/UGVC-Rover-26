@@ -3,7 +3,7 @@ import threading
 from collections.abc import Callable
 
 import pyglet
-import pyglet.window
+pyglet.options.headless = True
 from pyglet.input import Controller, ControllerManager
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
@@ -224,17 +224,23 @@ class JoystickNode(Node):
         r2 = normalize_trigger(raw_axes[5])
 
         buttons = [
-            int(getattr(controller, "a",             0)),  #  0  Cross
-            int(getattr(controller, "b",             0)),  #  1  Circle
-            int(getattr(controller, "x",             0)),  #  2  Square
-            int(getattr(controller, "y",             0)),  #  3  Triangle
-            int(getattr(controller, "leftshoulder",  0)),  #  4  L1
-            int(getattr(controller, "rightshoulder", 0)),  #  5  R1
-            int(getattr(controller, "leftthumb",     0)),  #  6  L3
-            int(getattr(controller, "rightthumb",    0)),  #  7  R3
-            int(getattr(controller, "start",         0)),  #  8  Options
-            int(getattr(controller, "back",          0)),  #  9  Create
-            int(getattr(controller, "guide",         0)),  # 10  PS button
+            int(controller.a),              # 0  Cross
+            int(controller.b),              # 1  Circle
+            int(controller.x),              # 2  Square
+            int(controller.y),              # 3  Triangle
+            int(controller.leftshoulder),   # 4  L1
+            int(controller.rightshoulder),  # 5  R1
+            int(controller.leftthumb),      # 6  L3
+            int(controller.rightthumb),     # 7  R3
+            int(controller.start),          # 8  Options
+            int(controller.back),           # 9  Create/ Share
+            int(controller.guide),          # 10 PS button
+            int(controller.dpad.x == -1),   # 11 dpad-left
+            int(controller.dpad.x == 1),    # 12 dpad-right
+            int(controller.dpad.y == -1),   # 13 dpad-down
+            int(controller.dpad.y == 1)     # 14 dpad-up
+            
+            
         ]
 
         def apply_deadzone(val: float) -> float:
