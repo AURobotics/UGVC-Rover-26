@@ -11,15 +11,16 @@ channels = [
 [tasks]
 # Launch RViz2
 rviz = "rviz2"
-# Launch Gazebo Server (runs physics in the background)
-gz_server = "gz sim -s -v 4"
-# Launch Gazebo Client (runs the GUI separately to prevent Windows crashes)
-gz_client = "gz sim -g"
 
-# TurtleBot3 Gazebo Simulation Launch Tasks
-tb3_empty = "ros2 launch turtlebot3_gazebo empty_world.launch.py"
-tb3_world = "ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py"
-tb3_teleop = "ros2 run turtlebot3_teleop teleop_keyboard"
+# # Launch Gazebo Server (runs physics in the background)
+# gz_server = "gz sim -s -v 4"
+# # Launch Gazebo Client (runs the GUI separately to prevent Windows crashes)
+# gz_client = "gz sim -g"
+
+# # TurtleBot3 Gazebo Simulation Launch Tasks
+# tb3_empty = "ros2 launch turtlebot3_gazebo empty_world.launch.py"
+# tb3_world = "ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py"
+# tb3_teleop = "ros2 run turtlebot3_teleop teleop_keyboard"
 
 # to test RViz2 run tb3_robot and tb3_rviz in separate terminals
 tb3_robot = "ros2 launch turtlebot3_bringup robot.launch.py"
