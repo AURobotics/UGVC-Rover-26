@@ -5,7 +5,7 @@ from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import Image, Imu, NavSatFix
 from std_msgs.msg import Float32MultiArray, String
-from joystick_node import JoystickNode
+from console.ros_nodes.joystick_node import JoystickNode
 
 class RoverSignals(QObject):
     telemetry_received = Signal(dict)
