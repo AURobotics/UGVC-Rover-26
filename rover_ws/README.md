@@ -1,51 +1,29 @@
-# Rover WS
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&repo=1162024079&skip_quickstart=true&ref=ros/dev&devcontainer_path=.devcontainer/rover_ws-pixi/devcontainer.json)
+# Overview:
+* `rover_ws/src/localization`: contains launch files and configuration files for the `robot_localization` nodes as well as the odom node (the node that takes encoders output and outputs /odometry/unfiltered)
 
-This folder covers the Rover sub-project, which is responsible for the high level control code that lives inside the on-board computer.
+* `rover_ws/src/simulation_localization`: contains the fake encoders node, which uses the positional data of the wheels in turtlebot3 as encoder data (use only for simultion)
 
-## Tech Stack
+* `rover_ws/turtlebot3_gazebo`: contains a modified version of the gazebo simulation package of the turtlebot3 simulation repo (more details later)
 
-- ROS2 (Jazzy)
-    - Using the RoboStack Conda distribution channel [↗️](https://robostack.github.io/GettingStarted.html)
-- Pixi, for cross-platform ROS2 and Python package management [↗️](https://pixi.prefix.dev/latest/robotics/)
+# How to simulate?
+* if you do not have turtlebot3 repo already setup, follow the setup instructions: https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup
 
-## Contributing
+* navigate to `turtlebot3_ws/src/turtlebot3_simulations` and replace the `turtlebot3_gazebo` directory with the modified one I included in `rover_ws/`
 
-### Project Setup
+* now you can run the following commands (do not forget to build both the turtbot3 packages, and the rover_ws packages first)
 
-After cloning the mono-repo, open the `rover_ws/` folder inside your favorite text editor or IDE.
+start gazebo simulation(make sure you are in the parent directory of turtlebot3\_ws): `export TURTLEBOT3_MODEL=burger; source turtlebot3_ws/install/setup.bash; ros2 launch turtlebot3_gazebo empty_world.launch.py`
 
-### Pre-requisites
+start rviz: `source turtlebot3_ws/install/setup.bash; ros2 launch turtlebot3_bringup rviz2.launch.py`
 
-#### Installing Pixi [↗️](https://pixi.prefix.dev/latest/installation/)
+launch the global localization node(make sure you are in the rover\_ws directory): `source install/setup.bash;ros2 launch localization global_launch.py;`
 
-Windows
-```pwsh
-winget install prefix-dev.pixi
-```
+launch fake encoder node: `source install/setup.bash; ros2 run simulation_localization encoder_sim_node`
 
-Linux/ MacOS
-```sh
-curl -fsSL https://pixi.sh/install.sh | bash
-```
+#How to run the nodes with no simulation:
 
-#### Installing project dependencies
+you only need to run this: `source install/setup.bash;ros2 launch localization global_launch.py;`
 
-Make sure you are in a pixi-activated shell
-```sh
-pixi shell
-```
+#TODO: 
 
-Then, run:
-```sh
-pixi install
-```
-
-### Devcontainer
-
-To open this project's devcontainer locally, navigate to the [monorepo root](../) and choose the configuration under [`.devcontainer/rover_ws-pixi/`](../.devcontainer/rover_ws-pixi/).
-
-You can also open the devcontainer via [GitHub Codespaces ↗️](https://github.com/codespaces/new?hide_repo_select=true&repo=1162024079&skip_quickstart=true&ref=ros/dev&devcontainer_path=.devcontainer/rover_ws-pixi/devcontainer.json).
-
-> [!WARNING]
-> Note that GitHub Codespaces will be difficult to configure for ROS2-based communication. For these tasks, please use develop locally even if using the devcontainer.
+add noise to sensors and test how the ekf nodes handle them.
