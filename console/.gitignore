@@ -5,3 +5,5 @@ pixi.lock
 
 # pycache
 *__pycache__/
+
+.vscode/settings.json
