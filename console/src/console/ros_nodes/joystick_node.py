@@ -1,9 +1,10 @@
-#! /usr/bin/env python3
 import threading
 from collections.abc import Callable
+import platform
 
 import pyglet
-pyglet.options.headless = True
+if platform.system() == "Linux":
+    pyglet.options.headless = True
 from pyglet.input import Controller, ControllerManager
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
