@@ -7,7 +7,7 @@ from PySide6.QtGui import QAction, QActionGroup
 from console.gui.main_tab import MainTab
 from console.gui.settings_tab import SettingsTab
 
-from testing.mediator import Mediator
+from console.ros_nodes.mediator import Mediator
 
 class MainWindow(QMainWindow):
     def __init__(self):
