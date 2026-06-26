@@ -1,9 +1,11 @@
-from PySide6.QtWidgets import QMainWindow, QToolBar, QWidget, QSizePolicy, QStackedWidget
+from PySide6.QtWidgets import (
+    QMainWindow, QToolBar, QWidget, QSizePolicy, QStackedWidget
+)
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QAction, QActionGroup
 
 from console.gui.main_tab import MainTab
-from console.gui.joystick_tab import JoystickTab
+from console.gui.settings_tab import SettingsTab
 
 from testing.mediator import Mediator
 
@@ -17,11 +19,11 @@ class MainWindow(QMainWindow):
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
 
         main_tab = MainTab(self.mediator)
-        joystick_tab = JoystickTab()
+        settings_tab = SettingsTab()
 
         self.stack = QStackedWidget()
         self.stack.addWidget(main_tab)
-        self.stack.addWidget(joystick_tab)
+        self.stack.addWidget(settings_tab)
         self.setCentralWidget(self.stack)
 
         self.sidebar = QToolBar()
@@ -55,11 +57,13 @@ class MainWindow(QMainWindow):
         self.sidebar_actions = QActionGroup(self)
         self.sidebar_actions.setExclusive(True)
 
-        for i, name in enumerate(["Main", "Joystick"]):
+        for i, name in enumerate(["Main", "Settings"]):
             self._setup_action(i, name)
 
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        self.sidebar.insertWidget(self.sidebar.actions()[-1], spacer)
+
         hide_action = self.sidebar.toggleViewAction()
         hide_action.setText("Hide sidebar")
         hide_action.setShortcut("Ctrl+B")
@@ -79,3 +83,7 @@ class MainWindow(QMainWindow):
         action.triggered.connect(lambda _: self.stack.setCurrentIndex(action.data()))
         if idx == 0:
             action.setChecked(True)
+
+    def closeEvent(self, event):
+        self.mediator.stop()
+        super().closeEvent(event)
