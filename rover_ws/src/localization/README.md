@@ -18,7 +18,7 @@ start rviz: `source turtlebot3_ws/install/setup.bash; ros2 launch turtlebot3_bri
 
 launch the global localization node(make sure you are in the rover\_ws directory): `source install/setup.bash;ros2 launch localization global_launch.py;`
 
-launch fake encoder node: `source install/setup.bash; ros2 run simulation_localization encoder_sim_node`
+launch fake encoder node: `source install/setup.bash; ros2 run localization encoder_sim_node`
 
 #How to run the nodes with no simulation:
 
