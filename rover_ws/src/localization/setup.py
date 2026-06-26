@@ -27,7 +27,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'odom_node = localization.odom_node:main'
+            'odom_node = localization.odom_node:main',
+             'encoder_sim_node = localization.encoder_sim_node:main'
         ],
     },
 )
