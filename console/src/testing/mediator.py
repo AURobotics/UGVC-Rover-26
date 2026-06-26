@@ -24,3 +24,9 @@ class Mediator:
         if self.telemetry_exists:
             return self.lane_bev_image
         return None
+    
+    def stop(self) -> None:
+        """Safely terminates the underlying ROS 2 thread."""
+        if hasattr(self, '_worker_thread') and self._worker_thread.isRunning():
+            print("Shutting down ROS2 Worker thread...")
+            self._worker_thread.stop()
