@@ -5,7 +5,7 @@ from rclpy.node import Node
 
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
-from ugvc_msgs.msg import Speed
+from rover_interfaces.msg import Speed
 from sensor_msgs.msg import Joy
 
 
