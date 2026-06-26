@@ -189,40 +189,18 @@ class JoystickNode(Node):
         msg.axes = axes
         self._pub_joy.publish(msg)
 
-
-################ MN AI TOOL ################
     def _read_controller_data(
         self,
         controller: Controller,
         deadzone: float,
     ) -> tuple[list[int], list[float]]:
-        raw_axes = [0.0] * 6
 
-        # absolute_axis_controls is an internal pyglet attribute — guard in
-        # case it disappears in a future pyglet version
-        if hasattr(controller, "absolute_axis_controls"):
-            for i, axis in enumerate(controller.absolute_axis_controls):
-                if i < 6 and axis and axis.value is not None:
-                    raw_axes[i] = float(axis.value)
-        else:
-            self.get_logger().warn(
-                "Controller has no 'absolute_axis_controls' — axes will read 0. "
-                "Check your pyglet version.",
-                throttle_duration_sec=5.0,
-            )
-
-        def normalize_stick(raw_val: float) -> float:
-            return max(-1.0, min(1.0, (raw_val - 32768.0) / 32768.0))
-
-        def normalize_trigger(raw_val: float) -> float:
-            return max(0.0, min(1.0, raw_val / 65535.0))
-
-        lx = normalize_stick(raw_axes[0])
-        ly = normalize_stick(raw_axes[1])
-        rx = normalize_stick(raw_axes[2])
-        ry = -normalize_stick(raw_axes[3])  # negated: hardware axis is inverted
-        l2 = normalize_trigger(raw_axes[4])
-        r2 = normalize_trigger(raw_axes[5])
+        lx = controller.leftx
+        ly = controller.lefty
+        rx = controller.rightx
+        ry = controller.righty
+        l2 = controller.lefttrigger
+        r2 = controller.righttrigger
 
         buttons = [
             int(controller.a),              # 0  Cross
@@ -231,8 +209,8 @@ class JoystickNode(Node):
             int(controller.y),              # 3  Triangle
             int(controller.leftshoulder),   # 4  L1
             int(controller.rightshoulder),  # 5  R1
-            int(controller.leftthumb),      # 6  L3
-            int(controller.rightthumb),     # 7  R3
+            int(controller.leftstick),      # 6  L3
+            int(controller.rightstick),     # 7  R3
             int(controller.start),          # 8  Options
             int(controller.back),           # 9  Create/ Share
             int(controller.guide),          # 10 PS button
@@ -255,5 +233,4 @@ class JoystickNode(Node):
             l2,                  # 4  L2  [0.0 → 1.0]
             r2,                  # 5  R2  [0.0 → 1.0]
         ]
-
         return buttons, axes
