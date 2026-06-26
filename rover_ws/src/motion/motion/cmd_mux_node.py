@@ -29,8 +29,8 @@ class CmdMuxNode(Node):
         self.declare_parameter('wheelbase', 0.50)          # meters
         self.declare_parameter('max_wheel_speed', 10.0)    # rad/s
         self.declare_parameter('publish_rate', 50.0)       # Hz
-        self.declare_parameter('joy_linear_axis',  1)     # axes index
-        self.declare_parameter('joy_angular_axis', 0)     # axes index
+        self.declare_parameter('joy_linear_axis',  0)     # throttle axes index (fwd/back)
+        self.declare_parameter('joy_angular_axis',  1)     # steering axes index (left/right)
         self.declare_parameter('joy_max_linear',   1.0)   # m/s
         self.declare_parameter('joy_max_angular',  2.0)   # rad/s
         self.declare_parameter('joy_deadzone',     0.1)   # 0.0 – 1.0
@@ -84,6 +84,7 @@ class CmdMuxNode(Node):
  
     def joy_callback(self, msg: Joy):
         self.joy_msg = msg
+        self.last_joy_time = self.get_clock().now()
 
     # Mission State Callback
     def state_callback(self, msg: String):
@@ -108,7 +109,13 @@ class CmdMuxNode(Node):
                     throttle_duration_sec=1.0
                 )
                 return 0.0, 0.0
- 
+            # Joy timeout:
+            # Check if joy message is stale (>0.5s old)
+            dt = (self.get_clock().now() - self.last_joy_time).nanoseconds * 1e-9
+            if dt > 5.0:
+                self.get_logger().warn('Joy timeout, outputting zero.', throttle_duration_sec=1.0)
+                return 0.0, 0.0
+            
             linear_val  = self.joy_msg.axes[self.joy_linear_axis]
             angular_val = self.joy_msg.axes[self.joy_angular_axis]
  
@@ -181,6 +188,7 @@ class CmdMuxNode(Node):
         self.get_logger().info(
             f'[{self.state}] v={v:.2f} w={w:.2f} → '
             f'vL={v_left:.2f} vR={v_right:.2f} rad/s',
+            throttle_duration_sec=1.0
         )
         
 
