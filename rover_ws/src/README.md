@@ -1,10 +1,9 @@
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
-- [Running pkgs with cmake](#running-pkgs-with-cmake)
+- [Building packages with cmake](#building-packages-with-cmake)
   - [Cmake file changes:](#cmake-file-changes)
-  - [For windows users](#for-windows-users)
-- [Running Gazebo with pixi](#running-gazebo-with-pixi)
+  - [Prerequisites (Windows)](#prerequisites-windows)
 - [Useful Commands](#useful-commands)
   - [Windows Notes](#windows-notes)
   - [Create a new package](#create-a-new-package)
@@ -16,7 +15,7 @@
 
 ---
 
-## Running pkgs with cmake
+## Building packages with cmake
 
 ### Cmake file changes:
 - add this to the begining of the cmake file:
@@ -39,38 +38,13 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 )
 ```
 
-### For windows users
-> part in development
-
-run:
+### Prerequisites (Windows)
+Install the 2022 MSVC build tools:
 ```powershell
-winget install --id Microsoft.VisualStudio.BuildTools
+winget install --id Microsoft.VisualStudio.2022.BuildTools --source winget --force --accept-package-agreements --accept-source-agreements --override "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --wait /norestart"
 ```
 
-then install desktop development with c++ workload and the following components:
-- MSVC v143 - VS 2022 C++ x64/x86 build tools (latest)
-- Windows 11 SDK (10.0.26100.7705 or later)
-
----
-
-## Running Gazebo with pixi
-
-1- Terminal 1 (RViz):
-```Bash
-pixi run rviz
-```
-
-2-Terminal 2 (Gazebo Backend Engine):
-``` Bash
-pixi run gz_server
-```
-
-3-Terminal 3 (Gazebo Frontend Visuals):
-``` Bash
-pixi run gz_client
-```
-
----
+RoboStack uses [vinca](https://github.com/RoboStack/vinca/) to generate workflows for building their ROS2 binaries. As of writing this, vinca's [GitHub action generator](https://github.com/RoboStack/vinca/blob/master/vinca/generate_gha.py) uses Visual Studio 2022 runners. This may change in the future, and the proper `winget` command may require a simple Visual Studio version change.
 
 ## Useful Commands
 
