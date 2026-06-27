@@ -22,4 +22,4 @@ joy_monitor = "python src/testing/joy_monitor.py"
 
 [pypi-dependencies]
 console = { path = ".", editable = true }
-pyglet = "==3.0.dev3"
+pyglet = ">=2.1.14, <3"
