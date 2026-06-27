@@ -12,6 +12,8 @@
   - [Run a Node](#run-a-node)
   - [Run a launch file](#run-a-launch-file)
   - [Usful Topic commands](#usful-topic-commands)
+  - [Run RViz2](#run-rviz2)
+  - [Run Gazebo](#run-gazebo)
 
 ---
 
@@ -129,4 +131,20 @@ ros2 launch pkg_name launch_file.py arg_name1:=arg_data1 arg_name2:=arg_data2
 | **`ros2 topic echo /topic/name --once`** | Print one meesage from /topic/name to the console.               |
 | **`ros2 topic info /topic/name`**        | Show publisher & subscriber count and topic type of /topic/name. |
 | **`ros2 topic hz /topic/name`**          | Report the average publishing rate of /topic/name.               |
+
+### Run RViz2
+```bash
+pixi run rviz
+```
+
+or use a launch file that includes rviz2
+
+
+### Run Gazebo
+
+run a a launch file that includes gazebo, for example:
+
+> [!WARNING]
+> Gazebo only works on Linux
+
 
