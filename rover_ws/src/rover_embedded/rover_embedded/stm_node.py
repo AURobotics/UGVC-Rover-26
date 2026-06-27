@@ -42,7 +42,7 @@ class STM32Node(Node):
         self.pub_wheel_vel = self.create_publisher(WheelVel,          '/wheel_vel',     10)
 
         # Subscribers
-        self.create_subscription(Twist,             '/cmd_vel',           self._cb_cmd_vel, 10)
+        self.create_subscription(Speed,             '/cmd_speed',           self._cb_cmd_vel, 10)
         self.create_subscription(Bool,              '/stm32/cmd_laser',   self._cb_laser,   10)
         self.create_subscription(Float32MultiArray, '/stm32/cmd_servo',   self._cb_servo,   10)
         self.create_subscription(Bool,              '/stm32/cmd_mode',    self._cb_mode,    10)
@@ -135,14 +135,12 @@ class STM32Node(Node):
         msg.motor_current_br    = vals[5]
         msg.servo_1_angle       = vals[6]
         msg.servo_2_angle       = vals[7]
-        combined_byte =vals[8]
-        msg.laser_enabled = bool(combined_byte & 0x01)
-        msg.led_enabled = bool(combined_byte & 0x02)
-        msg.emergency_stop = bool(combined_byte & 0x03)
-        msg.laser_enabled       = vals[8]
-        msg.led_enabled         = vals[9]
-        msg.emergency_stop      = vals[10]
-        msg.imu_calibration     = list(vals[9:13])
+
+        combined_byte      = vals[8]
+        msg.laser_enabled  = bool(combined_byte & 0x01)
+        msg.led_enabled    = bool(combined_byte & 0x02)
+        msg.emergency_stop = bool(combined_byte & 0x04)  # was 0x03
+        msg.imu_calibration = list(vals[9:13])
 
         self.pub_status.publish(msg)
 
@@ -197,7 +195,7 @@ class STM32Node(Node):
         if len(msg.data) != 1:
             self.get_logger().warn('antenna_angle needs [angle]')
             return
-        self._send(PacketType.MODE, struct.pack('<f', msg.data[0]))
+        self._send(PacketType.ANTENNA, struct.pack('<f', msg.data[0]))
 
 
     def destroy_node(self):
