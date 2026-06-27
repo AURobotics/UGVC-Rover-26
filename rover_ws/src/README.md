@@ -1,9 +1,9 @@
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
-- [Building packages with cmake](#building-packages-with-cmake)
+- [Running pkgs with cmake](#running-pkgs-with-cmake)
   - [Cmake file changes:](#cmake-file-changes)
-  - [Prerequisites (Windows)](#prerequisites-windows)
+  - [For windows users](#for-windows-users)
 - [Useful Commands](#useful-commands)
   - [Windows Notes](#windows-notes)
   - [Create a new package](#create-a-new-package)
