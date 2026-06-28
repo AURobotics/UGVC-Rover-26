@@ -21,6 +21,11 @@ def generate_launch_description():
         default_value='1.0',
         description='Max angular speed sent by the teleop node (rad/s)',
     )
+    wheel_base_arg = DeclareLaunchArgument(
+        'wheel_base',
+        default_value='0.30',
+        description='Distance between left and right wheels (m)',
+    )
 
    
     stm32_node = Node(
@@ -33,6 +38,16 @@ def generate_launch_description():
             {'port': LaunchConfiguration('port')},
         ],
     )
+    converter_node = Node(
+        package='rover_embedded',          
+        executable='twist_node',
+        name='twist_node',
+        output='screen',
+        parameters=[{
+            'wheel_base': LaunchConfiguration('wheel_base'),
+        }],
+    )
+
 
     teleop_node = Node(
         package='teleop_twist_keyboard',
@@ -40,10 +55,7 @@ def generate_launch_description():
         name='teleop_twist_keyboard',
         output='screen',
         emulate_tty=True,         
-        prefix='xterm -e',          
-        remappings=[
-            ('/cmd_vel', '/cmd_speed'),  # remap cmd_vel to cmd_speed for STM32Node
-        ],
+        prefix='terminator -x',         
         parameters=[{
             'speed':       LaunchConfiguration('linear_speed'),
             'turn':        LaunchConfiguration('angular_speed'),
@@ -56,6 +68,8 @@ def generate_launch_description():
         port_arg,
         linear_speed_arg,
         angular_speed_arg,
+        wheel_base_arg,
         stm32_node,
+        converter_node,
         teleop_node,
     ])
