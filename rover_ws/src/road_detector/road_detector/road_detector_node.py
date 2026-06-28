@@ -276,7 +276,7 @@ class RoadDetectorNode(Node):
             if len(lane_points) > self.max_points_per_cloud:
                 lane_points = lane_points[:self.max_points_per_cloud]
             
-            pc_msg = self.create_pointcloud2(lane_points, msg.header.frame_id)
+            pc_msg = self.create_pointcloud2(lane_points, msg)
             self.pc_pub.publish(pc_msg)
             self.get_logger().debug(f"Published {len(lane_points)} lane points")
             
@@ -287,7 +287,7 @@ class RoadDetectorNode(Node):
                     if len(cloud) > self.max_points_per_cloud:
                         cloud = cloud[:self.max_points_per_cloud]
                     
-                    pc_msg = self.create_pointcloud2(cloud, msg.header.frame_id)
+                    pc_msg = self.create_pointcloud2(cloud, msg)
                     self.pc_pub.publish(pc_msg)
                     self.get_logger().debug(f"Published circle cloud {i} with {len(cloud)} points")
             
@@ -352,11 +352,11 @@ class RoadDetectorNode(Node):
         if self.frame_count % 100 == 0:
             self.get_logger().info(stats_msg.data)
     
-    def create_pointcloud2(self, points, frame_id) -> PointCloud2:
+    def create_pointcloud2(self, points, msg) -> PointCloud2:
         """Convert numpy array of points to PointCloud2 message"""
         header = Header()
-        header.stamp = self.get_clock().now().to_msg()
-        header.frame_id = frame_id
+        header.stamp = msg.header.stamp
+        header.frame_id = msg.header.frame_id
         
         if len(points) == 0:
             # Return empty point cloud
@@ -373,6 +373,7 @@ class RoadDetectorNode(Node):
             return point_cloud2.create_cloud_xyz32(header, np.zeros((0, 3)))
         
         # Swap x and y, and set z to -height (or modify as needed)
+        # these transformations is to make the coordinates relative to the camera stamp
         modified_points = np.zeros_like(points_float32)
         modified_points[:, 0] = points_float32[:, 1]  # x becomes original y
         modified_points[:, 1] = points_float32[:, 0]  # y becomes original x
