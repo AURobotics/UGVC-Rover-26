@@ -1,0 +1,38 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 30
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+
+diff_drive_controller:
+  ros__parameters:
+    # Hardware
+    left_wheel_names: ["left_wheel_joint"]
+    right_wheel_names: ["right_wheel_joint"]
+    wheel_radius: 0.033
+    wheel_separation: 0.297
+    
+
+    # Frames
+    odom_frame_id: odom
+    base_frame_id: base_footprint
+    publish_rate: 30.0
+    odom_topic: odom # <-- added this line to match nav2_params.yaml
+    publish_odom_to_tf: true   
+    
+    # Booleans
+    enable_odom_tf: true
+    use_stamped_vel: true
+    cmd_vel_timeout: 0.5
+
+    # Velocity limits
+    linear.x.has_velocity_limits: true
+    linear.x.max_velocity: 1.0
+    linear.x.min_velocity: -1.0
+    angular.z.has_velocity_limits: true
+    angular.z.max_velocity: 2.5
+    angular.z.min_velocity: -2.5
