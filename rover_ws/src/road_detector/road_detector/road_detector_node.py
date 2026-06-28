@@ -216,7 +216,7 @@ class RoadDetectorNode(Node):
                 pitch_deg=self.pitch_deg,
                 yaw_deg=self.yaw_deg,
                 roll_deg=self.roll_deg,
-                dist_coeffs=np.array(self.dist_coeffs).reshape(-1, 1),
+                dist_coeffs=np.array(self.dist_coeffs, dtype=np.float64),  # shape (5,)
                 image_size=(image_width, image_height),
                 min_radius=self.min_radius,
                 max_radius=self.max_radius
