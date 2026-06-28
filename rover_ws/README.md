@@ -39,3 +39,14 @@ Then, run:
 ```sh
 pixi install
 ```
+
+
+## to try the simple publisher 
+cd ~/UGVC-Rover-26/rover_ws
+source install/setup.bash
+ros2 run lane_detector_pkg lane_test_node
+# in new terminal
+cd ~/UGVC-Rover-26/rover_ws
+source install/setup.bash
+ros2 topic echo /lane/error
+
