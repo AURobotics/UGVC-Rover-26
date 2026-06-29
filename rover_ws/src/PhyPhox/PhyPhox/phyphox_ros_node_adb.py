@@ -5,7 +5,7 @@ from std_msgs.msg import Header
 from typing import Optional, Tuple, Dict
 
 # Use the updated Phyphox API client
-from phyphox_api_adb import (
+from .API.phyphox_api_adb import (
     get_all_accelerometer,
     get_all_gyroscope,
     get_all_linear_acceleration,
