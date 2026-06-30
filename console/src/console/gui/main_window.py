@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
 
         main_tab = MainTab(self.mediator)
-        settings_tab = SettingsTab()
+        settings_tab = SettingsTab(self.mediator)
 
         self.stack = QStackedWidget()
         self.stack.addWidget(main_tab)
