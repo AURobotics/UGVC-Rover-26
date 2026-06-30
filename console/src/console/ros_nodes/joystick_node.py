@@ -195,48 +195,35 @@ class JoystickNode(Node):
     def set_deadzone(self, value: float) -> None:
         self.set_parameters([Parameter("deadzone", Parameter.Type.DOUBLE, value)])
 
-    def _read_controller_data(
-        self,
-        controller: Controller,
-        deadzone: float,
-    ) -> tuple[list[int], list[float]]:
 
-        lx = controller.leftx
-        ly = controller.lefty
-        rx = controller.rightx
-        ry = controller.righty
-        l2 = controller.lefttrigger
-        r2 = controller.righttrigger
-
-        buttons = [
-            int(controller.a),              # 0  Cross
-            int(controller.b),              # 1  Circle
-            int(controller.x),              # 2  Square
-            int(controller.y),              # 3  Triangle
-            int(controller.leftshoulder),   # 4  L1
-            int(controller.rightshoulder),  # 5  R1
-            int(controller.leftstick),      # 6  L3
-            int(controller.rightstick),     # 7  R3
-            int(controller.start),          # 8  Options
-            int(controller.back),           # 9  Create/ Share
-            int(controller.guide),          # 10 PS button
-            int(controller.dpad.x == -1),   # 11 dpad-left
-            int(controller.dpad.x == 1),    # 12 dpad-right
-            int(controller.dpad.y == -1),   # 13 dpad-down
-            int(controller.dpad.y == 1)     # 14 dpad-up
-            
-            
-        ]
-
+    def _read_controller_data(self, controller: Controller,deadzone: float,
+                              ) -> tuple[list[int], list[float]]:
+        
         def apply_deadzone(val: float) -> float:
             return val if abs(val) > deadzone else 0.0
 
+        lx = apply_deadzone(controller.leftx)
+        #ly = apply_deadzone(controller.lefty)
+        rx = apply_deadzone(controller.rightx)
+        ry = apply_deadzone(controller.righty)
+        l2 = controller.lefttrigger
+        r2 = controller.righttrigger
+
+        throttle = r2 - l2                  # 1 fwd, -1 bwd
+        steering = lx                       # 1 right, -1 left 
+        camera_vertical = ry                # 1 up, -1 down    
+        camera_horizontal = rx              # 1 right, -1 left  
+        laser = int(controller.start)       # options button: 1 on, 0 off
+
         axes = [
-            apply_deadzone(lx),  # 0  Left stick X
-            apply_deadzone(ly),  # 1  Left stick Y
-            apply_deadzone(rx),  # 2  Right stick X
-            apply_deadzone(ry),  # 3  Right stick Y
-            l2,                  # 4  L2  [0.0 → 1.0]
-            r2,                  # 5  R2  [0.0 → 1.0]
+            throttle,
+            steering,
+            camera_vertical,
+            camera_horizontal,
         ]
+        buttons = [
+            laser,
+        ]
+
         return buttons, axes
+        
