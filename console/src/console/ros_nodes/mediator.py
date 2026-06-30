@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 from PySide6.QtCore import Signal, QObject
 from console.ros_nodes.worker import ROS2Worker
 
@@ -21,6 +22,8 @@ class Mediator(QObject):
         self.rear_raw_image    = None
         self.face_detect_image = None
         self.lane_detect_image = None
+        ############
+        self.video_stream_image = None
 
         self.current_controller: dict[str, str] | None = None
 
@@ -57,6 +60,11 @@ class Mediator(QObject):
         lane = telemetry.get("lane_detect_image")
         if lane is not None:
             self.lane_detect_image = lane
+            
+        ###############
+        video = telemetry.get("video_stream_image")
+        if video is not None:
+            self.video_stream_image = video
 
         self.telemetry_exists = True
 
@@ -84,6 +92,17 @@ class Mediator(QObject):
         if joystick is not None:
             joystick.deselect()
 
+    def get_joystick_deadzone(self) -> float:
+        joystick = self._worker._joystick_node
+        if joystick is not None:
+            return joystick.get_deadzone()
+        return 0.20
+
+    def set_joystick_deadzone(self, value: float) -> None:
+        joystick = self._worker._joystick_node
+        if joystick is not None:
+            joystick.set_deadzone(value)
+
     def get_frame(self):
         return self.front_raw_image if self.telemetry_exists else None
 
@@ -96,6 +115,9 @@ class Mediator(QObject):
     def get_lane_frame(self):
         return self.lane_detect_image if self.telemetry_exists else None
 
+    ##############
+    def get_video_frame(self):
+        return self.video_stream_image if self.telemetry_exists else None
 
     def stop(self) -> None:
         if self._worker.isRunning():
