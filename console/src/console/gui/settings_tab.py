@@ -83,7 +83,7 @@ class DeadzoneSettings(QWidget):
         self._settings = settings
 
         deadzone = self._settings.value("deadzone", 0.20, type=float)
-        self._mediator.set_joystick_deadzone(deadzone) #temporary
+        self._mediator.set_joystick_deadzone(deadzone)
 
         self._layout = QHBoxLayout(self)
 
@@ -105,18 +105,18 @@ class DeadzoneSettings(QWidget):
         try:
             value = float(text)
         except ValueError:
-            self._deadzone_value.setText(f"{self._mediator.get_joystick_deadzone():.2f}") #temporary
+            self._deadzone_value.setText(f"{self._mediator.get_joystick_deadzone():.2f}")
             return
         if 0.0 <= value <= 1.0:
             slider_value = int(value * 100)
             self._deadzone_slider.setValue(slider_value)
-            self._mediator.set_joystick_deadzone(value) #temporary
+            self._mediator.set_joystick_deadzone(value)
             self._settings.setValue("deadzone", value)
         else:
-           self._deadzone_value.setText(f"{self._mediator.get_joystick_deadzone():.2f}") #temporary
+           self._deadzone_value.setText(f"{self._mediator.get_joystick_deadzone():.2f}")
 
     def _on_deadzone_slider_changed(self, value: int):
         deadzone_value = value / 100.0
         self._deadzone_value.setText(f"{deadzone_value:.2f}")
-        self._mediator.set_joystick_deadzone(deadzone_value) #temporary
+        self._mediator.set_joystick_deadzone(deadzone_value)
         self._settings.setValue("deadzone", deadzone_value)
