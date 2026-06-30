@@ -5,7 +5,7 @@
   - [Cmake file changes:](#cmake-file-changes)
   - [Prerequisites (Windows)](#prerequisites-windows)
 - [Useful Commands](#useful-commands)
-  - [Windows Notes](#windows-notes)
+  - [Windows Notesz](#windows-notesz)
   - [Create a new package](#create-a-new-package)
   - [Build pkg](#build-pkg)
   - [Source](#source)
@@ -50,7 +50,7 @@ RoboStack uses [vinca](https://github.com/RoboStack/vinca/) to generate workflow
 
 ## Useful Commands
 
-### Windows Notes
+### Windows Notesz
 > - your path to the repo must have **no spaces**
 > - steps to run code: build, run; no longer needs to source (automated by pixi.toml)
 
