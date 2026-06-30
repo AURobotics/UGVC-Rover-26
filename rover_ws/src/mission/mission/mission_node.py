@@ -32,10 +32,18 @@ class MissionNode(Node):
         if self.state==State.MANUAL:
             pass
         elif self.state==State.AUTO_LANES:
+            #if localization coordinates == waypoint 1:
+            #self.state=State.AUTO_WAYPOINTS
             pass
         elif self.state==State.AUTO_WAYPOINTS:
+            #if localization coordinates == waypoint 2:
+            #self.state=State.AUTO_WAYPOINT2
+            #elif localization coordinates == waypoint 3:
+            #self.state=State.AUTO_LANES
             pass
         elif self.state==State.AUTO_WAYPOINT2:
+            #if WAYPOINT2 is completed:
+            #self.state=State.AUTO_WAYPOINTS
             pass
 
     # --- helper functions ---
