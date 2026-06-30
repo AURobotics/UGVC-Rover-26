@@ -33,11 +33,15 @@ class WorkerNode(Node):
         self._latest_rear_raw_msg    = None
         self._latest_face_detect_msg = None
         self._latest_lane_detect_msg = None
+        ##########
+        self._latest_video_stream_msg = None
 
         self._front_updated = False
         self._rear_updated  = False
         self._face_updated  = False
         self._lane_updated  = False
+        ############
+        self._video_updated = False
 
         self.pub_state  = self.create_publisher(String, "rover/state", 10)
         self.sub_state  = self.create_subscription(String,             "rover/state",  self.state_callback,  10)
@@ -49,8 +53,13 @@ class WorkerNode(Node):
         self.sub_rear  = self.create_subscription(Image, "rover/camera/rear_raw",    self.rear_raw_callback,    1)
         self.sub_face  = self.create_subscription(Image, "rover/camera/face_detect", self.face_detect_callback, 1)
         self.sub_lane  = self.create_subscription(Image, "rover/camera/lane_detect", self.lane_detect_callback, 1)
-
+        #####
+        self.sub_video = self.create_subscription(Image, "rover/camera/video_stream", self.video_stream_callback, 1)
         self.gui_timer = self.create_timer(self.GUI_EMIT_INTERVAL_SEC, self.push_telemetry_to_gui)
+
+    def video_stream_callback(self, msg: Image) -> None:
+        self._latest_video_stream_msg = msg
+        self._video_updated = True
 
     def front_raw_callback(self, msg: Image) -> None:
         self._latest_front_raw_msg = msg
@@ -92,11 +101,15 @@ class WorkerNode(Node):
         rear_img  = self._latest_rear_raw_msg    if self._rear_updated  else None
         face_img  = self._latest_face_detect_msg if self._face_updated  else None
         lane_img  = self._latest_lane_detect_msg if self._lane_updated  else None
+        ############
+        video_img = self._latest_video_stream_msg if self._video_updated else None
 
         self._front_updated = False
         self._rear_updated  = False
         self._face_updated  = False
         self._lane_updated  = False
+        ############
+        self._video_updated = False
 
         self.signals.telemetry_received.emit(
             {
@@ -112,6 +125,8 @@ class WorkerNode(Node):
                 "rear_raw_image":      rear_img,
                 "face_detect_image":   face_img,
                 "lane_detect_image":   lane_img,
+                ##############
+                "video_stream_image":  video_img,
             }
         )
 

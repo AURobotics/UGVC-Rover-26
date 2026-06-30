@@ -1,7 +1,7 @@
 import threading
 from collections.abc import Callable
 import platform
-
+from rclpy.parameter import Parameter
 import pyglet
 if platform.system() == "Linux":
     pyglet.options.headless = True
@@ -23,7 +23,7 @@ class JoystickNode(Node):
         self._pub_joy = self.create_publisher(Joy, "joy", 10)
 
         # ROS parameter so deadzone can be tuned without editing the node
-        self.declare_parameter("deadzone", 0.15)
+        self.declare_parameter("deadzone", 0.20)
 
         @self._controller_manager.event
         def on_connect(controller: Controller) -> None:
@@ -188,6 +188,12 @@ class JoystickNode(Node):
         msg.buttons = buttons
         msg.axes = axes
         self._pub_joy.publish(msg)
+
+    def get_deadzone(self) -> float:
+            return self.get_parameter("deadzone").value
+    
+    def set_deadzone(self, value: float) -> None:
+        self.set_parameters([Parameter("deadzone", Parameter.Type.DOUBLE, value)])
 
     def _read_controller_data(
         self,
