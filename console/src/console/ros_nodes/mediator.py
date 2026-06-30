@@ -1,8 +1,11 @@
-
+from PySide6.QtCore import Signal, QObject
 from console.ros_nodes.worker import ROS2Worker
 
-class Mediator:
-    def __init__(self):
+class Mediator(QObject):
+    controller_changed = Signal(object)
+
+    def __init__(self, parent=None):
+        super().__init__()
         self.telemetry_exists = False
 
         self.status_state        = "Unknown"
@@ -59,6 +62,7 @@ class Mediator:
 
     def handle_controller_changed(self, controller_info: dict[str, str] | None) -> None:
         self.current_controller = controller_info
+        self.controller_changed.emit(controller_info)
 
     def get_active_controller(self) -> dict[str, str] | None:
         return self.current_controller
