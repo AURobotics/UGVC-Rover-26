@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
     QSpacerItem,
     QLabel, QSlider, QLineEdit
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSettings
 from PySide6.QtGui import QDoubleValidator
 
 from console.ros_nodes.mediator import Mediator
@@ -16,6 +16,7 @@ class SettingsTab(QWidget):
         super().__init__(parent)
 
         self._mediator = mediator
+        self._settings = QSettings("AUR", "UGVC-Rover-26")
 
         self._layout = QVBoxLayout(self)
 
@@ -30,7 +31,7 @@ class SettingsTab(QWidget):
 
         self._deadzone_label = QLabel("Deadzone:")
         self._joy_layout.addWidget(self._deadzone_label)
-        self._deadzone_settings = DeadzoneSettings(self._mediator)
+        self._deadzone_settings = DeadzoneSettings(self._mediator, self._settings)
         self._joy_layout.addWidget(self._deadzone_settings)
 
         self._layout.addWidget(self._joy_group)
@@ -76,13 +77,17 @@ class JoySelectComboBox(QComboBox):
             self._mediator.select_controller_by_guid(guid)
 
 class DeadzoneSettings(QWidget):
-    def __init__(self, mediator: Mediator, parent=None):
+    def __init__(self, mediator: Mediator, settings: QSettings, parent=None):
         super().__init__(parent)
         self._mediator = mediator
+        self._settings = settings
+
+        deadzone = self._settings.value("deadzone", 0.20, type=float)
+        #self._mediator.set_joystick_deadzone(deadzone) #temporary
 
         self._layout = QHBoxLayout(self)
 
-        self._deadzone_value = QLineEdit('0.00')
+        self._deadzone_value = QLineEdit(f'{deadzone:.2f}')
         self._deadzone_value.setStyleSheet("background-color: transparent; border: none;")
         self._deadzone_value.setFixedWidth(50)
         self._deadzone_value.setValidator(QDoubleValidator(0.00, 1.00, 2, self))
@@ -91,6 +96,7 @@ class DeadzoneSettings(QWidget):
 
         self._deadzone_slider = QSlider(Qt.Orientation.Horizontal)
         self._deadzone_slider.setRange(0, 100)
+        self._deadzone_slider.setValue(int(deadzone * 100))
         self._deadzone_slider.valueChanged.connect(self._on_deadzone_slider_changed)
         self._layout.addWidget(self._deadzone_slider)
 
@@ -105,6 +111,7 @@ class DeadzoneSettings(QWidget):
             slider_value = int(value * 100)
             self._deadzone_slider.setValue(slider_value)
             #self._mediator.set_joystick_deadzone(value) #temporary
+            self._settings.setValue("deadzone", value)
         else:
             ...
             #self._deadzone_value.setText(f"{self._mediator.get_joystick_deadzone():.2f}") #temporary
@@ -113,3 +120,4 @@ class DeadzoneSettings(QWidget):
         deadzone_value = value / 100.0
         self._deadzone_value.setText(f"{deadzone_value:.2f}")
         #self._mediator.set_joystick_deadzone(deadzone_value) #temporary
+        self._settings.setValue("deadzone", deadzone_value)
