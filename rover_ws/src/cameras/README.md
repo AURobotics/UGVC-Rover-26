@@ -9,10 +9,10 @@ A ROS 2 package that captures and displays video from two USB cameras simultaneo
 ```
 cameras/
 ├── launch/
-|   └── launch.py          # Launch file for both camera nodes
+|   └── launch.py # Launch file for both camera nodes (conatins parameters)
 └── cameras/
-    ├── camera_node.py     # USB camera publisher node
-    └── viewer_node.py     # Dual-camera viewer node
+    ├── camera_node.py # USB camera publisher node
+    └── viewer_node.py # Dual-camera viewer node
 ```
 
 ---
@@ -28,7 +28,7 @@ Opens a USB camera via OpenCV and publishes frames as ROS 2 `sensor_msgs/Image` 
 | Parameter      | Type   | Default               | Description                         |
 | -------------- | ------ | --------------------- | ----------------------------------- |
 | `device_index` | int    | `0`                   | Camera device index (`/dev/videoN`) |
-| `publish_rate` | float  | `30.0`                | Publishing rate in Hz               |
+| `publish_rate` | float  | `15.0`                | Publishing rate in Hz               |
 | `frame_id`     | string | `"camera"`            | TF frame ID stamped on each message |
 | `topic`        | string | `"/camera/image_raw"` | Topic to publish images on          |
 
@@ -95,7 +95,7 @@ ros2 run cameras camera_node --ros-args \
 ## Notes
 
 - Camera indices map to `/dev/videoN` on Linux. Run `ls /dev/video*` to list available devices.
-- The QoS profile uses **Best Effort** reliability — this matches typical camera driver behavior and avoids dropped-frame blocking. Ensure subscribers use a compatible QoS profile.
+- Optimized QoS profile for efficient data transmission. Ensure subscribers use a compatible QoS profile.
 - The viewer uses `passthrough` encoding when converting images, preserving the original color format published by the camera node (`bgr8`).
 
 ## IMPORTANT
@@ -103,9 +103,10 @@ ros2 run cameras camera_node --ros-args \
 **When subscribing to camera topics, you need to set the qos of the subscriber to match the publisher or else data will silently not get recieved**
 
 qos by subscriber:
+
 ```python
-camera_qos = QoSProfile(
-            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+qos_profile = QoSProfile(
+            reliability=QoSReliabilityPolicy.RELIABLE,
             durability=QoSDurabilityPolicy.VOLATILE,
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=1

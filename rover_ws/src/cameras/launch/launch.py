@@ -10,7 +10,7 @@ def generate_launch_description():
             name='camera1',
             parameters=[{
                 'device_index': 0,
-                'publish_rate': 30.0,
+                'publish_rate': 15.0,
                 'topic': '/camera1/image_raw',
                 'frame_id': 'camera1',
             }],
@@ -22,7 +22,7 @@ def generate_launch_description():
             name='camera2',
             parameters=[{
                 'device_index': 2,
-                'publish_rate': 30.0,
+                'publish_rate': 15.0,
                 'topic': '/camera2/image_raw',
                 'frame_id': 'camera2',
             }],
