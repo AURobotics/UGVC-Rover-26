@@ -1,3 +1,5 @@
+import sys
+
 import rclpy
 from rclpy.node import Node
 from rclpy.duration import Duration
@@ -7,6 +9,11 @@ from nav_msgs.msg import Odometry
 from std_srvs.srv import SetBool
 
 WAYPOINT_ERROR = 1.25 # 1.5 allowed error in meters for reaching a waypoint (1.25 for safety)
+WAYPOINT_TIMEOUT = 60 # 60 seconds allowed to reach a waypoint before timing out and returning to manual control
+
+# Topics
+LOCALIZATION_TOPIC = '/odometry/unfiltered'
+FACE_RECOGNITION_SERVICE = '/face_recognition/start'
 
 class State(Enum):
     MANUAL = auto() # Manual control mode
@@ -30,7 +37,7 @@ class MissionNode(Node):
 
         self.position_subscriber = self.create_subscription(
             Odometry,
-            '/odometry/unfiltered',
+            LOCALIZATION_TOPIC,
             self.odom_callback,
             10
         )
@@ -41,24 +48,43 @@ class MissionNode(Node):
     def _control_loop(self):
         if self.state==State.MANUAL:
             pass
+
         elif self.state==State.AUTO_LANES:
             if self.is_at_waypoint(1):
                 self.state=State.AUTO_WAYPOINTS
-        elif self.state==State.AUTO_WAYPOINTS:
-            if self.is_at_waypoint(2):
-                self.state=State.AUTO_WAYPOINT2
-                self.start_waypoint2()
-            elif self.is_at_waypoint(3):
-                self.state=State.AUTO_LANES
-            pass
-        elif self.state==State.AUTO_WAYPOINT2:
-            if self._clock.now() - self.waypoint2_start_time >= Duration(seconds=44):
-                self.state=State.AUTO_WAYPOINTS
-            #if WAYPOINT2 is completed:
-            #self.state=State.AUTO_WAYPOINTS
-            pass
+                self.waypoint1_time = self.get_clock().now()
 
-    # --- helper functions ---
+        elif self.state==State.AUTO_WAYPOINTS:
+            if self.waypoint1_time is not None: 
+                is_timed_out1 = self.get_clock().now() - self.waypoint1_time >= Duration(seconds=WAYPOINT_TIMEOUT)
+            else:
+                is_timed_out1 = False
+            if self.waypoint3_time is not None:
+                is_timed_out3 = self.get_clock().now() - self.waypoint3_time >= Duration(seconds=WAYPOINT_TIMEOUT*2) 
+            else:
+                is_timed_out3 = False
+
+            if self.is_at_waypoint(2) or is_timed_out1:
+                self.state=State.AUTO_WAYPOINT2
+                self.waypoint2_time = self.get_clock().now()
+                self.start_waypoint2()
+            elif self.is_at_waypoint(3) or is_timed_out3:
+                self.state=State.AUTO_LANES
+
+        elif self.state==State.AUTO_WAYPOINT2:
+            is_timed_out2 = self.get_clock().now() - self.waypoint2_time >= Duration(seconds=44)
+            if is_timed_out2:
+                self.call_face_recognition_service(False, "Stopping face recognition after 45 seconds")
+                self.state=State.AUTO_WAYPOINTS
+                self.waypoint3_time = self.get_clock().now()
+            #if WAYPOINT2 is completed: (node for servo movement to center the face isn't written yet)
+            # I will wait to take feedback from this node since it is the one that will be firing the laser
+            # or the node that fires the laser
+            #self.call_face_recognition_service(False, "Stopping face recognition after completion")
+            #self.state=State.AUTO_WAYPOINTS
+
+# ===== helper functions ================================================================================
+
     def _declare_fetch_variables(self):
         # mode of operation:
         self.declare_parameter('mode', 0)  # 0: manual, 1: auto
@@ -105,12 +131,33 @@ class MissionNode(Node):
         distance = ((self.position.x - self.waypoints[waypoint_number-1][0]) ** 2 + (self.position.y - self.waypoints[waypoint_number-1][1]) ** 2) ** 0.5
         return distance <= WAYPOINT_ERROR
     
-    def start_waypoint2(self):
-        self.waypoint2_start_time = self.get_clock().now()
-        # Implement the logic to start waypoint 2
-        pass
+    # WAYPOINT 2: Face recognition Functions
 
-    
+    def start_waypoint2(self):        
+        self.face_recognition_client = self.create_client(SetBool, FACE_RECOGNITION_SERVICE)
+        
+        self.call_face_recognition_service(True, "Starting face recognition for waypoint 2")
+
+    def call_face_recognition_service(self, state: bool, reason: str = ""):
+        if not self.face_recognition_client.service_is_ready():
+            print("[SESSION] Face recognition service not available", flush=True, file=sys.stdout)
+            return
+
+        request = SetBool.Request()
+        request.data = state
+        future = self.face_recognition_client.call_async(request)
+        future.add_done_callback(
+            lambda f: self.face_recognition_client_callback(f, reason)
+        )
+
+    def face_recognition_client_callback(self, future, reason: str):
+        try:
+            response = future.result()
+            tag = f" ({reason})" if reason else ""
+            print(f"[SESSION] Service response{tag}: {response.message}", flush=True, file=sys.stdout)
+        except Exception as e:
+            print(f"[SESSION] Service call failed: {e}", flush=True, file=sys.stdout)
+
 def main(args=None):
     rclpy.init(args=args)
     node = MissionNode()
