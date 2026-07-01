@@ -1,0 +1,8 @@
+servo_cam_node:
+  ros__parameters:
+    axis_x: 2
+    axis_y: 3
+    deadzone: 0.1
+    speed_x: 90.0
+    speed_y: 45.0
+    publish_rate: 50.0
