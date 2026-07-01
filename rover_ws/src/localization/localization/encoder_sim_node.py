@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from ugvc_msgs.msg import WheelVel
+from rover_interfaces.msg import WheelVel
 from sensor_msgs.msg import JointState
 from sensor_msgs.msg import Imu
 
