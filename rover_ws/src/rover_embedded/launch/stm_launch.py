@@ -54,8 +54,8 @@ def generate_launch_description():
         executable='teleop_twist_keyboard',
         name='teleop_twist_keyboard',
         output='screen',
-        emulate_tty=True,         
-        prefix='terminator -x',         
+        prefix='gnome-terminal --',
+        # emulate_tty=True,                 
         parameters=[{
             'speed':       LaunchConfiguration('linear_speed'),
             'turn':        LaunchConfiguration('angular_speed'),
