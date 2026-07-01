@@ -22,8 +22,6 @@
 
 \begin{titlepage}
     \centering
-    % \vspace*{1cm}
-
     {\LARGE \university \par}
     \vspace{0.3cm}
     
@@ -268,6 +266,11 @@ The system uses two pre-trained OpenCV deep learning models. YuNet is used for r
 The system implements a real-time face recognition pipeline that processes live camera frames. It first detects faces in each frame, then recognizes the target person by comparing the detected face with a stored facial representation. The output indicates whether the detected face matches the target or is an unknown person.
 
 For a recognized target, the system also estimates the face position relative to the center of the image by computing horizontal and vertical offsets. This information can be used for real-time tracking or robot navigation while continuously updating the visual output.
+
+\begin{figure}[H]
+    \includegraphics[width=0.45\textwidth]{assets/Face Recognition Pipeline.png}
+    \caption{Face Recognition Pipeline}
+\end{figure}
 
 \paragraph{ROS Integration:}
 The face recognition node subscribes to the video stream to process each frame, and publishes the annotated frame for optional debugging along with a coordinate offset for laser pointing.

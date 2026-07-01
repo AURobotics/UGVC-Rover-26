@@ -40,11 +40,31 @@
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
+% --- Intelligent Frame Selection ---
+\newif\ifshowpagination
+\showpaginationtrue
+
+\let\origpagenumbering\pagenumbering
+
+\renewcommand{\pagenumbering}[1]{%
+  \origpagenumbering{#1}
+  \def\temparg{#1}%
+  \def\gobblearg{gobble}%
+  \ifx\temparg\gobblearg
+    \showpaginationfalse
+  \else
+    \showpaginationtrue
+  \fi
+}
+
 \AddToShipoutPictureBG{%
     \AtPageLowerLeft{\includegraphics[width=\paperwidth,height=\paperheight]{assets/frame.pdf}}
-    \put(562,17){%
-        \makebox[10pt][c]{\textcolor{aur_color}{\large{\textbf{\thepage}}}} 
-    }
+    \ifshowpagination
+        \AtPageLowerLeft{\includegraphics[width=\paperwidth,height=\paperheight]{assets/pagination_frame.pdf}}
+        \put(562,17){%
+            \makebox[10pt][c]{\textcolor{aur_color}{\large{\textbf{\thepage}}}} 
+        }
+    \fi
 }
 
 % --- Pulling Headings Up Closer to the Preceding Paragraphs ---
