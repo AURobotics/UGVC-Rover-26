@@ -209,6 +209,31 @@ Safety was a core design consideration both in hardware and software.
 \subsubsection{Lane Detection and Navigation}
 % lane detection part
 % lane navigation part 
+The rover's lateral offset from the lane center, output by the \texttt{lane\_detection\_node}, is consumed by the lane navigation module as its error input. Lane navigation is handled by a PID control loop that converts this error into a corrective angular velocity command, while maintaining a constant forward velocity.
+\\
+The PID controller is tuned to provide a balance between responsiveness and stability in MATLAB's Simulink as shown in Figure \ref{fig:pid-tuning}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{assets/lane_control_loop.jpeg}
+    \caption{PID Tuning }
+    \label{fig:pid-tuning}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{assets/lane_control_response.jpeg}
+    \caption{PID step response for lane navigation control}
+    \label{fig:lane-control-response}
+\end{figure}
+\textbf{Safety and Stability Considerations:} 
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item Integral windup protection: The accumulated integral term is bounded to ±1.0, preventing the integral component from growing unbounded during sustained non-zero error.
+    \item Angular velocity saturation:  The final steering command is clamped to a max angular velocity, ensuring the rover cannot issue a steering command beyond necessary limits.
+\end{itemize}
+The lane navigation node then publishes the steering commands to the respective topic to be processed along with the obstacle avoidance node's output to generate a final angular velocity command for the rover.
+
 \subsubsection{Pothole Detection}
 \subsubsection{Obstacle Avoidance}
 The rover utilizes a LiDAR sensor (RPLIDAR A2)  to detect obstacles within the drivable lane corridor and generate a corrected heading that keeps the rover within lane boundaries while avoiding collisions.
@@ -234,7 +259,19 @@ At each scan cycle, the system executes the following sequence:
     \item \textbf{Heading Selection:} Following boundary expansion, select the direction within the permitted window that offers the greatest unobstructed distance and publish this as the corrected heading command.
 \end{enumerate}
 
+
 \subsubsection{Face Recognition and Detection}
+\paragraph{Models:}
+The system uses two pre-trained OpenCV deep learning models. YuNet is used for real-time face detection, while SFace extracts facial features and performs face recognition by comparing the detected face with a stored target feature using cosine similarity. The target feature is cached after the first extraction to improve runtime performance.
+
+\paragraph{Architecture:}
+The system implements a real-time face recognition pipeline that processes live camera frames. It first detects faces in each frame, then recognizes the target person by comparing the detected face with a stored facial representation. The output indicates whether the detected face matches the target or is an unknown person.
+
+For a recognized target, the system also estimates the face position relative to the center of the image by computing horizontal and vertical offsets. This information can be used for real-time tracking or robot navigation while continuously updating the visual output.
+
+\paragraph{ROS Integration:}
+The face recognition node subscribes to the video stream to process each frame, and publishes the annotated frame for optional debugging along with a coordinate offset for laser pointing.
+
 \subsection{Communication Systems}
 For transfering high-speed, high-bandwidth data between the onboard computer and the station, the existing ROS 2 system with its Data Distribution Service was used, to leverage descriptive topics, concurrent querying, real-time streaming and fault-tolerant connection.
 
