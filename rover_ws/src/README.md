@@ -132,6 +132,7 @@ ros2 launch pkg_name launch_file.py arg_name1:=arg_data1 arg_name2:=arg_data2
 | **`ros2 topic info /topic/name`**        | Show publisher & subscriber count and topic type of /topic/name. |
 | **`ros2 topic hz /topic/name`**          | Report the average publishing rate of /topic/name.               |
 
+<<<<<<< HEAD
 ### Run RViz2
 ```bash
 pixi run rviz
@@ -148,3 +149,5 @@ run a a launch file that includes gazebo, for example:
 > Gazebo only works on Linux
 
 
+=======
+>>>>>>> ros-motion
