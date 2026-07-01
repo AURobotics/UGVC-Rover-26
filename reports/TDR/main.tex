@@ -40,9 +40,6 @@
     {\large \email \par}
     % \vfill
     {\large \today \par}
-    
-\vspace{-0.5cm}
-
 \section*{Contents}
 \begin{multicols}{2}
     \tableofcontents
@@ -62,7 +59,6 @@ Founded by a group of engineering students at Alexandria University, our team wa
 We are proudly participating in the \textbf{International Competition of the Military Technical College: Unmanned Ground Vehicle Challenge of 2026 (UGVC)}.
 We aim to strengthen our experience with reliable rover technologies and produce a better performing rover compared to our attempt last year.
 
-\vspace{-10pt}
 \subsection{Team Organization}
 
 Our team is organized into four core technical departments: \textbf{Software}, \textbf{Firmware}, \textbf{Hardware}, and \textbf{Mechanical}.
@@ -144,353 +140,107 @@ Each department is led by a Head and supported by a Vice Head and a dedicated te
 
 \section{Design Process}
 
-The mechanical design process was the cornerstone of our rover’s development, aiming to create a robust, modular, and high-performance system capable of handling off-road environments. The design methodology followed an iterative cycle of concept generation, CAD modeling, simulation, manufacturing, and physical testing.
-
-\vspace{-10pt}
 \subsection{Requirement Definition}
 
-We began by identifying the key mechanical requirements of the rover based on UGVC terrain profiles, mission tasks, and functional constraints:
-\vspace{-5pt}
+Aided by our prior experience and knowledge of constraints, it was identified that the design must:
 
 \begin{itemize}
     \setlength{\itemsep}{1.2pt}
     \setlength{\parskip}{0pt}
     \setlength{\parsep}{0pt}
-    \item Must withstand impacts from rocky and sandy terrain
-    \item Should allow for modular integration with electronic and sensing subsystems
-    \item Must maintain traction and stability during sharp turns and climbs
-    \item Should be manufacturable using accessible local resources
+    \item Withstand impacts from rocky and sandy terrain
+    \item Maintain traction and stability during sharp turns
+    \item Be manufacturable using accessible local resources
+    \item Have zero-error emergency access mechanisms
+    \item Have responsive navigation via performant compute
 \end{itemize}
-
-\vspace{-5pt}
-These needs translated into functional targets for the frame, suspension, drivetrain, and wheels.
-
-\vspace{-10pt}
-\subsection{Frame Design}
-
-The rover’s frame was designed using 2020 aluminum extrusion profiles. This approach offered numerous mechanical benefits:
-
-
-\vspace{-5pt}
-\begin{itemize}
-    \setlength{\itemsep}{1pt}
-    \setlength{\parskip}{0pt}
-    \setlength{\parsep}{0pt}
-    \item High strength-to-weight ratio
-    \item Easy mounting for subsystems
-    \item Simple reconfiguration during prototyping
-    \item No need for welding, which helped avoid thermal deformation
-\end{itemize}
-
-We used angle brackets and flat nuts to assemble the profiles, making the frame rigid, modular, and easy to maintain or expand. The design allowed us to test multiple suspension positions and easily mount or relocate electronic components.
-
-\subsection{Suspension and Damping System}
-
-The mechanical team decided early in the design phase to implement a double wishbone suspension system — an advanced configuration typically found in high-performance vehicles. Its selection was based on its ability to:
-
-\vspace{-5pt}
-\begin{itemize}
-    \setlength{\itemsep}{1pt}
-    \setlength{\parskip}{0pt}
-    \setlength{\parsep}{0pt}
-    \item Maintain consistent tire contact with uneven ground
-    \item Reduce body roll during turns
-    \item Allow controlled wheel articulation and travel
-\end{itemize}
-
-The suspension arms were made from Aluminum 5083, laser-cut for dimensional accuracy, then manually bent using a bending machine. This material was chosen for its excellent strength, corrosion resistance, and workability. Each control arm was carefully designed in CAD to account for expected loads and the dynamic motion range of the wheels.
-
-To complete the system, we custom-designed and implemented dampers and springs. These were tailored to the rover's weight and expected ground impacts. We used hand calculations and simulation data to estimate the required spring constant and damping coefficient, ensuring smooth ride quality and protection of internal components from shock loading.
-
-\vspace{-5pt}
-\subsection{Drivetrain and Wheels}
-
-For propulsion, we used four brushed DC motors, one for each wheel. These were paired with 10-inch pneumatic off-road tires, which were chosen for their traction, shock absorption, and ability to handle soft ground.
-
-To enhance the top speed, we designed a 2:1 gear reduction system, transferring power efficiently while balancing speed and torque. This system was custom-fabricated and aligned with the motor specifications to avoid overheating or overload.
-
-\vspace{-5pt}
-\subsection{Manufacturing Process}
-
-All mechanical components were first modeled in SolidWorks. After thorough design reviews and interference checks, we exported 2D drawings for CNC laser cutting, ensuring high-precision profiles. The bending process was executed manually using bending dies and form jigs, requiring skill and careful alignment. Despite not having access to CNC bending, the team maintained high consistency through repeatability tests and dimensional inspections.
 
 \subsection{Software Tools}
 
-The rover's software development followed a modular, test-driven approach centered around ROS 2 (Foxy) running on a Raspberry Pi. Key tools used during development include:
+The rover's design and development followed an iterative, modular, prototype-aided, test-driven approach.
+The following software suite that allowed testing, simulation, design and telemetry plotting was used:
+
 \begin{itemize}
     \setlength{\itemsep}{1pt}
     \setlength{\parskip}{0pt}
     \setlength{\parsep}{0pt}
-    \item \textbf{Gazebo + RViz:} For simulating sensors, testing navigation, and visual debugging.
-    \item \textbf{MATLAB + Simulink:} For control system design, PID tuning, and motor modeling using the System Identification Toolbox.
-    \item \textbf{OpenCV:} For all computer vision-based modules including lane, obstacle, and pothole detection.
-    \item \textbf{Git + GitHub Projects:} For collaborative version control and agile task tracking.
-    \item \textbf{Docker:} Used to standardize development environments across the software team.
-    \item \textbf{Python (pySerial, adbutils, Qt6):} For serial communication, sensor parsing, and real-time plotting during testing.
+    \item \textbf{Gazebo + RViz:} For simulating sensors, testing navigation, and visual debugging
+    \item \textbf{MATLAB + Simulink:} For control system design, PID tuning, and motor modeling using the System Identification Toolbox
+    \item \textbf{OpenCV + YOLO:} For all computer vision-based modules including lane, obstacle, and pothole detection
+    \item \textbf{Git Monorepo:} For collaborative version control and agile task tracking
+    \item \textbf{Docker \& Pixi:} Used to standardize development environments across the software team
+    \item \textbf{Python (pySerial, adbutils, Qt6):} For serial communication, sensor parsing, and real-time plotting during testing
     \item \textbf{Custom Embedded Debugger:} For interactive ROS $\leftrightarrow$ MCU communication over UART.
 \end{itemize}
 
-This toolchain enabled parallel development across subsystems, robust testing, and reproducibility of simulation and deployment environments.
+This toolset enabled parallel development across subsystems, with 
 
 \subsection{Budget Management}
 
-The rover was developed within a tightly constrained budget, which required cost-effective yet reliable component selection. Budgeting principles included:
-\begin{itemize}
-    \setlength{\itemsep}{1pt}
-    \setlength{\parskip}{0pt}
-    \setlength{\parsep}{0pt}
-    \item \textbf{Modular PCBs:} Separated logic, power, and motor boards for reusability and easier debugging.
-    \item \textbf{Open-source software and free student licenses:} Leveraged ROS 2, Gazebo, OpenCV, and MATLAB student versions.
-    \item \textbf{Component prioritization:} Focused spending on mission-critical components like IMU (BNO055), GPS (NEO-6M), and motor encoders.
-    \item \textbf{Efficient power delivery:} Dual battery packs (2x12V in series) with DC-DC buck converters ensured safe power distribution without needing expensive power modules.
-    \item \textbf{Local sourcing \& salvaging:} Some structural and passive components were recycled from past projects or obtained from local vendors at reduced cost.
-    \item \textbf{Contingency Planning:} $\sim$10\% of the budget was reserved for hardware replacements due to risk of burnouts during testing.
-\end{itemize}
-
-Budget tracking was maintained using spreadsheets and versioned with Git to document iterations and track unit cost fluctuations.
-
-\vspace{-5pt}
 \subsection{Safety Measures}
 
 Safety was a core design consideration both in hardware and software.
-\vspace{-10pt}
 \paragraph{Hardware Safety:}
-\begin{itemize}
-    \setlength{\itemsep}{1pt}
-    \setlength{\parskip}{0pt}
-    \setlength{\parsep}{0pt}
-    \item \textbf{Mechanical E-Stop:} A hardwired emergency stop switch connected to the power board, cutting off motor power instantly.
-    \item \textbf{Wireless Kill Switch:} Implemented using NRF24L01 module. If signal is received, it sets motor speed to zero.
-    \item \textbf{Power Filtering:} Voltage regulators and filtering capacitors were integrated to protect sensitive electronics from ripple and noise.
-    \item \textbf{Voltage Scaling for Monitoring:} ADCs only read scaled battery values using precision resistive dividers to avoid damage.
-\end{itemize}
-\vspace{-10pt}
+
+
 \paragraph{Software Safety:}
-\begin{itemize}
-    \setlength{\itemsep}{1pt}
-    \setlength{\parskip}{0pt}
-    \setlength{\parsep}{0pt}
-    \item \textbf{Watchdog Timers:} Ensured ESPs reset in case of communication stall or software hang.
-    \item \textbf{Status Feedback Loop:} All critical systems (battery, IMU, navigation mode) are monitored and reported to the GUI. Warnings are issued if thresholds are exceeded or sensors are unhealthy.
-    \item \textbf{Command Timeout:} Motors automatically stop if no valid command is received within a certain timeframe.
-    \item \textbf{Mode Isolation:} Manual mode overrides all autonomous actions to ensure immediate user control in unsafe scenarios.
-    \item \textbf{Threaded UART Handler:} Prevents communication bottlenecks that could lead to unsafe delays in command dispatch.
-\end{itemize}
 
-\vspace{-10pt}
 \section{Technical Innovation}
-
-The mechanical and software branches introduced several technical innovations that enhanced the rover’s performance, modularity, and manufacturing efficiency.
 
 \subsection{Mechanical Innovations}
 
-\subsubsection*{a. Custom Damper and Spring Integration}
-One of our most significant mechanical innovations was the design and integration of a custom spring-damper system. Unlike using off-the-shelf shock absorbers, we developed our own based on analytical modeling and empirical testing. This allowed us to:
-\begin{itemize}
-    \setlength{\itemsep}{1pt}
-    \setlength{\parskip}{0pt}
-    \setlength{\parsep}{0pt}
-    \item Match the damping response to real terrain conditions
-    \item Optimize ride quality by controlling suspension rebound
-    \item Reduce the mechanical stress on the frame and electronics
-\end{itemize}
-This in-house development demonstrated our ability to integrate dynamic systems into compact, modular designs.
-
-\subsubsection*{b. Precision Laser-Fabricated Wishbones}
-Rather than rely on basic linkage systems, we implemented a fully custom wishbone suspension, manufactured using CNC laser cutting. Each arm was optimized in CAD for both geometry and material utilization, resulting in:
-\begin{itemize}
-    \setlength{\itemsep}{1pt}
-    \setlength{\parskip}{0pt}
-    \setlength{\parsep}{0pt}
-    \item Improved stress distribution under dynamic loads
-    \item Consistent geometry for smooth suspension operation
-    \item Compatibility with damping components and bearings
-\end{itemize}
-
-\subsubsection*{c. Modular and Serviceable Frame}
-The use of aluminum profile framing was not just for convenience — it was a strategic decision to allow for rapid prototyping, scalability, and serviceability. The mechanical team incorporated:
-\begin{itemize}
-    \setlength{\itemsep}{1pt}
-    \setlength{\parskip}{0pt}
-    \setlength{\parsep}{0pt}
-    \item Standardized hole patterns and bracket slots
-    \item Sliding slots for component position adjustment
-    \item Removable crossbars to access internal systems
-\end{itemize}
-
-\subsubsection*{d. Manual Bending Precision}
-While many teams rely on CNC bending, we proved that manual bending, when done with well-designed jigs and attention to tolerancing, can produce competition-grade components. This is particularly valuable for teams with limited access to high-end fabrication tools.
-
 \subsection{Software Innovations}
 
-\paragraph{Custom Messaging System with Flow Control}
-A modular, RTOS-compatible messaging system was developed with software flow control, hardware parity checks, and per-port mutex protection. It monitors byte timing and buffer usage, with an integrated debug mode that logs all traffic to an external terminal without interfering with core functions.
-
-\paragraph{Dual-Layer Sensor Fusion}
-We implemented a two-stage UKF architecture: a primary filter fuses IMU and wheel encoders for drift-resistant local estimation, while a secondary UKF integrates GPS via \texttt{navsat\_transform} for long-term accuracy. This hybrid design provides short-term responsiveness and global consistency.
-
-\paragraph{Angle-Constrained Bézier Planner}
-The Bézier path planner was extended to support heading constraints at start and end points, enabling smoother and curvature-limited paths. By planning over $(x, y, \theta)$ state vectors, the system supports tighter turns and better integration with controllers like Pure Pursuit.
-
-\paragraph{ROS $\leftrightarrow$ Embedded Abstraction}
-A custom, threaded UART protocol bridges ROS 2 and ESP32 microcontrollers. Messages are parsed asynchronously, and embedded nodes implement a minimal ROS-like structure. This enables scalable, modular communication resembling DDS pub/sub over serial.
-
-\paragraph{Embedded Autotuning and System ID}
-Motor controllers perform real-time system identification using encoder logs, with MATLAB used to model transfer functions and autotune PID gains. The tuned parameters are flashed to the MCU, reducing manual effort and improving control stability.
-
-\paragraph{Interactive Debug Console}
-An embedded console supports real-time telemetry, command input, and live reconfiguration of controller parameters. A debug policy ensures safe activation of print hooks without interrupting real-time execution, supporting in-field diagnostics and tuning.
-
-\paragraph{Health Monitor with GUI Feedback}
-A self-check system continuously monitors battery voltage, IMU calibration, and control modes. Alerts are pushed live to the GUI, offering real-time insight and fault warnings similar to automotive CAN systems.
-
 \section{Mechanical Design}
-
-Our primary objective was to develop a lightweight, stable, and high-speed rover that complies with competition constraints, thereby maximizing its chances of success. To achieve this, we applied various mechanical design principles, including vibration isolation techniques, to optimize the suspension system.
-
-To ensure a suspension that was both durable and flexible, we selected spring steel as the material of choice. Leveraging the principles of mechanical vibration, we calculated the required damping coefficients for effective vibration control. While we were limited to the dampers available in the local market, we successfully identified and acquired the best-performing options within those constraints.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{assets/WhatsApp Image 2025-07-10 at 23.37.24_614c0db6.jpg}
-    \caption{Suspension Design}
-    \label{fig:suspension-design}
-\end{figure}
-
-When selecting the wheels, we considered several factors, including traction, maneuverability, acceleration, and additional damping characteristics. Given the competition requirements, we determined that pneumatic (air-filled) wheels were the most suitable. Their superior ground traction and built-in shock absorption offered significant performance benefits for our rover.
-
-A detailed analysis of the forces acting on the rover's structural links and components led us to choose 5083-grade aluminium sheet metal as the primary material. Aluminium offers a significantly lower weight compared to alternatives like steel, which is crucial for a 50 kg rover aiming to optimize acceleration, maneuverability, and energy efficiency—especially when powered by batteries or solar energy.
-
-Beyond weight advantages, aluminium provides an excellent strength-to-weight ratio and is relatively easy to machine, weld, and form—allowing us to fabricate a complex yet efficient design. Its high recyclability and cost-effectiveness further supported our choice, especially when compared to other high-performance materials such as titanium or advanced composites.
-
-For manufacturing, we employed laser cutting as the preferred method for shaping aluminium plates. Laser cutting offers high precision and minimal material waste, enabling us to maintain tight tolerances. Since the process uses a focused laser beam without physical contact, it eliminates tool wear, resulting in cleaner cuts and smoother surfaces—often with little to no post-processing required. Additionally, the reduced tooling and setup costs made it an economical solution for producing custom parts from our 6 mm aluminium sheets.
-
-To simplify assembly, we primarily used screws and nuts to fasten components together. In areas requiring additional strength and reliability, we incorporated welding, providing robust joints where necessary without complicating the overall construction process.
-
+\subsection{Design Improvement}
 \subsection{Frame Design}
-
-The rover frame was designed in compliance with the UGVC Competition dimensional constraints, which specify a length between 90 cm and 200 cm, a width between 60 cm and 120 cm, and a maximum height of 120 cm excluding the mechanical emergency stop tower. The structure is fabricated using lightweight aluminum profile extrusions to ensure high strength-to-weight ratio and ease of assembly. The modular nature of the aluminum profiles facilitates structural adaptability and integration of subsystems such as suspension, electronics, and payload. The design prioritizes rigidity and accessibility while maintaining compliance with competition limits to ensure smooth transportation and operational efficiency.
-
-The SolidWorks model features a symmetric and balanced geometry optimized for both stability and load distribution, with mounting provisions integrated directly into the design to accommodate subsystems such as motors, electronics enclosures, suspension arms, and control modules. Finite Element Analysis (FEA) tools within SolidWorks were used to validate the structural integrity of the frame under anticipated mechanical loads during operation, ensuring minimal deflection and sufficient safety factors. Additionally, the modular nature of the aluminum profiles allows for quick modifications and maintenance, making the design both robust and adaptable. This SolidWorks-based approach not only ensures precision in fabrication but also streamlines the integration of mechanical and electrical systems within the competition constraints.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{assets/WhatsApp Image 2025-07-10 at 23.38.39_99dc3afa.jpg}
-    \caption{Frame Design}
-    \label{fig:frame-design}
-\end{figure}
-
-\vspace{-10pt}
-
 \subsection{Laser Pointer}
-
-The laser pointer mechanism was designed in compliance with UGVC regulations to ensure it could point accurately at any object, regardless of the rover’s orientation or angle. Stability and range of motion were key considerations in the design.
-
-The implemented design consists of a 3D-printed dual-axis mounting system integrating two servo motors. This configuration enables 180 degrees of horizontal motion in front of the robot and 180 degrees of vertical motion from bottom to top, ensuring full coverage.
-
-To maintain smooth motion and avoid overloading the servos, lightweight 3D printing materials were selected, including PLA, ABS, and PETG. The servo motors used were MG996 models, chosen for their high accuracy, durability, and efficiency in robotic applications.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.4\linewidth]{assets/WhatsApp Image 2025-07-11 at 00.17.15_36afd901.jpg}
-    \caption{Laser Pointer}
-    \label{fig:laser-pointer}
-\end{figure}
-
 \subsection{Hardware Box}
 
-The hardware box is responsible for housing the rover’s main electronic components and protecting sensitive equipment while ensuring stability and ventilation.
-
-MDF wood was selected for its suitability in meeting these requirements. The box was designed with a minimalistic approach to ensure compactness and efficiency. Mounting points were distributed throughout the interior to accommodate PCBs and components securely. Ventilation openings were incorporated on the sides and protected with dust filters, providing passive airflow while preventing dust ingress.
-
-The design balances protection, accessibility, and ease of integration, making it a reliable enclosure for the rover’s electrical system.
-
 \section{Electronic and Power Design}
-
-Our electrical system consists mainly of three PCBs: the Power Distribution Unit, the Main Control Unit, and the Motor Control Board. Our objectives were to create an electrical system that is highly efficient, yet simple and easily maintained.
-
-\vspace{-10pt}
 \subsection{Main Control Unit}
-
-The main board for the UGVC competition was designed based on the ESP microcontroller, integrating essential components required for navigation, communication, and control. The ESP microcontroller offers Wi-Fi and Bluetooth connectivity, making it ideal for wireless communication in embedded systems. It is also known for its high efficiency and integration compared to traditional microcontrollers. Its low power consumption and solid processing power make it suitable for real-time robotics applications.
-
-MOSFETs were used to switch the laser module on and off. The GPS module provides the robot with location and positioning data, while the IMU module offers orientation and motion sensing. Pin headers were included to provide interfaces for different communication protocols such as UART, I\textsuperscript{2}C, and SPI. Power management was handled using voltage regulators and filtering capacitors to ensure stable power delivery to all components. The PCB was designed with compact routing and noise isolation in mind. The ESP microcontroller was placed centrally on the board to minimize trace length and enhance signal integrity. The board was also designed to be easily connected to other robot systems using standard pin headers.
-
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[t]{0.48\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{assets/image.png}
-        \caption{3D View}
-        \label{fig:main-board-top}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.48\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{assets/image1.png}
-        \caption{Design View}
-        \label{fig:main-board-bottom}
-    \end{subfigure}
-    \caption{Main Control Board}
-    \label{fig:main-control-board}
-\end{figure}
-
-\vspace{-25pt}
 \subsection{Motor Control Board}
-
-The motor control board is designed to interface an ESP32 microcontroller with four DC motors and their respective encoders, It allows precise control of motor speed and direction through PWM and digital signals. It also provides power and signal for each encoder individually. In addition, it has an IDC connector socket for an external NRF24L01 module, which is used to receive the E-killswitch signal.
-
-
-
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[t]{0.48\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{assets/image11.png}
-        \caption{3D View}
-        \label{fig:main-board-top}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.48\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{assets/image22.png}
-        \caption{Design View}
-        \label{fig:main-board-bottom}
-    \end{subfigure}
-    \caption{Motor Control Board}
-    \label{fig:main-control-board}
-\end{figure}
-
-\vspace{-25pt}
 \subsection{Power Board}
-
-To provide the necessary input voltage for the power board, we used two 12V battery packs connected in series, resulting in a 24V main power source. This setup not only aligns with the input requirements of our buck converters but also ensures adequate voltage headroom for efficient regulation. Supplying 24V to the power board allows us to regulate and distribute power reliably to both the motors and other subsystems without direct high-load draw from the batteries. This approach simplifies power management while maximizing battery utilization and system stability.
-
-Our power board is designed to efficiently distribute power to all components in the system using two buck converters. These converters step down the primary 24V input to 12V and 5V outputs. The 12V output powers medium-voltage components such as motor controllers and certain sensors, while the 5V output supports low-voltage devices like microcontrollers and communication modules. This stepped-down power distribution ensures voltage stability and protects sensitive electronics, while optimizing energy efficiency across the rover’s subsystems.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{assets/image3.png}
-    \caption{Power Board}
-    \label{fig:power-board}
-\end{figure}
 
 \section{Software Design}
 
 \subsection{System Architecture Overview}
 \subsection{Core Functionalities}
-\subsubsection{Lane Detection and Path/Trajectory Control}
+\subsubsection{Lane Detection and Navigation}
+% lane detection part
+% lane navigation part 
 \subsubsection{Pothole Detection}
 \subsubsection{Obstacle Avoidance}
-\subsubsection{Waypoint Navigation}
+The rover utilizes a LiDAR sensor (RPLIDAR A2)  to detect obstacles within the drivable lane corridor and generate a corrected heading that keeps the rover within lane boundaries while avoiding collisions.
+The algorithm is a modified version of the \textbf{Disparity Extender} technique,constrained to an angular Region of Interest (ROI) aligned with the rover's current lane heading, rather than considering the entire 360-degree scan.
+This design ensures that the obstacle avoidance is treated as a local heading correction relative to the lane-following reference, preveting the rover from selecting a safe gap that would take it outside the lane.
+\begin{figure}[H]
+    
+    \centering
+    \includegraphics[width=0.75\linewidth]{assets/lidar_avoid.png}
+    \caption{Obstacle Avoidance Algorithm}
+    \label{fig:obstacle-avoidance}
+\end{figure}
+
+At each scan cycle, the system executes the following sequence:
+\begin{enumerate}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item \textbf{Scan Acquisition:} The LiDAR provides distance readings across its full field of view.
+    \item \textbf{Region of Interest Restriction:} The system receives the lane information and limits further processing to a defined angular window around that heading.
+    \item \textbf{Obstacle Edge Detection:} Within this window, the system identifies significant discontinuities between adjacent distance readings. These discontinuities indicate the physical edges of obstacles
+    \item \textbf{Boundary Expansion:} Each detected obstacle edge is extended outward by a distance corresponding to the rover's physical width plus an additional safety margin. This prevents the selection of a path that appears clear but would be insufficient for the rover to pass through safely.
+    \item \textbf{Heading Selection:} Following boundary expansion, select the direction within the permitted window that offers the greatest unobstructed distance and publish this as the corrected heading command.
+\end{enumerate}
+
 \subsubsection{Face Recognition and Detection}
 \subsection{Communication Systems}
-The onboard computer leverages the existing ROS 2 system to funnel the real-time streams of data between the different nodes.
-At the station, a lightweight installation of ROS 2 utilizies its Data Distribution Service to keep a reliable connection for debugging and manual control purposes.
+For transfering high-speed, high-bandwidth data between the onboard computer and the station, the existing ROS 2 system with its Data Distribution Service was used, to leverage descriptive topics, concurrent querying, real-time streaming and fault-tolerant connection.
 
-For station-rover communication, the onboard computer has an exposed 6 dBi unidirectional antenna, which is connected via a USB-A adapter directly to a PCIe bus rather than the shared USB bus for cameras to prevent internal bus congestion. By tuning the QoS profile for each telemetry topic, high-throughput non-critical streams like the camera streams are kept to a minimal bandwidth footprint.
-
-As local inter-node communication does not rely on a network connection, low latency is maintained by utilizing concurrency techniques and ROS's threaded executor.
+For station-rover communication, the onboard computer has an exposed 6 dBi unidirectional antenna, which is connected via a USB-A adapter directly to a PCIe bus rather than the shared USB bus for cameras to prevent internal bus congestion.
+By tuning the QoS profile for each telemetry topic, high-throughput non-critical streams like the camera streams have a reduced error-recovery load on the DDS.
+The station's router is configured to have a narrower wireless bandwidth (5-20 MHz) and shortened range (250m) for a robust, focused signal.
 
 \subsection{Auxiliary Systems}
 \subsubsection{Motor Control}
