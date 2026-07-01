@@ -28,7 +28,8 @@ setup(
     extras_require={'test': ['pytest']},
     entry_points={
         'console_scripts': [
-            'camera_publisher_node = face_recognition.camera_publisher_node:main',
+            'test1_node = face_recognition.test1_node:main',
+            'test2_node = face_recognition.test2_node:main',
             'face_recognition_node = face_recognition.face_recognition_node:main',
         ],
     },

@@ -17,89 +17,66 @@ class FaceRecognition:
             os.path.join(BASE_DIR, "face_recognition_sface_2021dec.onnx"),
             ""
         )
-
-        # Load feature from cache if it exists, otherwise extract and save it
         self.target_feature = self._load_target()
 
     def _load_target(self):
-
         if os.path.exists(FEATURE_CACHE_PATH):
             print(f"[Cache] Loading from cache: {FEATURE_CACHE_PATH}")
             return np.load(FEATURE_CACHE_PATH)
 
         target_img = cv2.imread(os.path.join(BASE_DIR, "assets", "target.jpg"))
-
         print("[Cache] No cache found. Extracting feature from 'target.jpg'...")
 
         if target_img is None:
             raise FileNotFoundError("Could not load 'target.jpg'. Make sure it exists.")
 
-        # Set correct input size for detection
         self.detector.setInputSize((target_img.shape[1], target_img.shape[0]))
-
-        # Detect face in target image
         _, faces = self.detector.detect(target_img)
 
         if faces is None or len(faces) == 0:
             raise ValueError("No face detected in 'target.jpg'. Please use a clearer image.")
 
-        # Align and crop detected face
         target_face = self.recognizer.alignCrop(target_img, faces[0])
-
-        # Extract 128D feature vector (face embedding)
         feature = self.recognizer.feature(target_face)
-
-        # Save to cache for future runs
         np.save(FEATURE_CACHE_PATH, feature)
         print(f"[Cache] Feature saved to '{FEATURE_CACHE_PATH}'. Future runs will load instantly.")
 
         return feature
 
     def recognize_frame(self, frame):
-
         start_time = time.time()
 
-        # Update detector with frame size
         self.detector.setInputSize((frame.shape[1], frame.shape[0]))
-
-        # Detect faces in current frame
         _, faces = self.detector.detect(frame)
 
+        is_faces = faces is not None
+        is_detected = False
+        offset_x = None  # percentage float, e.g. -42.5
+        offset_y = None  # percentage float, e.g. 10.3
+
         if faces is not None:
-
             for face in faces:
-
-                # Align face
                 aligned_face = self.recognizer.alignCrop(frame, face)
-
-                # Extract features
                 feature = self.recognizer.feature(aligned_face)
-
-                # Compare with target face
                 score = self.recognizer.match(
                     self.target_feature,
                     feature,
                     cv2.FaceRecognizerSF_FR_COSINE
                 )
 
-                # Get bounding box
                 x, y, w, h = map(int, face[:4])
+                processing_time = time.time() - start_time
 
-                # Decide if same person
                 if score > 0.45:
                     label = "MATCH"
                     color = (0, 255, 0)
+                    is_detected = True
+                    offset_x, offset_y = self.get_offset_percent(face, frame)  # returns (float, float)
                 else:
                     label = "UNKNOWN"
                     color = (0, 0, 255)
 
-                # Measure processing time
-                processing_time = time.time() - start_time
-
-                # Draw rectangle
                 cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-
-                # Show result text
                 cv2.putText(
                     frame,
                     f"{label} {score:.2f} {processing_time:.3f}s",
@@ -110,13 +87,23 @@ class FaceRecognition:
                     2
                 )
 
-        return frame
+        return frame, is_faces, is_detected, offset_x, offset_y
+
+    def get_offset_percent(self, face, frame):
+        frame_height, frame_width = frame.shape[:2]
+        x, y, w, h = map(int, face[:4])
+
+        face_center_x = x + w / 2
+        face_center_y = y + h / 2
+
+        offset_x_pct = (face_center_x - frame_width / 2) / (frame_width / 2) * 100
+        offset_y_pct = (face_center_y - frame_height / 2) / (frame_height / 2) * 100
+
+        return float(offset_x_pct), float(offset_y_pct)
+
 
 def main():
-
-    # Start webcam
     cap = cv2.VideoCapture(0)
-
     face_recognition = FaceRecognition()
 
     while True:
@@ -124,15 +111,16 @@ def main():
         if not ret:
             break
 
-        frame = face_recognition.recognize_frame(frame)
+        frame, is_faces, is_detected, offset_x, offset_y = face_recognition.recognize_frame(frame)
+        print(f"Faces Detected: {is_faces} | Target Detected: {is_detected} | Offset X: {offset_x}% | Offset Y: {offset_y}%")
         cv2.imshow("Face Recognition", frame)
 
-        # Press ESC to exit
         if cv2.waitKey(1) == 27:
             break
 
     cap.release()
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()
