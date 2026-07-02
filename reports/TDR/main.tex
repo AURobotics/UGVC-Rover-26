@@ -173,7 +173,7 @@ The following software suite that allowed testing, simulation, design and teleme
     \item \textbf{Git Monorepo:} For collaborative version control and agile task tracking
     \item \textbf{Docker \& Pixi:} Used to standardize development environments across the software team
     \item \textbf{Python (pySerial, adbutils, Qt6):} For serial communication, sensor parsing, and real-time plotting during testing
-    \item \textbf{Custom Embedded Debugger:} For interactive ROS $\leftrightarrow$ MCU communication over UART.
+    % \item \textbf{Custom Embedded Debugger:} For interactive ROS $\leftrightarrow$ MCU communication over UART.
 \end{itemize}
 
 This toolset enabled parallel development across subsystems.
@@ -234,7 +234,7 @@ The frame was modeled in SolidWorks as shown in figure \ref{fig:frame-cad} with 
 Finite Element Analysis (FEA) was performed in SolidWorks to validate the structural integrity of the frame under anticipated mechanical loads, confirming minimal deflection and a sufficient safety factor.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{assets/frame_1.png}
+    \includegraphics[width=0.5\linewidth]{assets/frame_1.jpeg}
     \caption{Frame CAD Model}
     \label{fig:frame-cad}
 \end{figure}
@@ -411,6 +411,28 @@ At each scan cycle, the system executes the following sequence:
     \item \textbf{Boundary Expansion:} Each detected obstacle edge is extended outward by a distance corresponding to the rover's physical width plus an additional safety margin. This prevents the selection of a path that appears clear but would be insufficient for the rover to pass through safely.
     \item \textbf{Heading Selection:} Following boundary expansion, select the direction within the permitted window that offers the greatest unobstructed distance and publish this as the corrected heading command.
 \end{enumerate}
+\subsubsection{Waypoint Navigation}
+Waypoint navigation is handled by two cooperating components: a trajectory generator, which converts a list of GPS waypoints into a smooth, heading-continuous drivable path, and a path-following controller, which follows that path using the Pure Pursuit path-tracking algorithm.
+
+\paragraph{Trajectory Generation}
+On receiving the first odometry message, the trajectory generator loads a list of GPS waypoints from a YAML configuration file. Each waypoint is converted from GPS coordinates into a local Cartesian frame relative to the rover's starting position using an equirectangular projection, then offset by the rover's actual starting position to produce world-frame coordinates.
+
+A smooth path is then constructed by fitting a cubic B\'{e}zier curve between each consecutive pair of waypoints. Heading constraints at each waypoint are computed from the direction of its neighboring segments -- interior waypoints use the averaged direction of the incoming and outgoing segments, ensuring the path transitions smoothly through each point rather than forming a sharp corner. 
+% Consecutive B\'{e}zier segments are then concatenated into a single continuous path, published once as a \texttt{nav\_msgs/Path} message on \texttt{/controller/path}. Waypoints are also published as an RViz \texttt{MarkerArray} on \texttt{/controller/waypoints} for visualization during testing, with the robot's starting position marked distinctly from the loaded waypoints.
+
+\paragraph{Path Following Controller}
+The path-following controller operates as a finite state machine with four states:
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item \textbf{Waiting for Path:} Idle until a path is received from the trajectory generator.
+\item \textbf{Aligning to Start:} If the rover's current position is not sufficiently close to the start of the received path, the rover rotates in place using a proportional heading controller until it is facing the path's start point.
+\item \textbf{Navigating:} The rover follows the path using the Pure Pursuit algorithm.
+\item \textbf{Goal Reached:} The final waypoint has been reached within the configured goal threshold; the rover is commanded to stop.
+\end{itemize}
+% During \textbf{NAVIGATING}, a lookahead point is located along the path at a fixed lookahead distance ahead of the rover's current position, found by computing the geometric intersection between a circle of that radius centered on the rover and each path segment. If no valid intersection is found (e.g., near the end of the path), the controller falls back to the nearest path point that satisfies the minimum lookahead distance. The heading error to this lookahead point is then used to compute an angular velocity command via the standard Pure Pursuit control law, while linear velocity is held constant. The resulting command is clamped to a maximum angular velocity before being published.
+
 
 
 \subsubsection{Face Recognition and Detection}
