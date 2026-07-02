@@ -270,6 +270,9 @@ The B\'ezier path planner was extended to support heading constraints at start a
 
 
 \section{Mechanical Design}
+
+The mechanical design followed a small set of integral principles -- the rover should be durable, robust, spaceious and internally stable. Portability and ease of modification were prioritized over strict modularity.
+
 \subsection{Frame Design}
 The rover frame was designed in compliance with UGVC competition dimensional constraints (90--200 cm length, 60--120 cm width, 120 cm max height), with a focus on modularity, weight optimization, and ease of assembly.
 The primary structural skeleton is constructed from 20$\times$20mm aluminum V-slot profiles, with the profiles' T-slot geometry enabling rapid assembly and adjustment using flat nuts and extrusion hardware which proved essential during prototyping and iterative testing. This choice provides:
@@ -344,9 +347,7 @@ The pan-axis servo forms the base, carrying the combined weight of the tilt serv
 Brackets are 3D-printed via FDM using PLA filament, with load-bearing walls held to a minimum 4~mm thickness to prevent layer delamination under high-speed movement.
 
 
-% \subsection{Hardware Box}
-
-\section{Electronic and Power Design}
+\section{Electronic \& Power Design}
 \subsection{Main Control Board}
 
 The main board serves as the central unit integrating the components required for navigation, communication, and control. It is built around an STM32F401RCT6 (ARM Cortex-M4) microcontroller, chosen for its strong real-time performance and widespread industry adoption in embedded control applications. 
@@ -580,6 +581,10 @@ The station's router is configured to have a narrower wireless bandwidth (5-20 M
 \subsubsection{Sensor Fusion}
 \subsubsection{Vehicle Monitoring}
 
+Using a station-side user interface made in Qt with QML-based widgets for the telemetry and system statistics, we can display in real-time vital information about the system.
+
+In case the ROS-based remote communication fails for any reason, we can directly \texttt{ssh} into the onboard computer and directly view nodes and debug them and their topics and check system vitals.
+
 \subsection{System Integration}
 
 To integrate all the components of the system with the different ROS nodes and topics, a set of strategies are deployed to ensure reliable communication.
@@ -640,7 +645,7 @@ we brought as much of a realistic environment to our simulations as possible.
 
 \paragraph{Navigation \& Control:}
 
-Using RViz and Gazebo, we were able to visualize what the rover "sees" as well as how responsive the navigation system is to sensor feedback. See Figure \ref{fig:rviz-gazebo}.
+Using RViz and Gazebo, we were able to visualize what the rover ``sees'' as well as how responsive the navigation system is to sensor feedback. See Figure \ref{fig:rviz-gazebo}.
 
 \begin{figure}[H]
     \centering
@@ -650,6 +655,13 @@ Using RViz and Gazebo, we were able to visualize what the rover "sees" as well a
 \end{figure}
 
 For the navigation approach we settled on, the PID controller was developed, tested and simulated in MATLAB.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{assets/Full System Model.jpeg}
+    \caption{Full system model in MATLAB}
+    \label{fig:matlab-full-sys-model}
+\end{figure}
 
 \subsection{Testing}
 
