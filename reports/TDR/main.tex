@@ -490,7 +490,6 @@ The path-following controller operates as a finite state machine with four state
 \item \textbf{Navigating:} The rover follows the path using the Pure Pursuit algorithm.
 \item \textbf{Goal Reached:} The final waypoint has been reached within the configured goal threshold; the rover is commanded to stop.
 \end{itemize}
-% During \textbf{NAVIGATING}, a lookahead point is located along the path at a fixed lookahead distance ahead of the rover's current position, found by computing the geometric intersection between a circle of that radius centered on the rover and each path segment. If no valid intersection is found (e.g., near the end of the path), the controller falls back to the nearest path point that satisfies the minimum lookahead distance. The heading error to this lookahead point is then used to compute an angular velocity command via the standard Pure Pursuit control law, while linear velocity is held constant. The resulting command is clamped to a maximum angular velocity before being published.
 
 
 \subsubsection{Face Recognition and Detection}
@@ -570,6 +569,39 @@ Software validation relied on a combination of visualization and debugging tools
 
 \section{Simulation \& Testing}
 
+Our team followed a strict test or simulate requirement before marking any task as completed.
+For simulated tests, we used industry standard software tools and techniques.
+
+\subsection{Simulations}
+
+\paragraph{Vision Models:}
+Simulations were done using Gazebo and static images as well as online video recordings of other competitions.
+By recreating the same quality constraints that would be present in our cameras and communication stacks using software filters and Gazebo configurations, as well as testing in manually taken pictures and videos of tracks and faces,
+we brought as much of a realistic environment to our simulations as possible.
+
+\paragraph{Navigation \& Control:}
+
+Using RViz and Gazebo, we were able to visualize what the rover "sees" as well as how responsive the navigation system is to sensor feedback.
+
+For the navigation approach we settled on, the PID controller was developed, tested and simulated in MATLAB.
+
+\subsection{Testing}
+
+\paragraph{Latency \& Performance}
+Using two laptops in an open field along with the router and its pointing system, we tested the ranges at which communication remains stable and latency remains low
+-- which allowed us to configure the router and the communication settings as well as rework our concurrency implementation in ROS 2.
+
+\paragraph{Navigation \& Localization}
+A miniature prototype robot was equipped with the same hardware and software that is used in the main rover, and was tested in a smaller testing environment with painted lanes and big obstacles.
+
+For navigation, the cameras were raised to their expected heights and their offset-from-center parameters were temporarily used in the navigation code to provide an accurate environment.
+
+\paragraph{PCB, PID \& Signal Analysis}
+
+Using a frequency and logic analyzer, as well as debuggers and multimeters, all electronic and control systems were tested on the workbench with software-simulated sensor readings.
+
+\paragraph{Risks \& Safety}
+For power board and motor response analyses, the necessary safety gear was worn and all sharp parts were covered or removed. Electrical testing configurations were set prior to powering on the electronics, and the boards were disconnected between every testing configuration.
 
 
 \section{Future Work}
