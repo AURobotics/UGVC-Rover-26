@@ -348,8 +348,7 @@ Brackets are 3D-printed via FDM using PLA filament, with load-bearing walls held
 
 \section{Electronic \& Power Design}
 \subsection{Main Control Board}
-
-The main board serves as the central unit integrating the components required for navigation, communication, and control. It is built around an STM32F401RCT6 (ARM Cortex-M4) microcontroller, chosen for its strong real-time performance and widespread industry adoption in embedded control applications. 
+The main board serves as the central unit integrating the components required for navigation, communication, and control, built around an STM32F401RCT6 (ARM Cortex-M4) microcontroller for its real-time performance and wide industry adoption.
 
 \begin{figure}[H]
 \centering
@@ -361,16 +360,15 @@ The main board serves as the central unit integrating the components required fo
 \end{figure}
 
 \paragraph{Power Management and Protection}
-The board provides two primary voltage rails, 5V and 3.3V, each with dedicated protection circuitry to improve reliability. Both inputs are protected against reverse polarity using a P-channel MOSFET and against overvoltage transients using a Zener diode clamp.
+The board provides 5~V and 3.3~V rails, each protected against reverse polarity (P-channel MOSFET) and overvoltage transients (Zener diode clamp).
 
 \paragraph{Motion Control and Safety Systems}
 \begin{itemize}
 \setlength{\itemsep}{1pt}
 \setlength{\parskip}{0pt}
 \setlength{\parsep}{0pt}
-\item \textbf{Encoder Interfaces (×4):} Four dedicated encoder inputs are located along the board edges (Fig.~\ref{fig:main-board}). Each channel includes an onboard RC low-pass filter to suppress mechanical and electrical bounce from motor encoders before the signal reaches the STM32's hardware timer pins.
-\item \textbf{PCA9685 Motor Control Header:} A dedicated I2C header breaks out signals to an external PCA9685 16-channel PWM driver, offloading motor control from the STM32's own limited PWM channels.
-\item \textbf{Emergency Shutdown Circuit:} A physical emergency-stop button immediately halts all motors and triggers a warning light when pressed.
+\item \textbf{Encoder Interfaces (×4):} Four encoder inputs along the board edges (Fig.~\ref{fig:main-board}), each with an RC low-pass filter to suppress bounce before reaching the STM32's hardware timer pins.
+\item \textbf{PCA9685 Motor Control Header:} A dedicated I2C header drives an external PCA9685 16-channel PWM driver, offloading motor control from the STM32's limited PWM channels.
 \end{itemize}
 
 \paragraph{Communication and Sensor Telemetry}
@@ -378,12 +376,49 @@ The board provides two primary voltage rails, 5V and 3.3V, each with dedicated p
 \setlength{\itemsep}{1pt}
 \setlength{\parskip}{0pt}
 \setlength{\parsep}{0pt}
-\item \textbf{NRF Wireless Module:} An NRF transceiver provides long-range wireless communication for remote control.
+\item \textbf{NRF Wireless Module:} Provides long-range wireless communication for remote control.
 \item \textbf{IMU Interface:} A 4-pin I2C header connects to an external IMU (e.g., BNO055) for orientation tracking and stabilization.
-\item \textbf{Power Distribution Board (PDB) Sensor Header:} An IDC connector receives telemetry from the power distribution board, including motor current draw and battery voltage.
+\item \textbf{PDB Sensor Header:} An IDC connector receives telemetry from the power distribution board, including motor current draw and battery voltage.
 \end{itemize}
-
 \subsection{Power Distribution Board}
+The Power Distribution Board (PDB) is the central power-management node of the rover.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\columnwidth]{assets/power_1.jpeg}
+\hfill
+\includegraphics[width=0.48\columnwidth]{assets/power_2.jpeg}
+\caption{3D render and PCB layout of the power distribution board.}
+\label{fig:power-board}
+\end{figure}
+\vspace{-25pt}
+\paragraph{Battery Architecture}
+The rover uses three independent battery packs:
+\begin{itemize}
+    \item \textbf{Two 24~V traction packs} (front and rear) — each dedicated to one pair of motors
+    \item \textbf{One 12~V control pack} — dedicated to control, sensor, and logic electronics
+\end{itemize}
+The control battery is deliberately isolated from the traction packs, so motor inrush, stall conditions, or a blown drivetrain fuse cannot affect flight-critical electronics. Each battery input also has its own reverse-polarity MOSFET, fuse, and filtering stage, so a fault on one battery cannot propagate to the others.
+
+\paragraph{Input Protection}
+Each battery input uses a P-channel MOSFET as a high-side reverse-polarity switch instead of a diode, giving lower voltage drop and heat at high current while still protecting against reversed connections.
+
+\paragraph{Motor and System Rails}
+\begin{itemize}
+    \item \textbf{Four independently fused 24~V outputs} feed the four motor drivers : two channels from each traction battery
+    \item Each motor channel has a \textbf{two-stage filter} consisting of Ceramic and Electrolytic capacitors to suppress switching noise and absorb ripple respectively.
+    \item A separate, lower-current \textbf{12~V rail} supplies logic and sensor systems
+    \item All 5~V/3.3~V regulation is done \textbf{off-board}, keeping switching-regulator heat and noise away from the PDB's current- and voltage-sensing circuitry
+\end{itemize}
+\paragraph{Diagnostics}
+Each fuse has a paired LED that lights on failure, giving instant visual fault indication. Each protected rail also has a "power present" LED distinguishing "no battery connected" from "fuse failed" at a glance.
+
+\paragraph{Current and Voltage Telemetry}
+Motor current is measured per-channel with an onboard Hall-effect sensor, avoiding extra connectors. 
+Battery voltage is measured via a resistive divider, Zener-clamped to protect the control board's ADC. Telemetry runs to the control board on a dedicated ribbon connector, separate from high-current wiring.
+
+% \paragraph{Grounding}
+% All return paths converge at a single star-ground point on the PDB, bonded to the chassis, preventing ground loops between motor return currents and analog sense signals.
 
 \subsection{Motor Drivers}
 Motor actuation is handled by H-bridge driver circuits built around IR2104 gate drivers, controlled directly by the main STM32F401RCT6 controller. The firmware enforces strict timing and sequencing rules to protect the gate drivers and motor FETs from damage during operation.
@@ -409,7 +444,15 @@ Switching the H-bridge directly between forward and reverse can cause a shoot-th
 
 \paragraph{Acceleration Ramping}
 To avoid inrush current spikes and mechanical stress, motor speed is ramped up gradually in small increments with only one direction driven at a time.
+\subsection{Emergency Stop Systems}
+The rover implements two independent emergency stop mechanisms, ensuring motors can be halted even if one method is inaccessible or fails.
 
+\begin{itemize}
+    \item \textbf{Physical E-Stop Button:} A dedicated emergency-stop button on the main control board immediately halts all motors and triggers a warning light when pressed.
+    \item \textbf{Wireless Kill Switch:} A remote stop command can be sent over the NRF wireless link, allowing an operator or safety official to halt the rover without requiring physical access.
+\end{itemize}
+\subsection{Cooling \& Ventilation System}
+Thermal management is provided by two brushless DC fans mounted on a dedicated cooling panel, which channel airflow through ducting aligned with the chassis rails, directing air across the electronics enclosure to prevent heat buildup during sustained operation.
 \section{Software Design}
 
 \subsection{Architecture Overview}
