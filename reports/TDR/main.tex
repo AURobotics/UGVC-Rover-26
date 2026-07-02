@@ -345,7 +345,7 @@ Motor brackets attach across multiple arms of the servos' stock 6-arm plastic ho
 The pan-axis servo forms the base, carrying the combined weight of the tilt servo, brackets, and laser via a recessed bracket secured at four points on the servo horn. The tilt-axis laser holder uses a reinforced single-side cantilever mount to resist deflection under the laser's weight.
 Brackets are 3D-printed via FDM using PLA filament, with load-bearing walls held to a minimum 4~mm thickness to prevent layer delamination under high-speed movement.
 
-
+\pagebreak{}
 \section{Electronic \& Power Design}
 \subsection{Main Control Board}
 The main board serves as the central unit integrating the components required for navigation, communication, and control, built around an STM32F401RCT6 (ARM Cortex-M4) microcontroller for its real-time performance and wide industry adoption.
@@ -690,6 +690,20 @@ s = K \frac{z - 1}{z + 1}, \quad K = \frac{W_l}{\tan\left(\frac{W_l T_s}{2}\righ
 \end{equation}
 matching $K$ to crossover frequency $W_l$ preserves exact phase and gain characteristics at the tracking crossover within the 100 Hz execution loop.
 \subsubsection{Sensor Fusion}
+To achieve reliable and accurate localization across both short-range and long-range scenarios, the rover uses a multi-layered sensor fusion approach based on the \texttt{robot\_localization} package in ROS 2. Two instances of the Unscented Kalman Filter (UKF) node are launched, each tailored for a different type of navigation.
+
+\paragraph{Primary UKF Node:}
+Fuses continuous high-frequency sensor data from the IMU and wheel encoders, producing precise short-term odometry optimized for short-distance waypoint navigation, and is published on the \texttt{/odometry/filtered} topic.
+The high update rate ensures responsive motion control with minimal latency.
+
+\paragraph{Secondary UKF Node:}
+Integrates the filtered odometry output from the primary UKF with GPS position data from the NEO-6M v2 module via the \texttt{navsat\_transform} node. This creates a drift-resistant long-term odometry solution suitable for long-distance navigation and GPS coordinate-based waypoint following. The GPS integration corrects accumulated drift from dead reckoning, ensuring accurate global positioning over extended operation periods. This fused estimate is crucial for long-distance autonomous navigation and waypoint tracking. This is shown in the figure below.
+
+In addition to the filtered odometry outputs, the system also publishes unfiltered odometry data to dedicated topics (\texttt{/odometry/unfiltered}). These represent the raw position estimates from individual sensors before fusion. This separation allows for easier debugging, sensor fault detection, and fallback logic in case one sensor stream becomes unreliable.
+
+To improve the accuracy of IMU data, a zeroing and calibration routine is executed at startup.
+
+
 \subsubsection{Vehicle Monitoring}
 
 Using a station-side user interface made in Qt with QML-based widgets for the telemetry and system statistics, we can display in real-time vital information about the system.
@@ -824,8 +838,9 @@ These changes aim to deepen hardware understanding, boost customization, and imp
 \addcontentsline{toc}{section}{References}
 \nocite{*}
 \bibliographystyle{plain}
-\small
-\bibliography{references}
-
+\begingroup
+    \small
+    \bibliography{references}
+\endgroup
 
 \end{document}
