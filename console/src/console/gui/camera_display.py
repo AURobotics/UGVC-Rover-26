@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget, QLabel
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtCore import Slot
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
 from cv_bridge import CvBridge #converts ros2 img to numpy array
 
 class CameraDisplay(QWidget):
@@ -15,16 +15,17 @@ class CameraDisplay(QWidget):
         self._frame_view.setScaledContents(True)
 
     @Slot(object)
-    def update_frame(self, msg: Image):
-        """Call this with a ROS Image message to update the display."""
-        frame = self._bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
-        image = QImage(
-            frame.data,
-            frame.shape[1], frame.shape[0], #width, height
-            frame.strides[0], #bytes per line
-            QImage.Format.Format_BGR888
-        )
-        self._frame_view.setPixmap(QPixmap.fromImage(image))
+    def update_frame(self, msg: CompressedImage):
+        """Call this with a ROS CompressedImage message to update the display."""
+        frame = self._bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='bgr8')
+        if frame is not None:
+            image = QImage(
+                frame.data,
+                frame.shape[1], frame.shape[0], #width, height
+                frame.strides[0], #bytes per line
+                QImage.Format.Format_BGR888
+            )
+            self._frame_view.setPixmap(QPixmap.fromImage(image))
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
