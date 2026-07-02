@@ -1,5 +1,7 @@
 \documentclass[12pt,a4paper,twocolumn]{article}
 \usepackage{preamble} % all preamble code is located in preamble.sty
+\usepackage{microtype}
+\hyphenpenalty=10
 
 \begin{document}
 \pagenumbering{gobble}  
@@ -250,6 +252,10 @@ The PID controller is tuned to provide a balance between responsiveness and stab
 The lane navigation node then publishes the steering commands to the respective topic to be processed along with the obstacle avoidance node's output to generate a final angular velocity command for the rover.
 
 \subsubsection{Pothole Detection}
+Using a YOLOv8-based model, the vision system provides the autonomous rover with real-time pothole detection.
+The information is later fused with lane detection results to estimate steering error percentage.
+The 
+
 \subsubsection{Obstacle Avoidance}
 The rover utilizes a LiDAR sensor (RPLIDAR A2)  to detect obstacles within the drivable lane corridor and generate a corrected heading that keeps the rover within lane boundaries while avoiding collisions.
 The algorithm is a modified version of the \textbf{Disparity Extender} technique,constrained to an angular Region of Interest (ROI) aligned with the rover's current lane heading, rather than considering the entire 360-degree scan.
