@@ -441,8 +441,6 @@ The path-following controller operates as a finite state machine with four state
 % During \textbf{NAVIGATING}, a lookahead point is located along the path at a fixed lookahead distance ahead of the rover's current position, found by computing the geometric intersection between a circle of that radius centered on the rover and each path segment. If no valid intersection is found (e.g., near the end of the path), the controller falls back to the nearest path point that satisfies the minimum lookahead distance. The heading error to this lookahead point is then used to compute an angular velocity command via the standard Pure Pursuit control law, while linear velocity is held constant. The resulting command is clamped to a maximum angular velocity before being published.
 
 
-\subsubsection{Waypoint Navigation}
-
 \subsubsection{Face Recognition and Detection}
 \paragraph{Models:}
 The system uses two pre-trained OpenCV deep learning models. YuNet is used for real-time face detection, while SFace extracts facial features and performs face recognition by comparing the detected face with a stored target feature using cosine similarity. The target feature is cached after the first extraction to improve runtime performance.
