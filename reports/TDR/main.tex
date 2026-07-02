@@ -173,7 +173,7 @@ The following software suite that allowed testing, simulation, design and teleme
     \item \textbf{Git Monorepo:} For collaborative version control and agile task tracking
     \item \textbf{Docker \& Pixi:} Used to standardize development environments across the software team
     \item \textbf{Python (pySerial, adbutils, Qt6):} For serial communication, sensor parsing, and real-time plotting during testing
-    \item \textbf{Custom Embedded Debugger:} For interactive ROS $\leftrightarrow$ MCU communication over UART.
+    % \item \textbf{Custom Embedded Debugger:} For interactive ROS $\leftrightarrow$ MCU communication over UART.
 \end{itemize}
 
 This toolset enabled parallel development across subsystems.
@@ -204,6 +204,16 @@ Safety was a core design consideration both in hardware and software.
 \section{Technical Innovation}
 
 \subsection{Mechanical Innovations}
+\label{sec:mechanical-innovations} 
+\paragraph{Rocker-Bogie Suspension Mechanism}
+A key design decision for this year's rover was the adoption of a fully passive Rocker-bogie suspension system, consciously opting against conventional active suspension components. While the Rocker-Bogie mechanism itself originates from NASA's Mars rover program, its selection over a more conventional suspension approach was a deliberate engineering decision made after careful analysis of the competition's specific terrain requirements. This choice was driven by several converging factors:
+
+\begin{itemize}
+\item \textbf{Simplicity and reliability:} Fewer moving parts reduce the number of potential failure points that are common in traditional suspension systems.
+\item \textbf{Mass optimization:} Eliminating shock absorbers and springs removes significant parasitic weight, improving battery life and maneuverability without sacrificing stability.
+\item \textbf{Terrain conformity and traction:} The geometry inherently maintains ground contact for all six wheels, even when scaling obstacles equal to or larger than the wheel radius.
+\item \textbf{Cost and manufacturing complexity:} Reduced material cost relative to active systems and manufacturing complexity, while simplifying testing and calibration.
+\end{itemize}
 
 \subsection{Software Innovations}
 
@@ -214,7 +224,7 @@ The primary structural skeleton is constructed from 20$\times$20mm aluminum V-sl
 
 \begin{itemize}
 \item Structural adaptability \& rigidity
-\item Modular subsystem mounting and repositioning without requiring a complete structural redesign
+\item Modular subsystem mounting \& repositioning without requiring a complete structural redesign
 \item Simplified maintenance and inspection, allowing rapid access to internal components
 \item Greater internal volume for mounting critical components
 \item Balanced weight distribution across the wheels, improving stability during motion
@@ -224,14 +234,64 @@ The frame was modeled in SolidWorks as shown in figure \ref{fig:frame-cad} with 
 Finite Element Analysis (FEA) was performed in SolidWorks to validate the structural integrity of the frame under anticipated mechanical loads, confirming minimal deflection and a sufficient safety factor.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{assets/frame_1.png}
+    \includegraphics[width=0.5\linewidth]{assets/frame_1.jpeg}
     \caption{Frame CAD Model}
     \label{fig:frame-cad}
 \end{figure}
 \subsection{Rocker Bogie Suspension}
+The core of the rover's mobility system is based on the Rocker-Bogie mechanism, a passive suspension architecture selected for its reliability and terrain-handling advantages (Section~\ref{sec:mechanical-innovations}).\\
+The system's architecture features a main rocker arm on each side, linked via a differential bar. Each rocker arm is articulated to a rear bogie carrying two wheels, with the front wheel mounted directly to the rocker arm itself as shown in figure \ref{fig:rocker-bogie}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{assets/rocker_bogie_1.jpeg}
+    \caption{Rocker-Bogie Suspension Mechanism}
+    \label{fig:rocker-bogie}
+\end{figure}
+This articulation allows each wheel to adapt independently to variations in the ground plane, maintaining continuous ground contact across uneven terrain.
+
 \subsection{Drivetrain and Wheels}
 \subsection{Manufacturing and Assembly}
+\paragraph{Main Frame Material}
+The primary structural skeleton of the chassis was constructed using 20$\times$20mm aluminum V-slot profiles.
+\paragraph{Fabrication Methods}
+Two primary fabrication methods were used: laser cutting and hydraulic V-bending.
+\begin{enumerate}
+    \item \textbf{Laser Cutting:} was  used on 6~mm aluminum sheets for components requiring tight tolerances and intricate geometries, minimizing heat-affected zones (HAZ) and ensuring repeatability. Components fabricated via laser cutting include:
+\begin{itemize}
+\item \textbf{Gears:} Precision-cut profile teeth for smooth engagement and minimal backlash.
+\item \textbf{Suspension links:} Structural links withstanding dynamic operational loads with precise geometric alignment.
+\item \textbf{Wheel couplings:} Interface hubs bridging drive shafts to wheel assemblies.
+\end{itemize}
+\item \textbf{Hydraulic V-bending:} was used for components requiring multi-planar rigidity without the weight or failure points of welding, including the main chassis brackets and structural reinforcement plates.
+%  Bend allowances and K-factors were calculated during the CAD phase to account for material springback.
+\end{enumerate}
+
+\paragraph{Assembly Process}
+\begin{enumerate}
+\item \textbf{Main frame assembly:} Chassis skeleton assembled from V-slot profiles, joined with corner brackets and gussets, fasteners threaded into flat nuts within the V-grooves. Frame verified square before final torqueing.
+\item \textbf{Suspension linkage:} Deep groove ball bearings press-fit into laser-cut suspension links, mounted using threaded rod pivot axles secured with locking hardware and spacers.
+\item \textbf{Wheel hub integration:} Bearing blocks mounted to suspension uprights; drive shafts inserted through bearings; wheel couplings and gears fixed onto shafts.
+\end{enumerate}
+
 \subsection{Laser Pointer}
+The laser pointer is mounted on a 2-degree-of-freedom (2-DoF) pan-tilt gimbal, moving independently along a pan axis (left/right) and a tilt axis (up/down) as shown in Figure \ref{fig:laser-pointer}. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\linewidth]{assets/laser_pointer.png}
+    \caption{Laser Pointer Pan-Tilt Gimbal}
+    \label{fig:laser-pointer}
+\end{figure}
+
+The gimbal is designed to be lightweight, compact, and capable of precise angular positioning for accurate laser pointing.
+\paragraph{Actuation}
+Both axes are actuated by \textbf{MG996R} high-torque servos. 
+% Each servo has a 25-tooth spline output, a 180\textdegree{} rotation range, and delivers approximately 9.4~kg$\cdot$cm torque at 4.8~V.
+Motor brackets attach across multiple arms of the servos' stock 6-arm plastic horns to distribute torsional load and prevent stripping under sudden stops.
+\paragraph{Bracket Structure \& Manufacturing}
+The pan-axis servo forms the base, carrying the combined weight of the tilt servo, brackets, and laser via a recessed bracket secured at four points on the servo horn. The tilt-axis laser holder uses a reinforced single-side cantilever mount to resist deflection under the laser's weight.
+Brackets are 3D-printed via FDM using PLA filament, with load-bearing walls held to a minimum 4~mm thickness to prevent layer delamination under high-speed movement.
+
+
 % \subsection{Hardware Box}
 
 \section{Electronic and Power Design}
@@ -358,6 +418,28 @@ At each scan cycle, the system executes the following sequence:
     \item \textbf{Boundary Expansion:} Each detected obstacle edge is extended outward by a distance corresponding to the rover's physical width plus an additional safety margin. This prevents the selection of a path that appears clear but would be insufficient for the rover to pass through safely.
     \item \textbf{Heading Selection:} Following boundary expansion, select the direction within the permitted window that offers the greatest unobstructed distance and publish this as the corrected heading command.
 \end{enumerate}
+\subsubsection{Waypoint Navigation}
+Waypoint navigation is handled by two cooperating components: a trajectory generator, which converts a list of GPS waypoints into a smooth, heading-continuous drivable path, and a path-following controller, which follows that path using the Pure Pursuit path-tracking algorithm.
+
+\paragraph{Trajectory Generation}
+On receiving the first odometry message, the trajectory generator loads a list of GPS waypoints from a YAML configuration file. Each waypoint is converted from GPS coordinates into a local Cartesian frame relative to the rover's starting position using an equirectangular projection, then offset by the rover's actual starting position to produce world-frame coordinates.
+
+A smooth path is then constructed by fitting a cubic B\'{e}zier curve between each consecutive pair of waypoints. Heading constraints at each waypoint are computed from the direction of its neighboring segments -- interior waypoints use the averaged direction of the incoming and outgoing segments, ensuring the path transitions smoothly through each point rather than forming a sharp corner. 
+% Consecutive B\'{e}zier segments are then concatenated into a single continuous path, published once as a \texttt{nav\_msgs/Path} message on \texttt{/controller/path}. Waypoints are also published as an RViz \texttt{MarkerArray} on \texttt{/controller/waypoints} for visualization during testing, with the robot's starting position marked distinctly from the loaded waypoints.
+
+\paragraph{Path Following Controller}
+The path-following controller operates as a finite state machine with four states:
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item \textbf{Waiting for Path:} Idle until a path is received from the trajectory generator.
+\item \textbf{Aligning to Start:} If the rover's current position is not sufficiently close to the start of the received path, the rover rotates in place using a proportional heading controller until it is facing the path's start point.
+\item \textbf{Navigating:} The rover follows the path using the Pure Pursuit algorithm.
+\item \textbf{Goal Reached:} The final waypoint has been reached within the configured goal threshold; the rover is commanded to stop.
+\end{itemize}
+% During \textbf{NAVIGATING}, a lookahead point is located along the path at a fixed lookahead distance ahead of the rover's current position, found by computing the geometric intersection between a circle of that radius centered on the rover and each path segment. If no valid intersection is found (e.g., near the end of the path), the controller falls back to the nearest path point that satisfies the minimum lookahead distance. The heading error to this lookahead point is then used to compute an angular velocity command via the standard Pure Pursuit control law, while linear velocity is held constant. The resulting command is clamped to a maximum angular velocity before being published.
+
 
 \subsubsection{Waypoint Navigation}
 
