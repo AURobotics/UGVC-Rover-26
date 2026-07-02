@@ -36,7 +36,7 @@ class MainTab(QMainWindow):
         return dock
     
     def update_camera_display(self):
-        frame = self.mediator.get_frame()
+        frame = self.mediator.get_video_frame()
         if frame is not None:
             self._cam.update_frame(frame)
     

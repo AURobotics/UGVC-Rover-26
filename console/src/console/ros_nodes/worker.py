@@ -5,7 +5,8 @@ from PySide6.QtCore import QObject, QThread, Signal
 import rclpy
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
-from sensor_msgs.msg import Image, Imu, NavSatFix
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDurabilityPolicy
+from sensor_msgs.msg import CompressedImage, Imu, NavSatFix
 from std_msgs.msg import Float32MultiArray, String
 from console.ros_nodes.joystick_node import JoystickNode
 
@@ -49,31 +50,38 @@ class WorkerNode(Node):
         self.sub_imu    = self.create_subscription(Imu,                "rover/imu",    self.imu_callback,    10)
         self.sub_status = self.create_subscription(Float32MultiArray,  "rover/status", self.status_callback, 10)
 
-        self.sub_front = self.create_subscription(Image, "rover/camera/front_raw",   self.front_raw_callback,   1)
-        self.sub_rear  = self.create_subscription(Image, "rover/camera/rear_raw",    self.rear_raw_callback,    1)
-        self.sub_face  = self.create_subscription(Image, "rover/camera/face_detect", self.face_detect_callback, 1)
-        self.sub_lane  = self.create_subscription(Image, "rover/camera/lane_detect", self.lane_detect_callback, 1)
+        qos_profile = QoSProfile(
+            reliability=QoSReliabilityPolicy.RELIABLE,
+            durability=QoSDurabilityPolicy.VOLATILE,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=1
+        )
+        self.sub_front = self.create_subscription(CompressedImage, "rover/camera/front_raw",   self.front_raw_callback,   qos_profile)
+        self.sub_rear  = self.create_subscription(CompressedImage, "rover/camera/rear_raw",    self.rear_raw_callback,    qos_profile)
+        self.sub_face  = self.create_subscription(CompressedImage, "rover/camera/face_detect", self.face_detect_callback, qos_profile)
+        self.sub_lane  = self.create_subscription(CompressedImage, "rover/camera/lane_detect", self.lane_detect_callback, qos_profile)
         #####
-        self.sub_video = self.create_subscription(Image, "rover/camera/video_stream", self.video_stream_callback, 1)
+        self.sub_video = self.create_subscription(CompressedImage, "video_stream", self.video_stream_callback, qos_profile)
+        
         self.gui_timer = self.create_timer(self.GUI_EMIT_INTERVAL_SEC, self.push_telemetry_to_gui)
 
-    def video_stream_callback(self, msg: Image) -> None:
+    def video_stream_callback(self, msg: CompressedImage) -> None:
         self._latest_video_stream_msg = msg
         self._video_updated = True
 
-    def front_raw_callback(self, msg: Image) -> None:
+    def front_raw_callback(self, msg: CompressedImage) -> None:
         self._latest_front_raw_msg = msg
         self._front_updated = True
 
-    def rear_raw_callback(self, msg: Image) -> None:
+    def rear_raw_callback(self, msg: CompressedImage) -> None:
         self._latest_rear_raw_msg = msg
         self._rear_updated = True
 
-    def face_detect_callback(self, msg: Image) -> None:
+    def face_detect_callback(self, msg: CompressedImage) -> None:
         self._latest_face_detect_msg = msg
         self._face_updated = True
 
-    def lane_detect_callback(self, msg: Image) -> None:
+    def lane_detect_callback(self, msg: CompressedImage) -> None:
         self._latest_lane_detect_msg = msg
         self._lane_updated = True
 
