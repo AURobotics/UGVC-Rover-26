@@ -511,6 +511,32 @@ A graphic summarizing all inter-node communications is shown in Figure \ref{fig:
 
 \subsection{Software Testing and Bug Tracking}
 
+Software validation relied on a combination of visualization and debugging tools alongside a structured team workflow for tracking progress and resolving issues throughout development.
+
+\paragraph{Testing and Debugging Tools}
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item \textbf{RViz:} Used extensively to visualize sensor data, planned paths, waypoints, and the rover's estimated position in real time, allowing issues in perception and navigation to be identified before field testing.
+\item \textbf{rqt\_graph:} Used to inspect the live communication graph between running components.
+% \item \textbf{ROS Bags:} Used to record and replay sensor and topic data, allowing real-world sensor readings to be replayed against the software stack or in simulators such as Gazebo without requiring the physical rover, which significantly sped up debugging of intermittent issues.
+\end{itemize}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{assets/rqt_graph.png}
+    \caption{rqt\_graph visualization of ROS node communication}
+    \label{fig:rqt-graph}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{assets/waypoint_rvizz.png}
+\caption{Rvizz visualization of waypoint navigation}
+\label{fig:manual-control-test}
+\end{figure}
+
+
 \section{Simulation \& Testing}
 
 
