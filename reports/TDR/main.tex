@@ -347,10 +347,51 @@ Brackets are 3D-printed via FDM using PLA filament, with load-bearing walls held
 % \subsection{Hardware Box}
 
 \section{Electronic and Power Design}
-\subsection{Main Control Unit}
-\subsection{Motor Control Board}
-\subsection{Power Board}
+\subsection{Main Control Board}
 
+The main board serves as the central unit integrating the components required for navigation, communication, and control. It is built around an STM32F401RCT6 (ARM Cortex-M4) microcontroller, chosen for its strong real-time performance and widespread industry adoption in embedded control applications. 
+% The microcontroller is mounted via female sockets rather than soldered directly, allowing it to be easily replaced or removed for debugging.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\linewidth]{assets/main_board.png}
+\caption{3D rendering of main control board.}
+\label{fig:main-board-3d}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\linewidth]{assets/main_board_2.png}
+\caption{PCB layout of the main control board.}
+\label{fig:main-board-pcb}
+\end{figure}
+
+\paragraph{Power Management and Protection}
+The board provides two primary voltage rails, 5V and 3.3V, each with dedicated protection circuitry to improve reliability. Both inputs are protected against reverse polarity using a P-channel MOSFET and against overvoltage transients using a Zener diode clamp.
+
+\paragraph{Motion Control and Safety Systems}
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item \textbf{Encoder Interfaces (×4):} Four dedicated encoder inputs are located along the board edges (Fig.~\ref{fig:main-board-pcb}). Each channel includes an onboard RC low-pass filter to suppress mechanical and electrical bounce from motor encoders before the signal reaches the STM32's hardware timer pins.
+\item \textbf{PCA9685 Motor Control Header:} A dedicated I2C header breaks out signals to an external PCA9685 16-channel PWM driver, offloading motor control from the STM32's own limited PWM channels.
+\item \textbf{Emergency Shutdown Circuit:} A physical emergency-stop button immediately halts all motors and triggers a warning light when pressed.
+\end{itemize}
+
+\paragraph{Communication and Sensor Telemetry}
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item \textbf{NRF Wireless Module:} An NRF transceiver provides long-range wireless communication for remote control.
+\item \textbf{IMU Interface:} A 4-pin I2C header connects to an external IMU (e.g., BNO055) for orientation tracking and stabilization.
+\item \textbf{Power Distribution Board (PDB) Sensor Header:} An IDC connector receives telemetry from the power distribution board, including motor current draw and battery voltage.
+\end{itemize}
+
+\subsection{Power Distribution Board}
+
+\subsection{Motor Drivers}
 \section{Software Design}
 
 \subsection{Architecture Overview}
