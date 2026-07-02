@@ -204,6 +204,16 @@ Safety was a core design consideration both in hardware and software.
 \section{Technical Innovation}
 
 \subsection{Mechanical Innovations}
+\label{sec:mechanical-innovations} 
+\paragraph{Rocker-Bogie Suspension Mechanism}
+A key design decision for this year's rover was the adoption of a fully passive Rocker-bogie suspension system, consciously opting against conventional active suspension components. While the Rocker-Bogie mechanism itself originates from NASA's Mars rover program, its selection over a more conventional suspension approach was a deliberate engineering decision made after careful analysis of the competition's specific terrain requirements. This choice was driven by several converging factors:
+
+\begin{itemize}
+\item \textbf{Simplicity and reliability:} Fewer moving parts reduce the number of potential failure points that are common in traditional suspension systems.
+\item \textbf{Mass optimization:} Eliminating shock absorbers and springs removes significant parasitic weight, improving battery life and maneuverability without sacrificing stability.
+\item \textbf{Terrain conformity and traction:} The geometry inherently maintains ground contact for all six wheels, even when scaling obstacles equal to or larger than the wheel radius.
+\item \textbf{Cost and manufacturing complexity:} Reduced material cost relative to active systems and manufacturing complexity, while simplifying testing and calibration.
+\end{itemize}
 
 \subsection{Software Innovations}
 
@@ -214,7 +224,7 @@ The primary structural skeleton is constructed from 20$\times$20mm aluminum V-sl
 
 \begin{itemize}
 \item Structural adaptability \& rigidity
-\item Modular subsystem mounting and repositioning without requiring a complete structural redesign
+\item Modular subsystem mounting \& repositioning without requiring a complete structural redesign
 \item Simplified maintenance and inspection, allowing rapid access to internal components
 \item Greater internal volume for mounting critical components
 \item Balanced weight distribution across the wheels, improving stability during motion
@@ -229,9 +239,59 @@ Finite Element Analysis (FEA) was performed in SolidWorks to validate the struct
     \label{fig:frame-cad}
 \end{figure}
 \subsection{Rocker Bogie Suspension}
+The core of the rover's mobility system is based on the Rocker-Bogie mechanism, a passive suspension architecture selected for its reliability and terrain-handling advantages (Section~\ref{sec:mechanical-innovations}).\\
+The system's architecture features a main rocker arm on each side, linked via a differential bar. Each rocker arm is articulated to a rear bogie carrying two wheels, with the front wheel mounted directly to the rocker arm itself as shown in figure \ref{fig:rocker-bogie}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{assets/rocker_bogie_1.jpeg}
+    \caption{Rocker-Bogie Suspension Mechanism}
+    \label{fig:rocker-bogie}
+\end{figure}
+This articulation allows each wheel to adapt independently to variations in the ground plane, maintaining continuous ground contact across uneven terrain.
+
 \subsection{Drivetrain and Wheels}
 \subsection{Manufacturing and Assembly}
+\paragraph{Main Frame Material}
+The primary structural skeleton of the chassis was constructed using 20$\times$20mm aluminum V-slot profiles.
+\paragraph{Fabrication Methods}
+Two primary fabrication methods were used: laser cutting and hydraulic V-bending.
+\begin{enumerate}
+    \item \textbf{Laser Cutting:} was  used on 6~mm aluminum sheets for components requiring tight tolerances and intricate geometries, minimizing heat-affected zones (HAZ) and ensuring repeatability. Components fabricated via laser cutting include:
+\begin{itemize}
+\item \textbf{Gears:} Precision-cut profile teeth for smooth engagement and minimal backlash.
+\item \textbf{Suspension links:} Structural links withstanding dynamic operational loads with precise geometric alignment.
+\item \textbf{Wheel couplings:} Interface hubs bridging drive shafts to wheel assemblies.
+\end{itemize}
+\item \textbf{Hydraulic V-bending:} was used for components requiring multi-planar rigidity without the weight or failure points of welding, including the main chassis brackets and structural reinforcement plates.
+%  Bend allowances and K-factors were calculated during the CAD phase to account for material springback.
+\end{enumerate}
+
+\paragraph{Assembly Process}
+\begin{enumerate}
+\item \textbf{Main frame assembly:} Chassis skeleton assembled from V-slot profiles, joined with corner brackets and gussets, fasteners threaded into flat nuts within the V-grooves. Frame verified square before final torqueing.
+\item \textbf{Suspension linkage:} Deep groove ball bearings press-fit into laser-cut suspension links, mounted using threaded rod pivot axles secured with locking hardware and spacers.
+\item \textbf{Wheel hub integration:} Bearing blocks mounted to suspension uprights; drive shafts inserted through bearings; wheel couplings and gears fixed onto shafts.
+\end{enumerate}
+
 \subsection{Laser Pointer}
+The laser pointer is mounted on a 2-degree-of-freedom (2-DoF) pan-tilt gimbal, moving independently along a pan axis (left/right) and a tilt axis (up/down) as shown in Figure \ref{fig:laser-pointer}. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\linewidth]{assets/laser_pointer.png}
+    \caption{Laser Pointer Pan-Tilt Gimbal}
+    \label{fig:laser-pointer}
+\end{figure}
+
+The gimbal is designed to be lightweight, compact, and capable of precise angular positioning for accurate laser pointing.
+\paragraph{Actuation}
+Both axes are actuated by \textbf{MG996R} high-torque servos. 
+% Each servo has a 25-tooth spline output, a 180\textdegree{} rotation range, and delivers approximately 9.4~kg$\cdot$cm torque at 4.8~V.
+Motor brackets attach across multiple arms of the servos' stock 6-arm plastic horns to distribute torsional load and prevent stripping under sudden stops.
+\paragraph{Bracket Structure \& Manufacturing}
+The pan-axis servo forms the base, carrying the combined weight of the tilt servo, brackets, and laser via a recessed bracket secured at four points on the servo horn. The tilt-axis laser holder uses a reinforced single-side cantilever mount to resist deflection under the laser's weight.
+Brackets are 3D-printed via FDM using PLA filament, with load-bearing walls held to a minimum 4~mm thickness to prevent layer delamination under high-speed movement.
+
+
 % \subsection{Hardware Box}
 
 \section{Electronic and Power Design}
