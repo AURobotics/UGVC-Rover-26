@@ -244,10 +244,40 @@ Finite Element Analysis (FEA) was performed in SolidWorks to validate the struct
 \subsection{System Architecture Overview}
 \subsection{Core Functionalities}
 \subsubsection{Lane Detection and Navigation}
-% lane detection part
-% lane navigation part 
+\paragraph{Detection:}
+A detection node equipped with a YOLOv8-based model is responsible for outputting a steering error percentage -- a lateral error offset from the lane center -- to the navigation nodes.
+
+\paragraph{Dataset \& Model Training:}
+
+The lane detection dataset was created by extracting frames from multiple recorded UGVC competition videos and another videos.
+The selected videos include different geometries , lighting conditions and camera viewpoints to improve the model's performance.
+The videos that were used in the training:
+\begin{itemize}
+    \item SCR IGVC 2024
+    \item SCR IGVC 2023
+    \item Self-driving car videos
+\end{itemize}
+
+After collecting the data, each frame was manually annotated using Roboflow.
+The lane boundaries were labeled with bounding box to create the training dataset used by YOLOv8 model, as shown in Figure \ref{fig:annotated-lanes}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{assets/Annotated Lane Dataset.jpeg}
+    \caption{Annotated lane dataset sample}
+    \label{fig:annotated-lanes}
+\end{figure}
+
+Shown in Figure \ref{fig:detected-lanes} are bounding boxes after lane detection.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{assets/Lane Detection Test.jpeg}
+    \caption{Lane detection bounding boxes}
+    \label{fig:detected-lanes}
+\end{figure}
+
+\paragraph{Navigation}
 The rover's lateral offset from the lane center, output by the \texttt{lane\_detection\_node}, is consumed by the lane navigation module as its error input. Lane navigation is handled by a PID control loop that converts this error into a corrective angular velocity command, while maintaining a constant forward velocity.
-\\
+
 The PID controller is tuned to provide a balance between responsiveness and stability in MATLAB's Simulink as shown in Figure \ref{fig:pid-tuning}.
 \begin{figure}[H]
     \centering
@@ -274,7 +304,29 @@ The lane navigation node then publishes the steering commands to the respective 
 \subsubsection{Pothole Detection}
 Using a YOLOv8-based model, the vision system provides the autonomous rover with real-time pothole detection.
 The information is later fused with lane detection results to estimate steering error percentage.
-The 
+After detecting pothols, the detection node publishes a lateral offset error \% to the \texttt{/hole/error} topic.
+
+\paragraph{Dataset:}
+The hole detection dataset was created by extracting frames from multiple recorded UGVC competition videos and another videos and gazebo simulation.
+The selected videos include different geometries, lighting conditions and camera viewpoints to improve the model's performance.
+Among other sources, SCR IGVC 2025 videos were used to extract and annotate pothole images.
+
+\begin{figure}[H]
+    \includegraphics[width=0.45\textwidth]{assets/Potholes Dataset Real.jpeg}
+    \caption{Examples of holes under different conditions}
+\end{figure}
+
+\paragraph{Training:}
+After collecting the data, each frame was manually annotated using Roboflow .
+The hole was labeled with bounding box to create the training dataset used by YOLOv8 model.
+
+\begin{figure}[H]
+    \includegraphics[width=0.45\textwidth]{assets/Potholes Annotated Dataset.jpeg}
+    \caption{Annotated dataset from videos and simulations}
+\end{figure}
+
+\paragraph{Error Calculation:}
+The pothole center is extracted from the detected bounding box and compared with the horizontal center of the image. The resulting lateral offset is normalized to a percentage and published as the steering error for the topic.
 
 \subsubsection{Obstacle Avoidance}
 The rover utilizes a LiDAR sensor (RPLIDAR A2)  to detect obstacles within the drivable lane corridor and generate a corrected heading that keeps the rover within lane boundaries while avoiding collisions.
