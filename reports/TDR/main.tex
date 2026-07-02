@@ -237,6 +237,38 @@ A key design decision for this year's rover was the adoption of a fully passive 
 
 \subsection{Software Innovations}
 
+\paragraph{Health Monitor with GUI Feedback}
+A self-check system continuously monitors battery voltage, IMU calibration, and control modes.
+Alerts are pushed live to the GUI, offering real-time insight and fault warnings similar to automotive CAN systems.
+
+\paragraph{Rover-Seeking Router}
+Using GPS coordinates and heading of each of the rover and the router station-side, an automated servo motor points the router at the rover by rotating the pole that holds the router.
+
+\paragraph{Dual-Layer Sensor Fusion}
+We implemented a two-stage UKF architecture: a primary filter fuses IMU and wheel encoders for driftresistant local estimation, while a secondary UKF integrates GPS via \texttt{navsat\_transform} for long-term accuracy.
+This hybrid design provides short-term responsiveness and global consistency.
+
+\paragraph{Interactive Debug Console}
+An embedded console supports real-time telemetry, command input, and live reconfiguration of controller parameters.
+A debug policy ensures safe activation of print hooks without interrupting real-time execution, supporting in-field diagnostics and tuning.
+
+\paragraph{Embedded Autotuning and System ID}
+Motor controllers perform real-time system identification using encoder logs, with MATLAB used to model transfer functions and autotune PID gains.
+The tuned parameters are flashed to the MCU, reducing manual effort and improving control stability.
+
+\textbf{ROS $ \leftrightarrow $ Embedded Abstraction}
+A stable CDC USB protocol bridges ROS 2 and \texttt{STM32} microcontroller.
+Messages are parsed asynchronously, and embedded nodes implement a minimal ROS-like structure.
+This enables scalable, modular communication resembling DDS pub/sub over serial.
+
+\textbf{Custom Messaging System with Flow Control}
+A modular, RTOS-compatible messaging system was developed with software flow control, hardware parity checks, and per-port mutex protection.
+It monitors byte timing and buffer usage, with an integrated debug mode that logs all traffic to an external terminal without interfering with core functions.
+
+\textbf{Angle-Constrained B\'ezier Planner}
+The B\'ezier path planner was extended to support heading constraints at start and end points, enabling smoother and curvature-limited paths. By planning over ($x,y,\theta$) state vectors, the system supports tighter turns and better integration with controllers like Pure Pursuit.
+
+
 \section{Mechanical Design}
 \subsection{Frame Design}
 The rover frame was designed in compliance with UGVC competition dimensional constraints (90--200 cm length, 60--120 cm width, 120 cm max height), with a focus on modularity, weight optimization, and ease of assembly.
@@ -269,7 +301,6 @@ The system's architecture features a main rocker arm on each side, linked via a 
 \end{figure}
 This articulation allows each wheel to adapt independently to variations in the ground plane, maintaining continuous ground contact across uneven terrain.
 
-\subsection{Drivetrain and Wheels}
 \subsection{Material Selection}
 \paragraph{Main Frame Material}
 The primary structural skeleton of the chassis was constructed using 20$\times$20mm aluminum V-slot profiles.
@@ -509,7 +540,7 @@ A graphic summarizing all inter-node communications is shown in Figure \ref{fig:
 \end{figure}
 
 
-\subsection{Software Testing and Bug Tracking}
+\subsection{Software Testing \& Bug Tracking}
 
 Software validation relied on a combination of visualization and debugging tools alongside a structured team workflow for tracking progress and resolving issues throughout development.
 
