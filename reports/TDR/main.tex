@@ -706,9 +706,18 @@ To improve the accuracy of IMU data, a zeroing and calibration routine is execut
 
 \subsubsection{Vehicle Monitoring}
 
-Using a station-side user interface made in Qt with QML-based widgets for the telemetry and system statistics, we can display in real-time vital information about the system.
+Using a station-side user interface made in Qt with QML-based widgets for the telemetry and system statistics, we can display in real-time vital information about the system including:
 
-In case the ROS-based remote communication fails for any reason, we can directly \texttt{ssh} into the onboard computer and directly view nodes and debug them and their topics and check system vitals.
+\begin{itemize}
+    \item \textbf{Battery Status:} Two floating-point values reporting the voltage of the traction and control battery rails.
+    \item \textbf{Linear Velocity:} The rover's current linear speed, in m/s.
+    \item \textbf{Yaw / Compass:} Current heading, derived from the onboard IMU.
+    \item \textbf{Motor Currents:} Four individual current readings (FL, FR, BL, BR), one per motor channel.
+    \item \textbf{Position (X, Y):} The rover's estimated 2D position on the field.
+\end{itemize}
+
+In case the ROS-based remote communication fails for any reason, the onboard computer can be accessed directly via \texttt{ssh}, allowing nodes, topics, and system vitals to be inspected and debugged.
+% In case the ROS-based remote communication fails for any reason, we can directly \texttt{ssh} into the onboard computer and directly view nodes and debug them and their topics and check system vitals.
 
 \subsection{System Integration}
 
