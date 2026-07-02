@@ -347,9 +347,68 @@ Brackets are 3D-printed via FDM using PLA filament, with load-bearing walls held
 % \subsection{Hardware Box}
 
 \section{Electronic and Power Design}
-\subsection{Main Control Unit}
-\subsection{Motor Control Board}
-\subsection{Power Board}
+\subsection{Main Control Board}
+
+The main board serves as the central unit integrating the components required for navigation, communication, and control. It is built around an STM32F401RCT6 (ARM Cortex-M4) microcontroller, chosen for its strong real-time performance and widespread industry adoption in embedded control applications. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\columnwidth]{assets/main_board.png}
+\hfill
+\includegraphics[width=0.48\columnwidth]{assets/main_board_2.png}
+\caption{3D render and PCB layout of the main control board.}
+\label{fig:main-board}
+\end{figure}
+
+\paragraph{Power Management and Protection}
+The board provides two primary voltage rails, 5V and 3.3V, each with dedicated protection circuitry to improve reliability. Both inputs are protected against reverse polarity using a P-channel MOSFET and against overvoltage transients using a Zener diode clamp.
+
+\paragraph{Motion Control and Safety Systems}
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item \textbf{Encoder Interfaces (×4):} Four dedicated encoder inputs are located along the board edges (Fig.~\ref{fig:main-board}). Each channel includes an onboard RC low-pass filter to suppress mechanical and electrical bounce from motor encoders before the signal reaches the STM32's hardware timer pins.
+\item \textbf{PCA9685 Motor Control Header:} A dedicated I2C header breaks out signals to an external PCA9685 16-channel PWM driver, offloading motor control from the STM32's own limited PWM channels.
+\item \textbf{Emergency Shutdown Circuit:} A physical emergency-stop button immediately halts all motors and triggers a warning light when pressed.
+\end{itemize}
+
+\paragraph{Communication and Sensor Telemetry}
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item \textbf{NRF Wireless Module:} An NRF transceiver provides long-range wireless communication for remote control.
+\item \textbf{IMU Interface:} A 4-pin I2C header connects to an external IMU (e.g., BNO055) for orientation tracking and stabilization.
+\item \textbf{Power Distribution Board (PDB) Sensor Header:} An IDC connector receives telemetry from the power distribution board, including motor current draw and battery voltage.
+\end{itemize}
+
+\subsection{Power Distribution Board}
+
+\subsection{Motor Drivers}
+Motor actuation is handled by H-bridge driver circuits built around IR2104 gate drivers, controlled directly by the main STM32F401RCT6 controller. The firmware enforces strict timing and sequencing rules to protect the gate drivers and motor FETs from damage during operation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\linewidth]{assets/motor_driver_pcb.jpeg}
+\caption{3D rendering of the H-bridge motor driver board.}
+\label{fig:motor-driver-pcb}
+\end{figure}
+\vspace{-15pt}
+\begin{figure}[H]   
+    \centering  
+    \includegraphics[width=0.75\linewidth]{assets/motor_driver_doc.jpeg}
+    \caption{Motor driver schematic and PCB layout.}
+\end{figure}
+
+\paragraph{PWM Configuration}
+The controller's timer peripheral is configured to generate a PWM signal at a switching frequency suitable for reliable operation with the IR2104 driver, balancing switching efficiency against audible noise and control precision.
+
+\paragraph{Dead-Time Protection}
+Switching the H-bridge directly between forward and reverse can cause a shoot-through condition, where both sides of the bridge conduct simultaneously and short-circuit the supply. To prevent this, the firmware enforces a mandatory dead-time delay on every direction change, disabling both driver channels before the new direction is enabled. This software interlock supplements the IR2104's internal dead-time protection.
+
+\paragraph{Acceleration Ramping}
+To avoid inrush current spikes and mechanical stress, motor speed is ramped up gradually in small increments with only one direction driven at a time.
 
 \section{Software Design}
 
