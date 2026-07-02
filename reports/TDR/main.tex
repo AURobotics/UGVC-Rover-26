@@ -449,10 +449,10 @@ The rover implements two independent emergency stop mechanisms, ensuring motors 
 
 \begin{itemize}
     \item \textbf{Physical E-Stop Button:} A dedicated emergency-stop button on the main control board immediately halts all motors and triggers a warning light when pressed.
-    \item \textbf{Wireless Kill Switch:} A remote stop command can be sent over the NRF wireless link, allowing an operator or safety official to halt the rover without requiring physical access.
+    \item \textbf{Wireless Kill Switch:} A remote stop command can be sent over the NRF wireless link based on hardware interrupt, allowing an operator or safety official to halt the rover without requiring physical access.
 \end{itemize}
 \subsection{Cooling \& Ventilation System}
-Thermal management is provided by two brushless DC fans mounted on a dedicated cooling panel, which channel airflow through ducting aligned with the chassis rails, directing air across the electronics enclosure to prevent heat buildup during sustained operation.
+Thermal management is provided by two brushless DC fans, which ventilates the hardware electronics box, preventing heat buildup during sustained operation.
 \section{Software Design}
 
 \subsection{Architecture Overview}
@@ -620,6 +620,75 @@ The station's router is configured to have a narrower wireless bandwidth (5-20 M
 
 \subsection{Auxiliary Systems}
 \subsubsection{Motor Control}
+\label{sec:motor-control} 
+The traction framework is powered by a 250 W, 24 V brushed DC motor, modeled as a second-order LTI state-space system with state vector $x = [\omega \quad i]^T$ (angular velocity and armature current):
+\begin{equation}
+\dot{x} = \begin{bmatrix} -b/J & k/J \\ -k/L & -R/L \end{bmatrix}x + \begin{bmatrix} 0 \\ 1/L \end{bmatrix}u, \quad y = \begin{bmatrix} 0 & 1 \end{bmatrix}x
+\end{equation}
+where $J = 0.01$ kg$\cdot$m$^2$, $b = 0.1$ N$\cdot$m$\cdot$s, $k = 0.1$ V$\cdot$s/rad, $R = 1\ \Omega$, $L = 0.5$ H. 
+% System identification was performed using MATLAB's grey-box framework (\texttt{greyest}) against a step-response test on the physical plant.
+\\ The full system model was modeled in MATLAB's Simulink and used to tune the PID controller for the inner velocity loop, as shown in Figure \ref{fig:full-control-loop}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{assets/Full System Model.jpeg}
+    \caption{Full system model for motor control loop}
+    \label{fig:full-control-loop}
+\end{figure}
+
+\paragraph{State Estimation \& Sensor Fusion}
+A Luenberger observer reconstructs velocity $\omega$ from measured armature current $y = i$:
+\begin{equation}
+\dot{\hat{x}} = A\hat{x} + Bu + K_e(y - C\hat{x})
+\end{equation}
+The gain $K_e$ is synthesized via LQR duality ($K_e = \text{lqr}(A^T, C^T, Q_o, R_o)^T$) with $Q_o = \text{diag}(10, 5)$, $R_o = 0.1$. The observer's estimate $\hat{\omega}$ is fused with the encoder reading $\omega_{\text{enc}}$ using a complementary filter at crossover $\omega_c = 5$ rad/s:
+\begin{equation}
+\omega_{\text{fused}}(s) = \left(\frac{s}{s+\omega_c}\right)\omega_{\text{obs}}(s) + \left(\frac{\omega_c}{s+\omega_c}\right)\omega_{\text{enc}}(s)
+\end{equation}
+The encoder anchors low-frequency DC tracking (eliminating observer drift from Coulomb drag and thermal shifts), while the observer handles high-frequency transients, bypassing encoder quantization latency.
+
+\paragraph{2-DOF Control Architecture and Loop Shaping}
+A Two-Degree-of-Freedom structure decouples disturbance rejection from command tracking.
+
+\paragraph{Reference Prefilter}
+A first-order prefilter smooths the reference outside the feedback loop:
+\begin{equation}
+F_{\text{ref}}(s) = \frac{\omega_n}{s + \omega_n}, \quad \omega_n = 5 \text{ rad/s}
+\end{equation}
+bounding rise time to $t_{\text{rise}} \approx 0.44$ s, limiting inrush current and wheel slip.
+
+\paragraph{Series Compensator Loop Shaping}
+The inner loop is shaped in the frequency domain via a 2-pole 2-zero compensator:
+\begin{equation}
+K_c(s) = K_g \cdot K_b(s) \cdot K_l(s) \cdot K_r(s)
+\end{equation}
+\begin{itemize}
+    \item \textbf{Gain ($K_g$):} Sets crossover frequency $W_l = 25$ rad/s.
+    \item \textbf{Low-Frequency Boost ($K_b(s) = \frac{B_b s + W_l}{s}$, $B_b=3$):} Ensures tight steady-state tracking.
+    \item \textbf{Lead Compensator ($K_l(s) = \frac{B_l s + W_l}{s + B_l W_l}$, $B_l=3$):} Recovers phase margin lost to transport delay.
+    \item \textbf{Roll-Off Filter ($K_r(s) = \frac{W_l \sqrt{B_r^2 + 1}}{s + B_r W_l}$, $B_r=10$):} Attenuates high-frequency gain by $>20$ dB against sensor noise.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{assets/loop_transfer_function.jpeg}
+    \caption{Open-loop frequency response $L(j\omega)$ mapping plant and cascade controllers.}
+    \label{fig:loop_gain}
+\end{figure}
+
+\subsubsection{Robustness Verification and Digital Mapping}
+A hierarchical bandwidth separation prevents coupling between control layers:
+\begin{equation}
+\omega_{\text{Nav}} < \omega_{\text{ref}} \ll W_l \le \frac{\pi}{5 T_s}
+\end{equation}
+with $\omega_{\text{Nav}} < 5$ rad/s (ROS 2/Pure Pursuit), $\omega_{\text{ref}} = 5$ rad/s (prefilter), $W_l = 25$ rad/s (inner loop), bounded by the 100 Hz MCU sampling limit ($F_s/10 \approx 62.8$ rad/s).
+
+Structured sensitivity analysis bounds peak sensitivity below 5 dB ($M_s \le 1.78$), guaranteeing Gain Margin $\ge 7.2$ dB and Phase Margin $\ge 32.6^\circ$ — absorbing the $\approx 14.3^\circ$ digital phase drop from ZOH delay ($T_s/2 = 5$ ms).
+
+The compensator $K_c(s)$ is discretized via prewarped Tustin transform:
+\begin{equation}
+s = K \frac{z - 1}{z + 1}, \quad K = \frac{W_l}{\tan\left(\frac{W_l T_s}{2}\right)}
+\end{equation}
+matching $K$ to crossover frequency $W_l$ preserves exact phase and gain characteristics at the tracking crossover within the 100 Hz execution loop.
 \subsubsection{Sensor Fusion}
 \subsubsection{Vehicle Monitoring}
 
@@ -696,13 +765,12 @@ Using RViz and Gazebo, we were able to visualize what the rover ``sees'' as well
     \label{fig:rviz-gazebo}
 \end{figure}
 
-For the navigation approach we settled on, the PID controller was developed, tested and simulated in MATLAB.
-
+For the navigation approach we settled on, the PID controller developed(See section \ref{sec:motor-control}) then  tested ,tuned ,and simulated in MATLAB.
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.45\textwidth]{assets/Full System Model.jpeg}
-    \caption{Full system model in MATLAB}
-    \label{fig:matlab-full-sys-model}
+\centering
+\includegraphics[width=0.45\textwidth]{assets/step_response.jpeg}
+\caption{Closed-loop step response showing settling to the reference speed with minimal overshoot.}
+\label{fig:step-response}
 \end{figure}
 
 \subsection{Testing}
