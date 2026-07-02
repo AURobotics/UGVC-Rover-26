@@ -194,11 +194,32 @@ All financials and payments were tracked using shared spreadsheets with saved hi
 
 \subsection{Safety Measures}
 
-Safety was a core design consideration both in hardware and software.
+Safety was a core principle in all aspects and stages of design.
+
+\paragraph{Mechanical Safety:}
+
+\begin{itemize}
+    \item No exposed sharp edges
+\end{itemize}
+
 \paragraph{Hardware Safety:}
 
+\begin{itemize}
+    \item Mechanical E-Stop: A hardwired emergency stop switch connected to the power board, cutting off motor power instantly
+    \item Wireless Kill Switch: Implemented using NRF24L01 module. If signal is received, it ets motor speed to zero
+    \item Power Filtering: Voltage regulators and filtering capacitors were integrated to protect sensitive electronics from ripple and noise
+    \item Voltage Scaling for Monitoring: ADCs only read scaled battery values using precision resistive dividers to avoid damage
+    \item Protection Components: fuses to prevent overcurrent; flyback diodes to prevent backwards EMF; Zener diodes to prevent overvoltage
+\end{itemize}
 
 \paragraph{Software Safety:}
+
+\begin{itemize}
+    \item Status Feedback Loop: All critical systems (battery, IMU, navigation mode) are monitored and reported to the GUI. Warnings are issued if thresholds are exceeded or sensors are unhealthy
+    \item Command Timeout: Motors automatically stop if no valid command is received within a certain timeframe
+    \item Mode Isolation: Manual mode overrides all autonomous actions to ensure immediate user control in unsafe scenarios
+    \item USB CDC \& Safety: Keeps communication robust and reduces latency to ensure integrity in command dispatch. Allows swift recovery on link-loss, and stopping motors while disconnected
+\end{itemize}
 
 \section{Technical Innovation}
 
@@ -493,7 +514,10 @@ A graphic summarizing all inter-node communications is shown in Figure \ref{fig:
 \section{Simulation \& Testing}
 
 
+
 \section{Future Work}
+
+We have a few planned improvements, limited by the team's budget, which we hope to implement in future participations -- not in this year's competition.
 
 \textbf{The mechanical team} aims to implement:
 
