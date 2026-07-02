@@ -175,7 +175,7 @@ The following software suite that allowed testing, simulation, design and teleme
     \item \textbf{Custom Embedded Debugger:} For interactive ROS $\leftrightarrow$ MCU communication over UART.
 \end{itemize}
 
-This toolset enabled parallel development across subsystems, with 
+This toolset enabled parallel development across subsystems.
 
 \subsection{Budget Management}
 Phoenix was designed within a tightly constrained budget. Chosen components had to be reliable in a cost-effective way. Our budgeting practices included:
@@ -207,10 +207,31 @@ Safety was a core design consideration both in hardware and software.
 \subsection{Software Innovations}
 
 \section{Mechanical Design}
-\subsection{Design Improvement}
 \subsection{Frame Design}
+The rover frame was designed in compliance with UGVC competition dimensional constraints (90--200 cm length, 60--120 cm width, 120 cm max height), with a focus on modularity, weight optimization, and ease of assembly.
+The primary structural skeleton is constructed from 20$\times$20mm aluminum V-slot profiles, with the profiles' T-slot geometry enabling rapid assembly and adjustment using flat nuts and extrusion hardware which proved essential during prototyping and iterative testing. This choice provides:
+
+\begin{itemize}
+\item Structural adaptability \& rigidity
+\item Modular subsystem mounting and repositioning without requiring a complete structural redesign
+\item Simplified maintenance and inspection, allowing rapid access to internal components
+\item Greater internal volume for mounting critical components
+\item Balanced weight distribution across the wheels, improving stability during motion
+\end{itemize}
+
+The frame was modeled in SolidWorks as shown in figure \ref{fig:frame-cad} with mounting provisions integrated directly into the design for motors, suspension arms, electronics enclosures, batteries, and control modules. 
+Finite Element Analysis (FEA) was performed in SolidWorks to validate the structural integrity of the frame under anticipated mechanical loads, confirming minimal deflection and a sufficient safety factor.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{assets/frame_1.png}
+    \caption{Frame CAD Model}
+    \label{fig:frame-cad}
+\end{figure}
+\subsection{Rocker Bogie Suspension}
+\subsection{Drivetrain and Wheels}
+\subsection{Manufacturing and Assembly}
 \subsection{Laser Pointer}
-\subsection{Hardware Box}
+% \subsection{Hardware Box}
 
 \section{Electronic and Power Design}
 \subsection{Main Control Unit}
