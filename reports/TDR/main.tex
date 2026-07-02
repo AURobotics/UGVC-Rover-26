@@ -350,20 +350,14 @@ Brackets are 3D-printed via FDM using PLA filament, with load-bearing walls held
 \subsection{Main Control Board}
 
 The main board serves as the central unit integrating the components required for navigation, communication, and control. It is built around an STM32F401RCT6 (ARM Cortex-M4) microcontroller, chosen for its strong real-time performance and widespread industry adoption in embedded control applications. 
-% The microcontroller is mounted via female sockets rather than soldered directly, allowing it to be easily replaced or removed for debugging.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.55\linewidth]{assets/main_board.png}
-\caption{3D rendering of main control board.}
-\label{fig:main-board-3d}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.55\linewidth]{assets/main_board_2.png}
-\caption{PCB layout of the main control board.}
-\label{fig:main-board-pcb}
+\includegraphics[width=0.48\columnwidth]{assets/main_board.png}
+\hfill
+\includegraphics[width=0.48\columnwidth]{assets/main_board_2.png}
+\caption{3D render and PCB layout of the main control board.}
+\label{fig:main-board}
 \end{figure}
 
 \paragraph{Power Management and Protection}
@@ -374,7 +368,7 @@ The board provides two primary voltage rails, 5V and 3.3V, each with dedicated p
 \setlength{\itemsep}{1pt}
 \setlength{\parskip}{0pt}
 \setlength{\parsep}{0pt}
-\item \textbf{Encoder Interfaces (×4):} Four dedicated encoder inputs are located along the board edges (Fig.~\ref{fig:main-board-pcb}). Each channel includes an onboard RC low-pass filter to suppress mechanical and electrical bounce from motor encoders before the signal reaches the STM32's hardware timer pins.
+\item \textbf{Encoder Interfaces (×4):} Four dedicated encoder inputs are located along the board edges (Fig.~\ref{fig:main-board}). Each channel includes an onboard RC low-pass filter to suppress mechanical and electrical bounce from motor encoders before the signal reaches the STM32's hardware timer pins.
 \item \textbf{PCA9685 Motor Control Header:} A dedicated I2C header breaks out signals to an external PCA9685 16-channel PWM driver, offloading motor control from the STM32's own limited PWM channels.
 \item \textbf{Emergency Shutdown Circuit:} A physical emergency-stop button immediately halts all motors and triggers a warning light when pressed.
 \end{itemize}
