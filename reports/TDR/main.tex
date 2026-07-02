@@ -241,7 +241,14 @@ Finite Element Analysis (FEA) was performed in SolidWorks to validate the struct
 
 \section{Software Design}
 
-\subsection{System Architecture Overview}
+\subsection{Architecture Overview}
+The system is built up on a ROS 2 base with multiple peripheral nodes producing feedback for the navigation controllers.
+
+A main finite state machine controller presides over the whole system, managing when services and nodes start and stop according to the rover's current state within the run.
+It also manages the transition between manual and autonomous modes.
+
+For manual navigation, a remote connection is established via ROS 2 to the station to receive motion commands.
+
 \subsection{Core Functionalities}
 \subsubsection{Lane Detection and Navigation}
 \paragraph{Detection:}
@@ -352,6 +359,7 @@ At each scan cycle, the system executes the following sequence:
     \item \textbf{Heading Selection:} Following boundary expansion, select the direction within the permitted window that offers the greatest unobstructed distance and publish this as the corrected heading command.
 \end{enumerate}
 
+\subsubsection{Waypoint Navigation}
 
 \subsubsection{Face Recognition and Detection}
 \paragraph{Models:}
@@ -381,16 +389,35 @@ The station's router is configured to have a narrower wireless bandwidth (5-20 M
 \subsubsection{Motor Control}
 \subsubsection{Sensor Fusion}
 \subsubsection{Vehicle Monitoring}
+
 \subsection{System Integration}
+
+To integrate all the components of the system with the different ROS nodes and topics, a set of strategies are deployed to ensure reliable communication.
+
+The main entry point and the emergency access hatch is \texttt{ssh} access to the onboard computer to debug, test, monitor and deploy the system.
+
+Once the main orchestrator node that is resposible for state transitions and state tracking is spun, the peripheral and auxiliary are started and put under the supervision of that main node.
+
+A graphic summarizing all inter-node communications is shown in Figure \ref{fig:ros-auto-overview}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{assets/ROS Autonomous System Overview.png}
+    \caption{ROS 2 node integration summary}
+    \label{fig:ros-auto-overview}
+\end{figure}
+
+
 \subsection{Software Testing and Bug Tracking}
+
+\section{Simulation \& Testing}
 
 
 \section{Future Work}
 
-The mechanical team aims to implement:
+\textbf{The mechanical team} aims to implement:
 
 \begin{enumerate}[label=\textbf{\alph*.}, itemsep=1pt, parsep=0pt]
-    \item \textbf{Active Suspension:} Servo-controlled or fluid-based damping systems for terrain-adaptive ride quality.
     \item \textbf{Lightweighting:} FEA and topology optimization to reduce mass without sacrificing strength.
     \item \textbf{Sealed Joints:} Sand-proof bearing housings and maintenance-friendly component designs.
     \item \textbf{Integrated Drive Units:} Compact gearboxes with aligned shafts, improved torque, and shock resistance.
@@ -398,19 +425,20 @@ The mechanical team aims to implement:
     \item \textbf{Manufacturing:} CNC bending, jig expansion, and QA protocols for consistency and precision.
 \end{enumerate}
 
-\vspace{1em}
-
-For electrical improvements, the team plans to:
+\textbf{For electrical improvements}, the team plans to:
 
 \begin{itemize}[itemsep=1pt]
     \setlength{\parskip}{0pt}
     \setlength{\parsep}{0pt}
-    \item Design custom microcontrollers tailored to system needs.
-    \item Develop in-house buck converters and motor drivers.
-    \item Enhance subsystem coordination and autonomy via smarter control algorithms.
+    \item Design custom integrated microcontroller boards tailored to system needs
+    \item Enhance subsystem coordination and autonomy via smarter control algorithms
+    \item Make use of sensored brushless motor for enhanced control and more accurate localization support
+    \item Develop in-house ESC
 \end{itemize}
 
 These changes aim to deepen hardware understanding, boost customization, and improve adaptability for complex tasks and terrains.
+
+\textbf{For software improvements}, the team aims to utilize a stereo camera setup to simplify and improve the efficiency of lane detection and obstacle avoidance.
 
 \addcontentsline{toc}{section}{References}
 \nocite{*}
