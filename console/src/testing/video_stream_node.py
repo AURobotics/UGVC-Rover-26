@@ -23,7 +23,7 @@ class VideoStreamNode(Node):
     def publish_video_stream(self):
         ret, frame = self.cap.read()
         if ret:
-            success, compressed_frame = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+            success, compressed_frame = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 40])
             if success:
                 msg = CompressedImage()
                 msg.header.stamp = self.get_clock().now().to_msg()
