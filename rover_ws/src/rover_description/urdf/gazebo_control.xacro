@@ -4,7 +4,6 @@
     <gazebo>
         <!-- <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so"> -->
         <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
-            <topic>cmd_vel</topic>
             <!-- Wheel Information -->
             <left_joint>left_wheel_joint</left_joint>
             <right_joint>right_wheel_joint</right_joint>

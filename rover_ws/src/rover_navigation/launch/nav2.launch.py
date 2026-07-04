@@ -22,7 +22,7 @@ def generate_launch_description():
     declare_params_file = DeclareLaunchArgument(
         'params_file',
         default_value=os.path.join(
-            get_package_share_directory('rover_nav'),
+            get_package_share_directory('rover_navigation'),
             'config', 'nav2_params.yaml'),
         description='Full path to nav2 params file')
 

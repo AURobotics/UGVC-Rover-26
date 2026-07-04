@@ -8,7 +8,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    pkg_nav = get_package_share_directory('rover_nav')
+    pkg_nav = get_package_share_directory('rover_navigation')
     default_rviz_config = os.path.join(pkg_nav, 'rviz', 'rover_teleop.rviz')
 
     declare_use_sim_time = DeclareLaunchArgument(

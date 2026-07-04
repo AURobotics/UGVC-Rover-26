@@ -1,13 +1,12 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-<!-- camera.xacro -->
-<joint name="camera_joint" type="fixed">
-  <parent link="chassis"/>
-  <child link="camera_link"/>
-  <origin xyz="0.335 -0.001 0.09" rpy="0 -0.611 0"/>
-  <!--                                    ↑ -35° in radians -->
-</joint>
+    <joint name="camera_joint" type="fixed">
+        <parent link="chassis"/>
+        <child link="camera_link"/>
+        <origin xyz="0.335 -0.001 0.09" rpy="0 0 0"/> 
+    </joint>
+
     <link name="camera_link">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>

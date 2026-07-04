@@ -18,7 +18,6 @@
     <xacro:property name="caster_wheel_mass" value="0.01"/>
     <xacro:property name="caster_wheel_offset_x" value="0.075"/>
     <xacro:property name="caster_wheel_offset_z" value="${wheel_offset_z - wheel_radius + caster_wheel_radius}"/>
-    <xacro:property name="mast_radius" value="0.015"/> <xacro:property name="mast_height" value="0.028"/>  ```
     <material name="rover_white">
         <color rgba="1 1 1 1" />
     </material>
@@ -145,7 +144,7 @@
         </visual>
         <collision>
             <geometry>
-                <sphere radius="${wheel_radius}" length="${wheel_thickness}"/>
+               <cylinder radius="${wheel_radius}" length="${wheel_thickness}"/>  
             </geometry>
         </collision>
         <xacro:inertial_cylinder mass="${wheel_mass}" length="${wheel_thickness}" radius="${wheel_radius}">
