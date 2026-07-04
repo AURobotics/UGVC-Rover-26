@@ -7,7 +7,7 @@ from .homography import HomographyBEV
 class RoadFeatureDetector:
 
     def __init__(self, K, camera_height, pitch_deg,yaw_deg,roll_deg, image_size, dist_coeffs=None,
-                 min_radius=10, max_radius=200):
+                 min_radius=10, max_radius=200, horizon_margin_px=20, max_forward_range=5.0):
 
         self.bev = HomographyBEV(
             K=np.array(K, dtype=np.float64),
@@ -22,9 +22,42 @@ class RoadFeatureDetector:
         self.min_radius = min_radius
         self.max_radius = max_radius
 
+        # How many extra pixels below the mathematical horizon row to
+        # additionally exclude, since points very close to the horizon
+        # are numerically unstable (tiny pitch/pixel errors -> huge
+        # distance swings) even though they're technically "below" it.
+        self.horizon_margin_px = horizon_margin_px
+
+        # Ground points farther than this (in meters) are treated as
+        # unreliable noise and dropped, rather than trusted at face value.
+        self.max_forward_range = max_forward_range
+
         self.lower_white = np.array([0, 0, 200])
         self.upper_white = np.array([180, 50, 255])
         self.kernel = np.ones((5, 5), np.uint8)
+
+        self._update_horizon_roi()
+
+    # ======================================================
+    # HORIZON ROI
+    # ======================================================
+    def _update_horizon_roi(self):
+        """
+        Recompute the topmost image row that is safe to run ground-plane
+        detection on, based on the current homography. Call this again
+        any time the underlying HomographyBEV's camera_height/pitch_deg/
+        yaw_deg/roll_deg change and its extrinsics are rebuilt.
+        """
+        row = self.bev.horizon_row()
+
+        if row is None or row < 0:
+            # No usable horizon in frame (e.g. camera pitched so far down
+            # the whole image is below it) -- don't crop anything.
+            self.roi_top_row = 0
+        else:
+            self.roi_top_row = int(np.clip(
+                row + self.horizon_margin_px, 0, self.bev.img_h
+            ))
 
     # ======================================================
     # ROI (kept separate, NOT used in pipeline by default)
@@ -57,6 +90,13 @@ class RoadFeatureDetector:
 
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, self.kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, self.kernel)
+
+        # Blank out everything at/above the horizon (+ margin). Those rows
+        # don't correspond to real ground points -- keeping them here
+        # would let sky/background pixels get treated as lane markings
+        # and later blow up into garbage ground-plane coordinates.
+        if self.roi_top_row > 0:
+            mask[:self.roi_top_row, :] = 0
 
         thin = ximgproc.thinning(mask)
 
@@ -146,6 +186,17 @@ class RoadFeatureDetector:
         return merged
 
     # ======================================================
+    # RANGE VALIDITY CHECK
+    # ======================================================
+    def _is_valid_ground_range(self, Y):
+        """
+        Y <= 0 means the point is at/behind the horizon (not real ground
+        in front of the camera). Y beyond max_forward_range is treated as
+        unreliable, since points get numerically unstable near the horizon.
+        """
+        return 0.0 < Y <= self.max_forward_range
+
+    # ======================================================
     # MAP CIRCLE CENTER TO GROUND
     # ======================================================
     def circle_to_ground(self, circle):
@@ -194,9 +245,18 @@ class RoadFeatureDetector:
         output = self.draw_lines(frame.copy(), lines)
 
         # --- Circles ---
-        circles = self._detect_circles(frame, white_mask)
-        ground_circles = [self.circle_to_ground(c) for c in circles]
-        circle_clouds  = [self.circle_to_ground_cloud(c) for c in circles]
+        raw_circles = self._detect_circles(frame, white_mask)
+
+        circles = []
+        ground_circles = []
+        circle_clouds = []
+        for c in raw_circles:
+            X, Y, radius_m = self.circle_to_ground(c)
+            if not self._is_valid_ground_range(Y):
+                continue
+            circles.append(c)
+            ground_circles.append((X, Y, radius_m))
+            circle_clouds.append(self.circle_to_ground_cloud(c))
 
         for x, y, r in circles:
             cv2.circle(output, (x, y), r, (0, 255, 0), 2)

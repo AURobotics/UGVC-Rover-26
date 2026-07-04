@@ -2,6 +2,7 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDurabilityPolicy
+from rclpy.duration import Duration
 
 from sensor_msgs.msg import Image, PointCloud2, CameraInfo
 from std_msgs.msg import Header, String
@@ -9,11 +10,8 @@ from std_msgs.msg import Header, String
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 
-# For point cloud conversion
 from sensor_msgs_py import point_cloud2
 
-# Import your custom modules
-from .cv_code.road_features_detector import RoadFeatureDetector
 from .cv_code.pipeline import RoadFeatureBEVPipeline
 
 
@@ -45,21 +43,20 @@ class RoadDetectorNode(Node):
         self.processing_times = []
         self.frame_count = 0
         
-        # Setup publishers, subscribers, and timers
-        self.setup_comms()
-        
         # Add dynamic parameter callback
         self.add_on_set_parameters_callback(self.parameters_callback)
         
         self.get_logger().info("Road Detector Node Initialized Successfully")
         self.get_logger().info(f"Debug images: {self.publish_debug_images}")
+
+        # Setup publishers, subscribers, and timers
+        self.setup_comms()
     
     def _declare_parameters(self):
         """Declare all node parameters with default values"""
         
         # Topic parameters
         self.declare_parameter('camera_topic', '/camera/image_raw')
-        self.declare_parameter('camera_info_topic', '/camera/camera_info')
         self.declare_parameter('output_pointcloud_topic', '/road_detector/pointcloud')
         self.declare_parameter('output_lane_mask_topic', '/road_detector/debug/lane_mask')
         self.declare_parameter('output_bev_topic', '/road_detector/debug/bev_image')
@@ -81,6 +78,10 @@ class RoadDetectorNode(Node):
         # Detection parameters
         self.declare_parameter('min_radius', 10)
         self.declare_parameter('max_radius', 200)
+
+        # Ground-plane projection safety limits
+        self.declare_parameter('horizon_margin_px', 20)
+        self.declare_parameter('max_forward_range', 5.0)
                 
         # Debug parameters
         self.declare_parameter('publish_debug_images', False)
@@ -94,7 +95,6 @@ class RoadDetectorNode(Node):
         
         # Topic parameters
         self.camera_topic = self.get_parameter('camera_topic').value
-        self.camera_info_topic = self.get_parameter('camera_info_topic').value
         self.pc_topic = self.get_parameter('output_pointcloud_topic').value
         self.lane_mask_topic = self.get_parameter('output_lane_mask_topic').value
         self.bev_topic = self.get_parameter('output_bev_topic').value
@@ -117,6 +117,10 @@ class RoadDetectorNode(Node):
         # Detection parameters
         self.min_radius = self.get_parameter('min_radius').value
         self.max_radius = self.get_parameter('max_radius').value
+
+        # Ground-plane projection safety limits
+        self.horizon_margin_px = self.get_parameter('horizon_margin_px').value
+        self.max_forward_range = self.get_parameter('max_forward_range').value
                 
         # Debug parameters
         self.publish_debug_images = self.get_parameter('publish_debug_images').value
@@ -169,20 +173,13 @@ class RoadDetectorNode(Node):
             depth=10
         )
         
-        # Subscriber for camera images (BEST_EFFORT for real-time video)
-        self.sub = self.create_subscription(
-            Image, 
-            self.camera_topic, 
-            self.image_callback, 
-            image_qos
-        )
-        
         # Publishers
         self.pc_pub = self.create_publisher(
             PointCloud2, 
             self.pc_topic, 
             reliable_qos
         )
+        self.get_logger().info(f"PointCloud2 publisher created on topic: {self.pc_topic}")
         
         if self.publish_debug_images:
             self.img_pub = self.create_publisher(
@@ -203,6 +200,14 @@ class RoadDetectorNode(Node):
                 self.stats_topic,
                 reliable_qos
             )
+
+        # Subscriber for camera images (BEST_EFFORT for real-time video)
+        self.sub = self.create_subscription(
+            Image, 
+            self.camera_topic, 
+            self.image_callback, 
+            image_qos
+        )
     
     def initialize_pipeline(self, image_width, image_height):
         """Initialize the pipeline with correct image dimensions"""
@@ -219,7 +224,9 @@ class RoadDetectorNode(Node):
                 dist_coeffs=np.array(self.dist_coeffs, dtype=np.float64),  # shape (5,)
                 image_size=(image_width, image_height),
                 min_radius=self.min_radius,
-                max_radius=self.max_radius
+                max_radius=self.max_radius,
+                horizon_margin_px=self.horizon_margin_px,
+                max_forward_range=self.max_forward_range
             )
             
             self.image_size = (image_width, image_height)
@@ -278,7 +285,7 @@ class RoadDetectorNode(Node):
             
             pc_msg = self.create_pointcloud2(lane_points, msg)
             self.pc_pub.publish(pc_msg)
-            self.get_logger().debug(f"Published {len(lane_points)} lane points")
+            self.get_logger().info(f"Published {len(lane_points)} lane points")
             
             # Publish circle point clouds
             for i, cloud in enumerate(circle_clouds):
@@ -352,33 +359,28 @@ class RoadDetectorNode(Node):
         if self.frame_count % 100 == 0:
             self.get_logger().info(stats_msg.data)
     
-    def create_pointcloud2(self, points, msg) -> PointCloud2:
-        """Convert numpy array of points to PointCloud2 message"""
+    def create_pointcloud2(self, points, msg) -> PointCloud2|None:
+        source_frame = "camera_link"
+
+        # 2. Filter points first
+        pts = np.array(points, dtype=np.float32)
+        if pts.size > 0:
+            pts = pts[np.isfinite(pts).all(axis=1)]
+
+        # 3. If still empty, skip publishing in your main loop instead of building a message
+        if pts.size == 0:
+            return None 
+
+        # 4. Create the header once
         header = Header()
         header.stamp = msg.header.stamp
-        header.frame_id = msg.header.frame_id
-        
-        if len(points) == 0:
-            # Return empty point cloud
-            return point_cloud2.create_cloud_xyz32(header, np.zeros((0, 3)))
-        
-        # Ensure points are float32 for PointCloud2
-        points_float32 = points.astype(np.float32)
-        
-        # Filter out invalid points (NaN or Inf)
-        mask = np.isfinite(points_float32).all(axis=1)
-        points_float32 = points_float32[mask]
-        
-        if len(points_float32) == 0:
-            return point_cloud2.create_cloud_xyz32(header, np.zeros((0, 3)))
-        
-        # Swap x and y, and set z to -height (or modify as needed)
-        # these transformations is to make the coordinates relative to the camera stamp
-        modified_points = np.zeros_like(points_float32)
-        modified_points[:, 0] = points_float32[:, 1]  # x becomes original y
-        modified_points[:, 1] = points_float32[:, 0]  # y becomes original x
-        modified_points[:, 2] = -self.camera_height  # set z to -camera_height (change this as needed)
-        
+        header.frame_id = source_frame
+
+        modified_points = np.zeros_like(pts)
+        modified_points[:, 0] = pts[:, 1]  # x becomes original y
+        modified_points[:, 1] = pts[:, 0]  # y becomes original x
+        modified_points[:, 2] = -self.camera_height  # set z to -camera_height -> ground
+
         return point_cloud2.create_cloud_xyz32(header, modified_points)
     
     def parameters_callback(self, params):

@@ -40,6 +40,33 @@ class HomographyBEV:
         self._build_bev_scaling()
 
     # =========================================================
+    # UPDATE POSE (rebuilds extrinsics/homography from scratch)
+    # =========================================================
+
+    def set_pose(self, camera_height=None, pitch_deg=None, yaw_deg=None, roll_deg=None):
+        """
+        Update one or more extrinsic parameters and rebuild the homography.
+        Required for dynamic reconfigure to actually take effect -- just
+        setting self.camera_height/self.pitch_deg/etc directly does NOT
+        update the derived rotation/homography matrices.
+        """
+        if camera_height is not None:
+            self.camera_height = camera_height
+        if pitch_deg is not None:
+            self.pitch_deg = pitch_deg
+            self.pitch = np.deg2rad(pitch_deg)
+        if yaw_deg is not None:
+            self.yaw_deg = yaw_deg
+            self.yaw = np.deg2rad(yaw_deg)
+        if roll_deg is not None:
+            self.roll_deg = roll_deg
+            self.roll = np.deg2rad(roll_deg)
+
+        self._build_extrinsics()
+        self._build_homography()
+        self._build_bev_scaling()
+
+    # =========================================================
     # BUILD EXTRINSICS
     # =========================================================
 
@@ -135,6 +162,39 @@ class HomographyBEV:
 
         self.S_inv = np.linalg.inv(self.S)
         self.H_bev = self.S @ self.H_inv
+
+    # =========================================================
+    # HORIZON ROW
+    # =========================================================
+
+    def horizon_row(self, u=None):
+        """
+        Return the image row (v) at which the ground plane maps to
+        infinite distance (the horizon) for a given column u.
+
+        Rows AT or ABOVE this value do not correspond to real ground
+        points in front of the camera -- the math will still return a
+        number for them (huge or negative), but it is not physically
+        meaningful and must be excluded before any ground-plane
+        projection (lane detection, circle detection, etc).
+
+        Returns None if the horizon line is undefined for this
+        column (degenerate case, e.g. a perfectly vertical horizon
+        line, which should not happen for realistic pitch/roll).
+        """
+        if u is None:
+            u = self.K[0, 2]  # default to principal point column (cx)
+
+        # ground_h[2] (the homogeneous denominator) is an affine function
+        # of (u, v): a*u + b*v + c. The horizon is where it crosses zero.
+        a = self.H_inv[2, 0]
+        b = self.H_inv[2, 1]
+        c = self.H_inv[2, 2]
+
+        if abs(b) < 1e-12:
+            return None
+
+        return -(a * u + c) / b
 
     # =========================================================
     # PIXEL -> GROUND
