@@ -29,7 +29,8 @@ def mask_to_pixels(mask):
 
 class RoadFeatureBEVPipeline:
 
-    def __init__(self, K, camera_height, pitch_deg,yaw_deg,roll_deg,dist_coeffs, image_size, min_radius=10, max_radius=200):
+    def __init__(self, K, camera_height, pitch_deg,yaw_deg,roll_deg,dist_coeffs, image_size, min_radius=10,
+                 max_radius=200, horizon_margin_px=20, max_forward_range=5.0):
 
         self.detector = RoadFeatureDetector(
             K=K,
@@ -40,7 +41,9 @@ class RoadFeatureBEVPipeline:
             dist_coeffs=dist_coeffs,
             image_size=image_size,
             min_radius=min_radius,
-            max_radius=max_radius
+            max_radius=max_radius,
+            horizon_margin_px=horizon_margin_px,
+            max_forward_range=max_forward_range
         )
 
         self.bev = self.detector.bev  # reuse same HomographyBEV instance
@@ -74,7 +77,18 @@ class RoadFeatureBEVPipeline:
         if len(pixels) == 0:
             lane_points = np.zeros((0, 3), dtype=np.float64)
         else:
-            xy          = self.bev.pixels_to_ground(pixels)
+            xy = self.bev.pixels_to_ground(pixels)
+
+            # Safety net on top of the horizon-row crop already applied to
+            # the mask: drop any point at/behind the horizon (Y <= 0) or
+            # beyond the configured max reliable range. Detector-level
+            # cropping should make this a no-op in the common case, but
+            # protects against Hough line segments that poke a few pixels
+            # past the ROI boundary.
+            Y = xy[:, 1]
+            valid = (Y > 0.0) & (Y <= self.detector.max_forward_range)
+            xy = xy[valid]
+
             z           = np.zeros((len(xy), 1), dtype=np.float64)
             lane_points = np.hstack([xy, z])
 
@@ -91,17 +105,25 @@ class RoadFeatureBEVPipeline:
         self.bev.save_pcd(points, filename)
 
     # setters to allow dynamic reconfigure
+    # NOTE: these must rebuild the homography (via set_pose) for the change
+    # to actually affect projection, and must refresh the detector's
+    # horizon ROI afterwards or lane/circle detection will keep cropping
+    # against the old, stale horizon row.
     def set_camera_height(self, value):
-        self.bev.camera_height = value # same object shared with detector, so no need to update there
+        self.bev.set_pose(camera_height=value)
+        self.detector._update_horizon_roi()
 
     def set_pitch_deg(self, value):
-        self.bev.pitch_deg = value
+        self.bev.set_pose(pitch_deg=value)
+        self.detector._update_horizon_roi()
 
     def set_yaw_deg(self, value):
-        self.bev.yaw_deg = value
+        self.bev.set_pose(yaw_deg=value)
+        self.detector._update_horizon_roi()
 
     def set_roll_deg(self, value):
-        self.bev.roll_deg = value
+        self.bev.set_pose(roll_deg=value)
+        self.detector._update_horizon_roi()
 
     def set_dist_coeffs(self, value):
         self.bev.dist_coeffs = value

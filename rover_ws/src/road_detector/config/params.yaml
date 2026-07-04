@@ -1,7 +1,6 @@
 road_detector:
   ros__parameters:
     camera_topic: "/camera/image_raw"
-    camera_info_topic: "/camera/camera_info"
     output_pointcloud_topic: "/road_detector/pointcloud"
     output_lane_mask_topic: "/road_detector/debug/lane_mask"
     output_bev_topic: "/road_detector/debug/bev_image"
@@ -21,6 +20,14 @@ road_detector:
     # Detection parameters
     min_radius: 5
     max_radius: 200
+
+    # Ground-plane projection safety limits
+    # horizon_margin_px: extra pixels below the mathematical horizon row
+    #   to exclude, since points very close to it are numerically unstable.
+    # max_forward_range: ground points beyond this distance (meters) are
+    #   dropped as unreliable.
+    horizon_margin_px: 20
+    max_forward_range: 5.0
     
     # Debug Options
     publish_debug_images: False
