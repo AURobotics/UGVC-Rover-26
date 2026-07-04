@@ -4,7 +4,7 @@ from PySide6.QtCore import QUrl
 from console.assets import get_asset
 
 class StatusWidget(QWidget):
-    def __init__(self, data_bridge, widget_filepath: str, parent: QWidget | None = None):
+    def __init__(self, widget_filepath: str, data_bridge = None, parent: QWidget | None = None):
         super().__init__(parent)
 
         self._data_bridge = data_bridge
@@ -18,11 +18,3 @@ class StatusWidget(QWidget):
         
         self._view.setResizeMode(QQuickWidget.ResizeMode.SizeRootObjectToView)
         self._layout.addWidget(self._view)
-
-    def hideEvent(self, event):
-        self._data_bridge.stop_timer()
-        super().hideEvent(event)
-
-    def showEvent(self, event):
-        self._data_bridge.start_timer()
-        super().showEvent(event)
