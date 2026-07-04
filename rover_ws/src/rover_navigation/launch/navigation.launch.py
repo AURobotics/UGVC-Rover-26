@@ -8,7 +8,7 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     # 1. Locate paths
-    rover_nav_dir = get_package_share_directory('rover_nav')
+    rover_nav_dir = get_package_share_directory('rover_navigation')
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
     
     # 2. Declare configurations

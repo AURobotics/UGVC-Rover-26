@@ -20,8 +20,8 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    rover_nav_dir = get_package_share_directory('rover_nav')
-    rover_precp_dir = get_package_share_directory('road_detector')
+    rover_nav_dir = get_package_share_directory('rover_navigation')
+    rover_precp_dir = get_package_share_directory('rover_perception')
     # ------------------------------------------------------------------ #
     #  BT XML paths                                                        #
     # ------------------------------------------------------------------ #
