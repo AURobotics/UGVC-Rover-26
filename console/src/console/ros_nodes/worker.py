@@ -12,6 +12,11 @@ from console.ros_nodes.joystick_node import JoystickNode
 
 class RoverSignals(QObject):
     telemetry_received = Signal(dict)
+    rear_received = Signal(CompressedImage)
+    front_received = Signal(CompressedImage)
+    face_received = Signal(CompressedImage)
+    lane_received = Signal(CompressedImage)
+    video_received = Signal(CompressedImage)
 
 class WorkerNode(Node):
     GUI_EMIT_INTERVAL_SEC = 0.1
@@ -51,19 +56,19 @@ class WorkerNode(Node):
         self.gui_timer = self.create_timer(self.GUI_EMIT_INTERVAL_SEC, self.push_telemetry_to_gui)
 
     def video_stream_callback(self, msg: CompressedImage) -> None:
-        self.signals.telemetry_received.emit({"video_stream_image": msg})
+        self.signals.video_received.emit(msg)
 
     def front_raw_callback(self, msg: CompressedImage) -> None:
-        self.signals.telemetry_received.emit({"front_raw_image": msg})
+        self.signals.front_received.emit(msg)
 
     def rear_raw_callback(self, msg: CompressedImage) -> None:
-        self.signals.telemetry_received.emit({"rear_raw_image": msg})
+        self.signals.rear_received.emit(msg)
 
     def face_detect_callback(self, msg: CompressedImage) -> None:
-        self.signals.telemetry_received.emit({"face_detect_image": msg})
+        self.signals.face_received.emit(msg)
 
     def lane_detect_callback(self, msg: CompressedImage) -> None:
-        self.signals.telemetry_received.emit({"lane_detect_image": msg})
+        self.signals.lane_received.emit(msg)
 
 
     def state_callback(self, msg: String) -> None:
