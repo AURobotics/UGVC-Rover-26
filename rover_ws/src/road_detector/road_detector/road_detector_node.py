@@ -376,9 +376,21 @@ class RoadDetectorNode(Node):
         header.stamp = msg.header.stamp
         header.frame_id = source_frame
 
+        """
+            swap x and y, and negate y to match ROS coordinate conventions.
+            In ROS, the coordinate system is typically defined as:
+            - x-axis: forward
+            - y-axis: left
+            - z-axis: up
+
+            to swap x and y correctly we need to negate y; why?
+                pixels on the image's right side map to positive X, and left-side pixels map to negative X.
+                But ROS convention (REP-103) says +Y should point left.
+        """
+
         modified_points = np.zeros_like(pts)
         modified_points[:, 0] = pts[:, 1]  # x becomes original y
-        modified_points[:, 1] = pts[:, 0]  # y becomes original x
+        modified_points[:, 1] = -pts[:, 0]  # y becomes original x
         modified_points[:, 2] = -self.camera_height  # set z to -camera_height -> ground
 
         return point_cloud2.create_cloud_xyz32(header, modified_points)
