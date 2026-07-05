@@ -30,20 +30,6 @@ class WorkerNode(Node):
         self.latest_right_motor_v   = 0.0
         self.latest_battery_percent = 0.0
 
-        self._latest_front_raw_msg   = None
-        self._latest_rear_raw_msg    = None
-        self._latest_face_detect_msg = None
-        self._latest_lane_detect_msg = None
-        ##########
-        self._latest_video_stream_msg = None
-
-        self._front_updated = False
-        self._rear_updated  = False
-        self._face_updated  = False
-        self._lane_updated  = False
-        ############
-        self._video_updated = False
-
         self.pub_state  = self.create_publisher(String, "rover/state", 10)
         self.sub_state  = self.create_subscription(String,             "rover/state",  self.state_callback,  10)
         self.sub_gps    = self.create_subscription(NavSatFix,          "rover/gps",    self.gps_callback,    10)
@@ -60,30 +46,25 @@ class WorkerNode(Node):
         self.sub_rear  = self.create_subscription(CompressedImage, "rover/camera/rear_raw",    self.rear_raw_callback,    qos_profile)
         self.sub_face  = self.create_subscription(CompressedImage, "rover/camera/face_detect", self.face_detect_callback, qos_profile)
         self.sub_lane  = self.create_subscription(CompressedImage, "rover/camera/lane_detect", self.lane_detect_callback, qos_profile)
-        #####
         self.sub_video = self.create_subscription(CompressedImage, "video_stream", self.video_stream_callback, qos_profile)
-        
+
         self.gui_timer = self.create_timer(self.GUI_EMIT_INTERVAL_SEC, self.push_telemetry_to_gui)
 
     def video_stream_callback(self, msg: CompressedImage) -> None:
-        self._latest_video_stream_msg = msg
-        self._video_updated = True
+        self.signals.telemetry_received.emit({"video_stream_image": msg})
 
     def front_raw_callback(self, msg: CompressedImage) -> None:
-        self._latest_front_raw_msg = msg
-        self._front_updated = True
+        self.signals.telemetry_received.emit({"front_raw_image": msg})
 
     def rear_raw_callback(self, msg: CompressedImage) -> None:
-        self._latest_rear_raw_msg = msg
-        self._rear_updated = True
+        self.signals.telemetry_received.emit({"rear_raw_image": msg})
 
     def face_detect_callback(self, msg: CompressedImage) -> None:
-        self._latest_face_detect_msg = msg
-        self._face_updated = True
+        self.signals.telemetry_received.emit({"face_detect_image": msg})
 
     def lane_detect_callback(self, msg: CompressedImage) -> None:
-        self._latest_lane_detect_msg = msg
-        self._lane_updated = True
+        self.signals.telemetry_received.emit({"lane_detect_image": msg})
+
 
     def state_callback(self, msg: String) -> None:
         self.actual_state = msg.data
@@ -99,26 +80,13 @@ class WorkerNode(Node):
         if len(msg.data) < 4:
             self.get_logger().warn(f"rover/status expected 4 values, got {len(msg.data)}")
             return
+        
         self.latest_battery_v       = msg.data[0]
         self.latest_left_motor_v    = msg.data[1]
         self.latest_right_motor_v   = msg.data[2]
         self.latest_battery_percent = msg.data[3]
 
     def push_telemetry_to_gui(self) -> None:
-        front_img = self._latest_front_raw_msg   if self._front_updated else None
-        rear_img  = self._latest_rear_raw_msg    if self._rear_updated  else None
-        face_img  = self._latest_face_detect_msg if self._face_updated  else None
-        lane_img  = self._latest_lane_detect_msg if self._lane_updated  else None
-        ############
-        video_img = self._latest_video_stream_msg if self._video_updated else None
-
-        self._front_updated = False
-        self._rear_updated  = False
-        self._face_updated  = False
-        self._lane_updated  = False
-        ############
-        self._video_updated = False
-
         self.signals.telemetry_received.emit(
             {
                 "status_state":        self.actual_state,
@@ -129,12 +97,6 @@ class WorkerNode(Node):
                 "right_motor_voltage": self.latest_right_motor_v,
                 "battery_percent":     self.latest_battery_percent,
                 "imu_accel_z":         self.latest_imu_z,
-                "front_raw_image":     front_img,
-                "rear_raw_image":      rear_img,
-                "face_detect_image":   face_img,
-                "lane_detect_image":   lane_img,
-                ##############
-                "video_stream_image":  video_img,
             }
         )
 

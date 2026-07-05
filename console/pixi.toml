@@ -18,7 +18,7 @@ ros-jazzy-joy = ">=3.3.0,<4"
 vid_test = "python src/testing/video_stream_node.py"
 joy_echo = "ros2 topic echo /joy sensor_msgs/msg/Joy"
 joy_monitor = "python src/testing/joy_monitor.py"
-
+tel_test = "python src/testing/test_telemetry.py"
 
 [pypi-dependencies]
 console = { path = ".", editable = true }
