@@ -6,6 +6,7 @@ from rclpy.duration import Duration
 
 from sensor_msgs.msg import Image, PointCloud2, CameraInfo
 from std_msgs.msg import Header, String
+from std_srvs.srv import SetBool
 
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
@@ -38,6 +39,7 @@ class RoadDetectorNode(Node):
         self.pipeline = None
         self.image_size = (1920, 1080)  # Will be updated from first frame
         self.latest_image = None
+        self.is_enabled = True  # state variable for tracking enabled/disabled status
         
         # Performance tracking
         self.processing_times = []
@@ -49,7 +51,7 @@ class RoadDetectorNode(Node):
         self.get_logger().info("Road Detector Node Initialized Successfully")
         self.get_logger().info(f"Debug images: {self.publish_debug_images}")
 
-        # Setup publishers, subscribers, and timers
+        # Setup publishers, subscribers, services, and timers
         self.setup_comms()
     
     def _declare_parameters(self):
@@ -157,7 +159,7 @@ class RoadDetectorNode(Node):
         return valid
     
     def setup_comms(self):
-        """Setup publishers, subscribers, and timers"""
+        """Setup publishers, subscribers, services, and timers"""
         
         # QoS profiles
         image_qos = QoSProfile(
@@ -201,13 +203,31 @@ class RoadDetectorNode(Node):
                 reliable_qos
             )
 
+        # Service server to enable/disable processing
+        self.enable_srv = self.create_service(
+            SetBool,
+            '/road_detector/enable',
+            self.handle_enable_service
+        )
+        self.get_logger().info("Service server '/road_detector/enable' created.")
+
         # Subscriber for camera images (BEST_EFFORT for real-time video)
         self.sub = self.create_subscription(
             Image, 
             self.camera_topic, 
             self.image_callback, 
             image_qos
-        )
+        ) # subscribe at the end to avoid race conditions during initialization
+
+    def handle_enable_service(self, request, response):
+        """Callback for handling enable/disable service requests"""
+        self.is_enabled = request.data
+        status_str = "ENABLED" if self.is_enabled else "DISABLED"
+        
+        response.success = True
+        response.message = f"Road detector processing has been {status_str}."
+        self.get_logger().info(response.message)
+        return response
     
     def initialize_pipeline(self, image_width, image_height):
         """Initialize the pipeline with correct image dimensions"""
@@ -233,11 +253,15 @@ class RoadDetectorNode(Node):
             self.get_logger().info("Pipeline initialization complete")
     
     def image_callback(self, msg):
+        # Guard clause checking if the node is allowed to process images
+        if not self.is_enabled:
+            return
+            
         self._process_image(msg)
     
     def process_latest_image(self):
         """Process the latest image at controlled rate"""
-        if self.latest_image is None:
+        if not self.is_enabled or self.latest_image is None:
             return
         
         msg = self.latest_image
