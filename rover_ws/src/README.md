@@ -1,9 +1,9 @@
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
-- [Running pkgs with cmake](#running-pkgs-with-cmake)
+- [Building packages with cmake](#building-packages-with-cmake)
   - [Cmake file changes:](#cmake-file-changes)
-  - [For windows users](#for-windows-users)
+  - [Prerequisites (Windows)](#prerequisites-windows)
 - [Useful Commands](#useful-commands)
   - [Windows Notes](#windows-notes)
   - [Create a new package](#create-a-new-package)
@@ -12,10 +12,12 @@
   - [Run a Node](#run-a-node)
   - [Run a launch file](#run-a-launch-file)
   - [Usful Topic commands](#usful-topic-commands)
+  - [Run RViz2](#run-rviz2)
+  - [Run Gazebo](#run-gazebo)
 
 ---
 
-## Running pkgs with cmake
+## Building packages with cmake
 
 ### Cmake file changes:
 - add this to the begining of the cmake file:
@@ -38,18 +40,13 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 )
 ```
 
-### For windows users
-> part in development
-
-run:
+### Prerequisites (Windows)
+Install the 2022 MSVC build tools:
 ```powershell
-winget install --id Microsoft.VisualStudio.BuildTools
+winget install --id Microsoft.VisualStudio.2022.BuildTools --source winget --force --accept-package-agreements --accept-source-agreements --override "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --wait /norestart"
 ```
 
-then install desktop development with c++ workload and the following components:
-- MSVC v143 - VS 2022 C++ x64/x86 build tools (latest)
-- Windows 11 SDK (10.0.26100.7705 or later)
-
+RoboStack uses [vinca](https://github.com/RoboStack/vinca/) to generate workflows for building their ROS2 binaries. As of writing this, vinca's [GitHub action generator](https://github.com/RoboStack/vinca/blob/master/vinca/generate_gha.py) uses Visual Studio 2022 runners. This may change in the future, and the proper `winget` command may require a simple Visual Studio version change.
 
 ## Useful Commands
 
@@ -134,4 +131,20 @@ ros2 launch pkg_name launch_file.py arg_name1:=arg_data1 arg_name2:=arg_data2
 | **`ros2 topic echo /topic/name --once`** | Print one meesage from /topic/name to the console.               |
 | **`ros2 topic info /topic/name`**        | Show publisher & subscriber count and topic type of /topic/name. |
 | **`ros2 topic hz /topic/name`**          | Report the average publishing rate of /topic/name.               |
+
+### Run RViz2
+```bash
+pixi run rviz
+```
+
+or use a launch file that includes rviz2
+
+
+### Run Gazebo
+
+run a a launch file that includes gazebo, for example:
+
+> [!WARNING]
+> Gazebo only works on Linux
+
 
