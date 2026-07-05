@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from turtle import stamp
-
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDurabilityPolicy
@@ -12,14 +10,8 @@ from std_msgs.msg import Header, String
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 
-# For point cloud conversion
 from sensor_msgs_py import point_cloud2
-from tf2_ros import Buffer, TransformListener
-import tf2_ros
-from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 
-# Import your custom modules
-from .cv_code.road_features_detector import RoadFeatureDetector
 from .cv_code.pipeline import RoadFeatureBEVPipeline
 
 
@@ -54,10 +46,6 @@ class RoadDetectorNode(Node):
         # Add dynamic parameter callback
         self.add_on_set_parameters_callback(self.parameters_callback)
         
-        # transfomr buffer and listener for point cloud transformations
-        self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self)
-
         self.get_logger().info("Road Detector Node Initialized Successfully")
         self.get_logger().info(f"Debug images: {self.publish_debug_images}")
 
