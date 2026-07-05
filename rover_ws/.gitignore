@@ -13,3 +13,6 @@ face_recognition_sface_2021dec.onnx
 
 # testing data
 data/
+
+# early development files
+navigation/

@@ -21,7 +21,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
 
     rover_nav_dir = get_package_share_directory('rover_navigation')
-    rover_precp_dir = get_package_share_directory('rover_perception')
+    # rover_precp_dir = get_package_share_directory('rover_perception')
     # ------------------------------------------------------------------ #
     #  BT XML paths                                                        #
     # ------------------------------------------------------------------ #
@@ -40,8 +40,8 @@ def generate_launch_description():
     #  Patch nav2_params.yaml — inject BT XML paths                       #
     # ------------------------------------------------------------------ #
     src_params = os.path.join(rover_nav_dir, 'config', 'nav2_params.yaml')
-    road_detector_params = os.path.join(rover_precp_dir, 'config', 'road_detector_params.yaml')
-    lane_follower_params = os.path.join(rover_precp_dir, 'config', 'lane_follower_params.yaml')
+    # road_detector_params = os.path.join(rover_precp_dir, 'config', 'road_detector_params.yaml')
+    # lane_follower_params = os.path.join(rover_precp_dir, 'config', 'lane_follower_params.yaml')
     with open(src_params, 'r') as fh:
         params = yaml.safe_load(fh)
 
@@ -130,46 +130,46 @@ def generate_launch_description():
     # ------------------------------------------------------------------ #
     #  Virtual Wall Node (t +3 s)                                         #
     # ------------------------------------------------------------------ #
-    virtual_wall_node = TimerAction(
-        period=3.0,
-        actions=[
-            Node(
-                package='rover_perception',
-                executable='road_detector_node',
-                name='road_detector_node',
-                output='screen',
-                parameters=[road_detector_params, {'use_sim_time': use_sim_time}],
-                arguments=['--ros-args', '--log-level', log_level],
-                remappings=[
-                    ('/camera/image_raw',       '/camera/image_raw'),
-                    ('/camera/depth/image_raw', '/camera/depth/image_raw'),
-                    ('/virtual_walls',          '/virtual_walls'),
-                ],
-            )
-        ],
-    )
+    # virtual_wall_node = TimerAction(
+    #     period=3.0,
+    #     actions=[
+    #         Node(
+    #             package='rover_perception',
+    #             executable='road_detector_node',
+    #             name='road_detector_node',
+    #             output='screen',
+    #             parameters=[road_detector_params, {'use_sim_time': use_sim_time}],
+    #             arguments=['--ros-args', '--log-level', log_level],
+    #             remappings=[
+    #                 ('/camera/image_raw',       '/camera/image_raw'),
+    #                 ('/camera/depth/image_raw', '/camera/depth/image_raw'),
+    #                 ('/virtual_walls',          '/virtual_walls'),
+    #             ],
+    #         )
+    #     ],
+    # )
 
     # ------------------------------------------------------------------ #
     #  Lane Follower Node (t +10 s)                                       #
     # ------------------------------------------------------------------ #
-    lane_follower = TimerAction(
-        period=10.0,
-        actions=[
-            Node(
-                package='rover_perception',
-                executable='lane_follower_node',
-                name='lane_follower_node',
-                output='screen',
-                parameters=[lane_follower_params, {
-                    'use_sim_time':       use_sim_time,
-                    'min_remaining_dist': 0.8,
-                    'startup_delay_sec':  0.0,
-                    'nav_goal_timeout':   25.0,
-                }],
-                arguments=['--ros-args', '--log-level', log_level],
-            )
-        ],
-    )
+    # lane_follower = TimerAction(
+    #     period=10.0,
+    #     actions=[
+    #         Node(
+    #             package='rover_perception',
+    #             executable='lane_follower_node',
+    #             name='lane_follower_node',
+    #             output='screen',
+    #             parameters=[lane_follower_params, {
+    #                 'use_sim_time':       use_sim_time,
+    #                 'min_remaining_dist': 0.8,
+    #                 'startup_delay_sec':  0.0,
+    #                 'nav_goal_timeout':   25.0,
+    #             }],
+    #             arguments=['--ros-args', '--log-level', log_level],
+    #         )
+    #     ],
+    # )
 
     # ------------------------------------------------------------------ #
     #  twist_stamper                                                       #
@@ -203,6 +203,23 @@ def generate_launch_description():
         ]
     )
 
+    road_detector = Node(
+        package='road_detector',
+        executable='road_detector_node',
+        name='road_detector',
+        parameters=[os.path.join(get_package_share_directory('road_detector'), 'config', 'params_sim.yaml'),
+                    {'use_sim_time': True}],
+        additional_env={'PYTHONUNBUFFERED': '1'}, # <-- Forces logs to flush instantly
+        output='screen'
+    )
+
+    noisy_controller = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('rover_controller'),
+            'launch', 'controller.launch.py',
+        )])
+    )
+
     return LaunchDescription([
         declare_use_sim_time,
         # declare_slam_params,
@@ -210,10 +227,12 @@ def generate_launch_description():
         declare_log_level,
         declare_lookahead,
         startup_msg,
+        noisy_controller,
         # localization,
         nav2_launch,
-        virtual_wall_node,
+        # virtual_wall_node,
         # lane_follower,
         rviz,            # ← now uses shared rviz.launch.py
         twist_stamper,
+        road_detector,  
     ])

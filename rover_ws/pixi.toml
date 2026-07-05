@@ -20,6 +20,7 @@ tb3_rviz = "ros2 launch turtlebot3_bringup rviz2.launch.py"
 tb3_empty = "ros2 launch turtlebot3_gazebo empty_world.launch.py" # Gazebo + TurtleBot3 Burger in an empty world
 tb3_world = "ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py" # Gazebo + TurtleBot3 Burger in a custom world
 tb3_teleop = "ros2 run turtlebot3_teleop teleop_keyboard" # Launch the keyboard teleoperation node 
+tb3_nav2 = "ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False" # test full simulation + Nav2 + RViz2 altogether
 
 [dependencies]
 python = ">=3.12,<3.13"
@@ -49,6 +50,8 @@ ros-jazzy-turtlebot3 = "*"
 ros-jazzy-turtlebot3-simulations = "*"
 ros-jazzy-turtlebot3-description = ">=2.3.6,<3"
 
+ros-jazzy-rmw-cyclonedds-cpp = ">=2.2.3,<3"
+
 [target.win-64.activation]
 scripts = ["install\\setup.bat"]
 
@@ -56,6 +59,7 @@ scripts = ["install\\setup.bat"]
 [activation.env]
 TURTLEBOT3_MODEL = "burger"
 LDS_MODEL = "LDS-01"
+RMW_IMPLEMENTATION = "rmw_cyclonedds_cpp"
 
 [target.linux.dependencies]
 libgl-devel = "*"

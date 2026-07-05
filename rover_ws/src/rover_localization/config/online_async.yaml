@@ -1,0 +1,36 @@
+slam_toolbox:
+  ros__parameters:
+    # --- Basic ROS Parameters ---
+    use_sim_time: true
+    map_start_at_dock: false
+    map_start_pose: [0.0, 0.0, 0.0]
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_footprint   # Ensure this is the frame your EKF is tracking
+    scan_topic: /scan
+    mode: mapping                # "mapping" means build live, don't load a saved map
+    
+    # --- Map Settings ---
+    map_update_interval: 1.0     # Update the map every 1.0 seconds
+    resolution: 0.05             # 5cm per pixel (Standard Nav2 resolution)
+    max_laser_range: 12.0        # Perfectly matches your simulated Gazebo LIDAR
+
+    # --- TF and Timing ---
+    transform_publish_period: 0.02
+    transform_timeout: 0.2
+    tf_buffer_duration: 30.0
+
+    # --- Ceres Solver Plugins (The Core Math) ---
+    solver_plugin: solver_plugins::CeresSolver
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    ceres_trust_region_strategy: LEVENBERG_MARQUARDT
+    ceres_dogleg_type: TRADITIONAL_DOGLEG
+    ceres_loss_function: None
+
+    # --- Scan Matching Tuning ---
+    minimum_time_interval: 0.5
+    minimum_distance_penalty: 0.5
+    minimum_angle_penalty: 0.9
+    use_scan_matching: true
+    use_scan_barycenter: true
