@@ -47,6 +47,7 @@ ros-jazzy-ros2-controllers = "*"
 # --- Added TurtleBot3 Dependencies ---
 ros-jazzy-turtlebot3 = "*"
 ros-jazzy-turtlebot3-simulations = "*"
+ros-jazzy-turtlebot3-description = ">=2.3.6,<3"
 
 [target.win-64.activation]
 scripts = ["install\\setup.bat"]

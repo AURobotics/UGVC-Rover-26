@@ -285,7 +285,7 @@ class RoadDetectorNode(Node):
             
             pc_msg = self.create_pointcloud2(lane_points, msg)
             self.pc_pub.publish(pc_msg)
-            self.get_logger().info(f"Published {len(lane_points)} lane points")
+            # self.get_logger().info(f"Published {len(lane_points)} lane points")
             
             # Publish circle point clouds
             for i, cloud in enumerate(circle_clouds):

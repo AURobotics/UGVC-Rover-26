@@ -1,0 +1,1 @@
+export GZ_SIM_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH:$HOME/aur-26/rover_UGVC2026/rover/src/gz_model
