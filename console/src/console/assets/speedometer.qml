@@ -41,6 +41,7 @@ Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     color: "#cccccc"
                 }
+
                 Text {
                     id: tickLabel
                     anchors.top: tick.bottom
@@ -55,11 +56,21 @@ Rectangle {
                 }
             }
         }
+
         Item {
             id:needleContainer
             anchors.margins: container.border.width + container.width * 0.05
             anchors.fill: parent
             rotation: 225 + (270 / root.maxSpeed) * root.speed
+
+            Behavior on rotation {
+                RotationAnimation {
+                    direction: RotationAnimation.Shortest
+                    duration: 150
+                    easing.type: Easing.OutQuad
+                }
+            }
+
             Rectangle {
                 id: needleBase
                 width: container.width * 0.05
@@ -68,6 +79,7 @@ Rectangle {
                 anchors.centerIn: parent
                 color: "red"
             }
+
             Shape {
                 id: needle
                 anchors.bottom: needleBase.verticalCenter
