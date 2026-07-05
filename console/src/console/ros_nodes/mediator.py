@@ -4,6 +4,7 @@ from console.ros_nodes.worker import ROS2Worker
 
 class Mediator(QObject):
     controller_changed = Signal(object)
+    telemetry_updated = Signal()
 
     def __init__(self, parent=None):
         super().__init__()
@@ -74,6 +75,7 @@ class Mediator(QObject):
         self.battery_percent     = telemetry.get("battery_percent",     self.battery_percent)
         self.imu_accel_z         = telemetry.get("imu_accel_z",         self.imu_accel_z)
         self.telemetry_exists = True
+        self.telemetry_updated.emit()
 
     def handle_controller_changed(self, controller_info: dict[str, str] | None) -> None:
         self.current_controller = controller_info
