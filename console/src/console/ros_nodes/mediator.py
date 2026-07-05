@@ -22,21 +22,47 @@ class Mediator(QObject):
         self.rear_raw_image    = None
         self.face_detect_image = None
         self.lane_detect_image = None
-        ############
         self.video_stream_image = None
 
         self.current_controller: dict[str, str] | None = None
 
         self._worker = ROS2Worker()
+        
         self._worker.signals.telemetry_received.connect(self.handle_telemetry)
-        self._worker.start()
+        
+        self._worker.signals.front_received.connect(self.handle_front_image)
+        self._worker.signals.rear_received.connect(self.handle_rear_image)
+        self._worker.signals.face_received.connect(self.handle_face_image)
+        self._worker.signals.lane_received.connect(self.handle_lane_image)
+        self._worker.signals.video_received.connect(self.handle_video_image)
 
+        self._worker.start()
         self._worker.wait_until_ready()
 
         joystick = self._worker._joystick_node
         if joystick is not None:
             joystick.set_gui_signal(self.handle_controller_changed)
             self.current_controller = joystick.get_selected()
+
+    def handle_front_image(self, msg) -> None:
+        self.front_raw_image = msg
+        self.telemetry_exists = True
+
+    def handle_rear_image(self, msg) -> None:
+        self.rear_raw_image = msg
+        self.telemetry_exists = True
+
+    def handle_face_image(self, msg) -> None:
+        self.face_detect_image = msg
+        self.telemetry_exists = True
+
+    def handle_lane_image(self, msg) -> None:
+        self.lane_detect_image = msg
+        self.telemetry_exists = True
+
+    def handle_video_image(self, msg) -> None:
+        self.video_stream_image = msg
+        self.telemetry_exists = True
 
     def handle_telemetry(self, telemetry: dict) -> None:
         self.status_state        = telemetry.get("status_state",        self.status_state)
@@ -47,25 +73,6 @@ class Mediator(QObject):
         self.right_motor_voltage = telemetry.get("right_motor_voltage", self.right_motor_voltage)
         self.battery_percent     = telemetry.get("battery_percent",     self.battery_percent)
         self.imu_accel_z         = telemetry.get("imu_accel_z",         self.imu_accel_z)
-
-        front = telemetry.get("front_raw_image")
-        if front is not None:
-            self.front_raw_image = front
-        rear = telemetry.get("rear_raw_image")
-        if rear is not None:
-            self.rear_raw_image = rear
-        face = telemetry.get("face_detect_image")
-        if face is not None:
-            self.face_detect_image = face
-        lane = telemetry.get("lane_detect_image")
-        if lane is not None:
-            self.lane_detect_image = lane
-            
-        ###############
-        video = telemetry.get("video_stream_image")
-        if video is not None:
-            self.video_stream_image = video
-
         self.telemetry_exists = True
 
     def handle_controller_changed(self, controller_info: dict[str, str] | None) -> None:
@@ -115,7 +122,6 @@ class Mediator(QObject):
     def get_lane_frame(self):
         return self.lane_detect_image if self.telemetry_exists else None
 
-    ##############
     def get_video_frame(self):
         return self.video_stream_image if self.telemetry_exists else None
 
