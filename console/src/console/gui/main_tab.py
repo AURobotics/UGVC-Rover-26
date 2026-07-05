@@ -30,6 +30,10 @@ class MainTab(QMainWindow):
         self._speedometer_dock = self._create_dock("Speedometer", self._speedometer)
         self.splitDockWidget(self._battery_dock, self._speedometer_dock, Qt.Orientation.Horizontal)
 
+        self._compass = StatusWidget("compass.qml", self.mediator, self)
+        self._compass_dock = self._create_dock("Compass", self._compass)
+        self.splitDockWidget(self._battery_dock, self._compass_dock, Qt.Orientation.Horizontal)
+
     def _create_dock(self, title, widget):
         dock = QDockWidget(title, self)
         dock.setWidget(widget)
