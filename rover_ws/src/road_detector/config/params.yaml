@@ -27,7 +27,7 @@ road_detector:
     # max_forward_range: ground points beyond this distance (meters) are
     #   dropped as unreliable.
     horizon_margin_px: 20
-    max_forward_range: 5.0
+    max_forward_range: 50.0
     
     # Debug Options
     publish_debug_images: False
