@@ -1,7 +1,8 @@
-from PySide6.QtWidgets import QMainWindow, QDockWidget, QLabel
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtWidgets import QMainWindow, QDockWidget, QLabel, QSizePolicy
+from PySide6.QtCore import Qt
 from console.gui.camera_display import CameraDisplay
 from console.gui.status_widget import StatusWidget
+from console.gui.motor_currents import MotorCurrents
 
 class MainTab(QMainWindow):
     def __init__(self, mediator, parent=None):
@@ -18,9 +19,15 @@ class MainTab(QMainWindow):
             | QMainWindow.DockOption.VerticalTabs
         )
 
+        self._motor_currents = MotorCurrents(self._mediator)
+        self._motor_currents.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        self._motor_dock = self._create_dock("Motor Currents", self._motor_currents)
+        self.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, self._motor_dock)
+
         self._cam = CameraDisplay(self._mediator, self)
+        self._cam.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         self._cam_dock = self._create_dock("Camera", self._cam)
-        self.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, self._cam_dock)
+        self.splitDockWidget(self._motor_dock, self._cam_dock, Qt.Orientation.Horizontal)
 
         self._battery_status = StatusWidget("batteries.qml", self._mediator, self)
         self._battery_dock = self._create_dock("Battery Status", self._battery_status)
@@ -32,11 +39,13 @@ class MainTab(QMainWindow):
 
         self._compass = StatusWidget("compass.qml", self._mediator, self)
         self._compass_dock = self._create_dock("Compass", self._compass)
-        self.splitDockWidget(self._battery_dock, self._compass_dock, Qt.Orientation.Horizontal)
+        self.splitDockWidget(self._speedometer_dock, self._compass_dock, Qt.Orientation.Horizontal)
 
         self._position = QLabel("Position: 0, 0")
         self.statusBar().addPermanentWidget(self._position)
         self._mediator.telemetry_updated.connect(self.update_position)
+
+        self.resizeDocks([self._motor_dock, self._cam_dock], [50, 500], Qt.Orientation.Horizontal)
 
     def _create_dock(self, title, widget):
         dock = QDockWidget(title, self)

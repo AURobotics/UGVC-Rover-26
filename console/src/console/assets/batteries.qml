@@ -4,7 +4,7 @@ import Qt5Compat.GraphicalEffects
 
 Rectangle {
     id: root
-    width: 60
+    width: 100
     height: 100
     color: palette.window
 
