@@ -8,8 +8,8 @@ Rectangle {
     required property var rover
     property real bearing: 0.0 //temporary value for testing, should be rover.bearing
 
-    width: 240
-    height: 240
+    width: 200
+    height: 200
     antialiasing: true
     color: palette.window
 
