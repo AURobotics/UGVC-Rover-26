@@ -44,6 +44,7 @@ ros-jazzy-cv-bridge = ">=4.1.0,<5"
 ros-jazzy-gz-ros2-control = "*"
 ros-jazzy-ros2-control = "*"
 ros-jazzy-ros2-controllers = "*"
+filelock = ">=3.29.5,<4"
 
 # --- Added TurtleBot3 Dependencies ---
 ros-jazzy-turtlebot3 = "*"
@@ -62,7 +63,7 @@ scripts = ["install/setup.bash"]
 LDS_MODEL = "LDS-01"
 RMW_IMPLEMENTATION = "rmw_cyclonedds_cpp"
 LC_NUMERIC = "C"
-ROS_LOCALHOST_ONLY = "1"
+# ROS_LOCALHOST_ONLY = "1"
 
 # Target Linux-specific paths for Gazebo Harmonic (Jazzy)
 [target.linux.activation.env]

@@ -11,6 +11,10 @@
 face_detection_yunet_2023mar.onnx
 face_recognition_sface_2021dec.onnx
 
+# Python artifacts
+*.pyc
+__pycache__/
+
 # testing data
 data/
 
