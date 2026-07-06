@@ -23,8 +23,8 @@ setup(
     license='TODO: License declaration',
     entry_points={
         'console_scripts': [
-            'lane_detector_node = lane_detector_pkg.lane_detector_node:main',
-            'lane_test_node = lane_detector_pkg.test:main',
-        ],
-    },
+        'lane_detector_node = lane_detector_pkg.lane_detector_node:main',
+        'testOfLanes = lane_detector_pkg.testOfLanes:main',
+    ],
+}
 )
