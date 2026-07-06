@@ -308,7 +308,8 @@ class RoadDetectorNode(Node):
                 lane_points = lane_points[:self.max_points_per_cloud]
             
             pc_msg = self.create_pointcloud2(lane_points, msg)
-            self.pc_pub.publish(pc_msg)
+            if pc_msg is not None:
+                self.pc_pub.publish(pc_msg)
             # self.get_logger().info(f"Published {len(lane_points)} lane points")
             
             # Publish circle point clouds
@@ -319,7 +320,8 @@ class RoadDetectorNode(Node):
                         cloud = cloud[:self.max_points_per_cloud]
                     
                     pc_msg = self.create_pointcloud2(cloud, msg)
-                    self.pc_pub.publish(pc_msg)
+                    if pc_msg is not None:
+                        self.pc_pub.publish(pc_msg)
                     self.get_logger().debug(f"Published circle cloud {i} with {len(cloud)} points")
             
             # Publish debug images
