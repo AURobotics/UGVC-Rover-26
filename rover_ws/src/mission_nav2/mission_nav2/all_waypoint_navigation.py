@@ -34,6 +34,9 @@ from action_msgs.msg import GoalStatus
 from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action import NavigateToPose
 
+#TODO: use cancel_all_goals method as needed
+#TODO: add manual
+#TODO: organize code
 
 @dataclass
 class Waypoint:
@@ -111,6 +114,12 @@ class LaneModeManager(Node):
         rclpy.spin_until_future_complete(self, result_future)
         status = result_future.result().status
         return status == GoalStatus.STATUS_SUCCEEDED
+    
+    #TODO: implement a cancel_all_goals method that cancels all active Nav2 goals
+    def cancel_all_goals(self):
+        """Cancels all active Nav2 goals."""
+        self.get_logger().info("Cancelling all active navigation goals...")
+        pass
 
     # -- task at WP2 --------------------------------------------------------
     def run_task_at_wp2(self) -> None:
@@ -155,7 +164,11 @@ class LaneModeManager(Node):
 
         # Phase D: past WP3, lanes ON again
         self.set_lane_layer_enabled(True)
-        self.get_logger().info("Mission complete: lane-following resumed past WP3")
+        if not self.navigate_to(WP1):
+            self.get_logger().error("Failed to reach WP1, aborting mission")
+            return
+        
+        self.get_logger().info("Mission complete: lane-following resumed")
 
 
 def main():

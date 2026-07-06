@@ -11,6 +11,10 @@ from std_srvs.srv import SetBool
 import time
 from enum import Enum
 
+#TODO: use cancel_all_goals method as needed
+#TODO: make sure cancel_all_goals is correct
+#TODO: organize code
+
 class MissionState(Enum):
     INIT = 0
     PHASE1_LANE_TO_WP1 = 1
@@ -50,6 +54,11 @@ class RoverMissionExecutive(Node):
         
         # Kickoff the mission loop using a one-shot timer to keep the constructor non-blocking
         self.create_timer(0.5, self.mission_loop, callback_group=self.cb_group)
+
+    def cancel_all_goals(self):
+        """Cancels all active Nav2 goals."""
+        self.get_logger().info("Cancelling all active navigation goals...")
+        self.navigator.cancelTask()
 
     def generate_pose(self, x, y, qz, qw):
         """Helper to build a PoseStamped message."""
