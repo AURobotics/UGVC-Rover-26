@@ -37,7 +37,7 @@ class OdomNode(Node):
     def listener_callback(self, msg:WheelVel):
         self.curr_stamp = msg.header.stamp.sec + (msg.header.stamp.nanosec * 1e-9)
         
-        if(self.prev_stamp is None): #if this is the first message the node receives, initialize the prev stamp parameter and wait for next message
+        if(self.prev_stamp == -1): #if this is the first message the node receives, initialize the prev stamp parameter and wait for next message
             self.prev_stamp = self.curr_stamp
             self.get_logger().info('wheel base: "%f"' % float(self.wheel_base))
             self.get_logger().info('wheel radius: "%f"' % float(self.wheel_radius))
@@ -56,7 +56,7 @@ class OdomNode(Node):
 
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "odom"
-        msg.child_frame_id = "base_link"
+        msg.child_frame_id = "base_footprint"
 
         x,y,z = odom_matrix[0]
         msg.pose.pose.position = Point(x=x, y=y, z=z)

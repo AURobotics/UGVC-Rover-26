@@ -61,8 +61,8 @@ scripts = ["install/setup.bash"]
 
 [activation.env]
 LDS_MODEL = "LDS-01"
-RMW_IMPLEMENTATION = "rmw_cyclonedds_cpp"
-LC_NUMERIC = "C"
+# RMW_IMPLEMENTATION = "rmw_cyclonedds_cpp"
+# LC_NUMERIC = "C"
 # ROS_LOCALHOST_ONLY = "1"
 
 # Target Linux-specific paths for Gazebo Harmonic (Jazzy)

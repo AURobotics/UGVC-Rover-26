@@ -127,14 +127,6 @@ def generate_launch_description():
         output='screen'
     )
 
-    road_detector_video_viewer = Node(
-        package='road_detector',
-        executable='video_viewer_node',
-        name='video_viewer',
-        output='screen',
-        emulate_tty=True,
-    )
-
     return LaunchDescription([
         clock_bridge,
         gazebo,
@@ -143,5 +135,4 @@ def generate_launch_description():
         delayed_spawn,
         delay_joint_state_broadcaster_after_spawn,
         delay_diff_drive_spawner_after_joint_state,
-        # road_detector
     ])
