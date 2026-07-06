@@ -50,16 +50,25 @@ ros-jazzy-turtlebot3 = "*"
 ros-jazzy-turtlebot3-simulations = "*"
 ros-jazzy-turtlebot3-description = ">=2.3.6,<3"
 
-ros-jazzy-rmw-cyclonedds-cpp = ">=2.2.3,<3"
+ros-jazzy-rmw-cyclonedds-cpp = "*"
 
 [target.win-64.activation]
 scripts = ["install\\setup.bat"]
 
-# Use a standard table block for environment variables
+[target.linux.activation]
+scripts = ["install/setup.bash"]
+
 [activation.env]
-TURTLEBOT3_MODEL = "burger"
 LDS_MODEL = "LDS-01"
 RMW_IMPLEMENTATION = "rmw_cyclonedds_cpp"
+LC_NUMERIC = "C"
+ROS_LOCALHOST_ONLY = "1"
+
+# Target Linux-specific paths for Gazebo Harmonic (Jazzy)
+[target.linux.activation.env]
+TURTLEBOT3_MODEL = "burger"
+GZ_SIM_RESOURCE_PATH = "./src/gz_model:${PIXI_PROJECT_ROOT}/.pixi/envs/default/share/gazebo:${GZ_SIM_RESOURCE_PATH}"
+GZ_SIM_SYSTEM_PLUGIN_PATH = "${PIXI_PROJECT_ROOT}/.pixi/envs/default/lib:${GZ_SIM_SYSTEM_PLUGIN_PATH}"
 
 [target.linux.dependencies]
 libgl-devel = "*"

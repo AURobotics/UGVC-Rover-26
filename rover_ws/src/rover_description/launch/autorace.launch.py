@@ -143,7 +143,5 @@ def generate_launch_description():
         delayed_spawn,
         delay_joint_state_broadcaster_after_spawn,
         delay_diff_drive_spawner_after_joint_state,
-        # road_detector_debug,
-        # road_detector_video_viewer
-        # road_detector
+        road_detector
     ])

@@ -6,8 +6,7 @@
 #   - You already have a valid TF tree (map/odom -> base_link) from your own
 #     localization stack. amcl/robot_localization are NOT covered here.
 #   - 2D lidar publishes sensor_msgs/LaserScan on /scan
-#   - Lane boundary points published as sensor_msgs/PointCloud2 on /lane_points
-#   - Pothole points published as sensor_msgs/PointCloud2 on /pothole_points
+#   - Road points published as sensor_msgs/PointCloud2 on /road_detector/pointcloud
 #
 # KEY IDEA:
 #   lane_layer.enabled is a normal ROS2 parameter. An external "mission
@@ -164,7 +163,7 @@ local_costmap:
       height: 6
       resolution: 0.05
       footprint: "[[0.3,0.25],[0.3,-0.25],[-0.3,-0.25],[-0.3,0.25]]"  # SET TO YOUR ROBOT
-      plugins: ["obstacle_layer", "pothole_layer", "lane_layer", "inflation_layer"]
+      plugins: ["obstacle_layer", "lane_layer", "inflation_layer"]
 
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
@@ -181,27 +180,12 @@ local_costmap:
           raytrace_max_range: 8.5
           raytrace_min_range: 0.0
 
-      pothole_layer:
-        plugin: "nav2_costmap_2d::ObstacleLayer"
-        enabled: true
-        observation_sources: potholes
-        potholes:
-          topic: /pothole_points
-          sensor_frame: ""
-          data_type: "PointCloud2"
-          marking: true
-          clearing: false      # potholes are static; don't let missed rays erase them
-          min_obstacle_height: -1.0
-          max_obstacle_height: 1.0
-          obstacle_max_range: 10.0
-          obstacle_min_range: 0.0
-
       lane_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: true          # <-- toggled false/true by lane_mode_manager.py
         observation_sources: lane_cloud
         lane_cloud:
-          topic: /lane_points
+          topic: /road_detector/pointcloud
           sensor_frame: ""
           data_type: "PointCloud2"
           marking: true
@@ -228,7 +212,7 @@ global_costmap:
       resolution: 0.05
       track_unknown_space: true
       footprint: "[[0.3,0.25],[0.3,-0.25],[-0.3,-0.25],[-0.3,0.25]]"  # SET TO YOUR ROBOT
-      plugins: ["obstacle_layer", "pothole_layer", "lane_layer", "inflation_layer"]
+      plugins: ["obstacle_layer", "lane_layer", "inflation_layer"]
 
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
@@ -245,27 +229,12 @@ global_costmap:
           raytrace_max_range: 8.5
           raytrace_min_range: 0.0
 
-      pothole_layer:
-        plugin: "nav2_costmap_2d::ObstacleLayer"
-        enabled: true
-        observation_sources: potholes
-        potholes:
-          topic: /pothole_points
-          sensor_frame: ""
-          data_type: "PointCloud2"
-          marking: true
-          clearing: false
-          min_obstacle_height: -1.0
-          max_obstacle_height: 1.0
-          obstacle_max_range: 10.0
-          obstacle_min_range: 0.0
-
       lane_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: true          # <-- toggled by lane_mode_manager.py
         observation_sources: lane_cloud
         lane_cloud:
-          topic: /lane_points
+          topic: /road_detector/pointcloud
           sensor_frame: ""
           data_type: "PointCloud2"
           marking: true
