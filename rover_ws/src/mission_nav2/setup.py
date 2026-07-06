@@ -35,7 +35,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'state_machine = mission_nav2.mission_nav2_node:main'
+            'state_machine = mission_nav2.mission_nav2_node:main',
             'waypoint_navigation = mission_nav2.all_waypoint_navigation:main'
         ],
     },
