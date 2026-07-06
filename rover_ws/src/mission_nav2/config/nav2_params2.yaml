@@ -1,0 +1,348 @@
+##############################################################################
+# Nav2 parameter file for: lane-following + pothole/obstacle avoidance,
+# with a free-navigation gap between waypoint 1 and waypoint 3 (task at WP2).
+#
+# ASSUMES:
+#   - You already have a valid TF tree (map/odom -> base_link) from your own
+#     localization stack. amcl/robot_localization are NOT covered here.
+#   - 2D lidar publishes sensor_msgs/LaserScan on /scan
+#   - Lane boundary points published as sensor_msgs/PointCloud2 on /lane_points
+#   - Pothole points published as sensor_msgs/PointCloud2 on /pothole_points
+#
+# KEY IDEA:
+#   lane_layer.enabled is a normal ROS2 parameter. An external "mission
+#   manager" node (see lane_mode_manager.py) flips it to false right after
+#   WP1 and back to true right after WP3, using the SAME costmap config for
+#   both the lane-constrained and open-navigation phases of the mission.
+##############################################################################
+
+amcl:
+  ros__parameters:
+    use_sim_time: False
+    # Fill in / replace with your own localization stack if not using amcl.
+
+bt_navigator:
+  ros__parameters:
+    use_sim_time: False
+    global_frame: map
+    robot_base_frame: base_link
+    odom_topic: /odom
+    bt_loop_duration: 10
+    default_server_timeout: 20
+    wait_for_service_timeout: 1000
+    default_nav_to_pose_bt_xml: "navigate_to_pose_w_replanning_and_recovery.xml"
+    default_nav_through_poses_bt_xml: "navigate_through_poses_w_replanning_and_recovery.xml"
+    plugin_lib_names:
+      - nav2_compute_path_to_pose_action_bt_node
+      - nav2_follow_path_action_bt_node
+      - nav2_spin_action_bt_node
+      - nav2_wait_action_bt_node
+      - nav2_back_up_action_bt_node
+      - nav2_drive_on_heading_bt_node
+      - nav2_clear_costmap_service_bt_node
+      - nav2_is_stuck_condition_bt_node
+      - nav2_goal_reached_condition_bt_node
+      - nav2_goal_updated_condition_bt_node
+      - nav2_reinitialize_global_localization_service_bt_node
+      - nav2_rate_controller_bt_node
+      - nav2_distance_controller_bt_node
+      - nav2_recovery_node_bt_node
+      - nav2_pipeline_sequence_bt_node
+
+controller_server:
+  ros__parameters:
+    use_sim_time: False
+    controller_frequency: 20.0
+    min_x_velocity_threshold: 0.001
+    min_theta_velocity_threshold: 0.001
+    progress_checker_plugins: ["progress_checker"]
+    goal_checker_plugins: ["goal_checker"]
+    controller_plugins: ["FollowPath"]
+
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.3
+      movement_time_allowance: 10.0
+
+    goal_checker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 0.20
+      yaw_goal_tolerance: 0.20
+      stateful: True
+
+    # MPPI copes well with narrow lane corridors AND open areas without
+    # retuning, because it samples trajectories directly against the
+    # costmap (lane lines + potholes + lidar obstacles all show up there).
+    FollowPath:
+      plugin: "nav2_mppi_controller::MPPIController"
+      time_steps: 56
+      model_dt: 0.05
+      batch_size: 2000
+      vx_std: 0.2
+      vy_std: 0.0
+      wz_std: 0.4
+      vx_max: 0.8
+      vx_min: -0.2
+      vy_max: 0.0
+      wz_max: 1.2
+      ax_max: 3.0
+      ax_min: -3.0
+      az_max: 3.5
+      iteration_count: 1
+      prune_distance: 1.7
+      transform_tolerance: 0.1
+      temperature: 0.3
+      gamma: 0.015
+      motion_model: "DiffDrive"   # change to "Omni" or "Ackermann" as needed
+      visualize: false
+      critics: [
+        "ConstraintCritic", "CostCritic", "GoalCritic", "GoalAngleCritic",
+        "PathAlignCritic", "PathFollowCritic", "PathAngleCritic",
+        "PreferForwardCritic", "ObstaclesCritic"
+      ]
+      ConstraintCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 4.0
+      CostCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 3.81
+        critical_cost: 300.0
+        consider_footprint: true
+        collision_cost: 1000000.0
+        near_goal_distance: 1.0
+      GoalCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 5.0
+      GoalAngleCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 3.0
+      PathAlignCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 14.0
+        # Higher weight here = stick tighter to the planned path, which
+        # matters most inside the lane segments. The mission manager can
+        # lower this via set_parameters when lanes are absent if you want
+        # looser tracking in the open segment.
+        max_path_occupancy_ratio: 0.05
+      PathFollowCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 5.0
+        offset_from_furthest: 5
+      PathAngleCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 2.0
+      PreferForwardCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 5.0
+      ObstaclesCritic:
+        enabled: true
+        cost_power: 1
+        repulsion_weight: 1.5
+        critical_weight: 20.0
+        consider_footprint: true
+        collision_cost: 1000000.0
+        collision_margin_distance: 0.05
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      use_sim_time: False
+      update_frequency: 10.0
+      publish_frequency: 10.0
+      global_frame: odom
+      robot_base_frame: base_link
+      rolling_window: true
+      width: 6
+      height: 6
+      resolution: 0.05
+      footprint: "[[0.3,0.25],[0.3,-0.25],[-0.3,-0.25],[-0.3,0.25]]"  # SET TO YOUR ROBOT
+      plugins: ["obstacle_layer", "pothole_layer", "lane_layer", "inflation_layer"]
+
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: scan
+        scan:
+          topic: /scan
+          sensor_frame: ""
+          data_type: "LaserScan"
+          marking: true
+          clearing: true
+          obstacle_max_range: 8.0
+          obstacle_min_range: 0.0
+          raytrace_max_range: 8.5
+          raytrace_min_range: 0.0
+
+      pothole_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: potholes
+        potholes:
+          topic: /pothole_points
+          sensor_frame: ""
+          data_type: "PointCloud2"
+          marking: true
+          clearing: false      # potholes are static; don't let missed rays erase them
+          min_obstacle_height: -1.0
+          max_obstacle_height: 1.0
+          obstacle_max_range: 10.0
+          obstacle_min_range: 0.0
+
+      lane_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true          # <-- toggled false/true by lane_mode_manager.py
+        observation_sources: lane_cloud
+        lane_cloud:
+          topic: /lane_points
+          sensor_frame: ""
+          data_type: "PointCloud2"
+          marking: true
+          clearing: false      # lane boundaries are static; never auto-clear them
+          min_obstacle_height: -1.0
+          max_obstacle_height: 1.0
+          obstacle_max_range: 10.0
+          obstacle_min_range: 0.0
+
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        enabled: true
+        cost_scaling_factor: 4.0
+        inflation_radius: 0.4    # keep modest so a narrow lane still has free space
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      use_sim_time: False
+      update_frequency: 5.0
+      publish_frequency: 5.0
+      global_frame: map
+      robot_base_frame: base_link
+      resolution: 0.05
+      track_unknown_space: true
+      footprint: "[[0.3,0.25],[0.3,-0.25],[-0.3,-0.25],[-0.3,0.25]]"  # SET TO YOUR ROBOT
+      plugins: ["obstacle_layer", "pothole_layer", "lane_layer", "inflation_layer"]
+
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: scan
+        scan:
+          topic: /scan
+          sensor_frame: ""
+          data_type: "LaserScan"
+          marking: true
+          clearing: true
+          obstacle_max_range: 8.0
+          obstacle_min_range: 0.0
+          raytrace_max_range: 8.5
+          raytrace_min_range: 0.0
+
+      pothole_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: potholes
+        potholes:
+          topic: /pothole_points
+          sensor_frame: ""
+          data_type: "PointCloud2"
+          marking: true
+          clearing: false
+          min_obstacle_height: -1.0
+          max_obstacle_height: 1.0
+          obstacle_max_range: 10.0
+          obstacle_min_range: 0.0
+
+      lane_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true          # <-- toggled by lane_mode_manager.py
+        observation_sources: lane_cloud
+        lane_cloud:
+          topic: /lane_points
+          sensor_frame: ""
+          data_type: "PointCloud2"
+          marking: true
+          clearing: false
+          min_obstacle_height: -1.0
+          max_obstacle_height: 1.0
+          obstacle_max_range: 10.0
+          obstacle_min_range: 0.0
+
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        enabled: true
+        cost_scaling_factor: 4.0
+        inflation_radius: 0.4
+
+planner_server:
+  ros__parameters:
+    use_sim_time: False
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "nav2_smac_planner/SmacPlanner2D"
+      tolerance: 0.25
+      downsample_costmap: false
+      allow_unknown: true
+      max_iterations: 1000000
+      max_on_approach_iterations: 1000
+      max_planning_time: 3.0
+      cost_travel_multiplier: 2.0
+      use_final_approach_orientation: false
+
+behavior_server:
+  ros__parameters:
+    use_sim_time: False
+    local_costmap_topic: local_costmap/costmap_raw
+    global_costmap_topic: global_costmap/costmap_raw
+    local_footprint_topic: local_costmap/published_footprint
+    global_footprint_topic: global_costmap/published_footprint
+    behavior_plugins: ["spin", "backup", "drive_on_heading", "wait", "assisted_teleop"]
+    spin:
+      plugin: "nav2_behaviors::Spin"
+      max_rotational_vel: 0.8    # kept modest so a spin recovery is less likely to swing into a lane boundary
+    backup:
+      plugin: "nav2_behaviors::BackUp"
+    drive_on_heading:
+      plugin: "nav2_behaviors::DriveOnHeading"
+    wait:
+      plugin: "nav2_behaviors::Wait"
+    assisted_teleop:
+      plugin: "nav2_behaviors::AssistedTeleop"
+    global_frame: odom
+    robot_base_frame: base_link
+    transform_timeout: 0.1
+    simulate_ahead_time: 2.0
+
+waypoint_follower:
+  ros__parameters:
+    use_sim_time: False
+    loop_rate: 20
+    stop_on_failure: false
+    waypoint_task_executor_plugin: "wait_at_waypoint"
+    wait_at_waypoint:
+      # Built-in plugin: fine for a plain pause. Replace with your own
+      # WaypointTaskExecutor plugin (see notes) to actually RUN the task
+      # at WP2 and cap it at 45s instead of just waiting.
+      plugin: "nav2_waypoint_follower::WaitAtWaypoint"
+      enabled: true
+      waypoint_pause_duration: 0   # set per-waypoint logic in your own plugin instead
+
+velocity_smoother:
+  ros__parameters:
+    use_sim_time: False
+    smoothing_frequency: 20.0
+    scale_velocities: false
+    feedback: "OPEN_LOOP"
+    max_velocity: [0.8, 0.0, 1.2]
+    min_velocity: [-0.2, 0.0, -1.2]
+    max_accel: [2.5, 0.0, 3.2]
+    max_decel: [-2.5, 0.0, -3.2]
+    odom_topic: "odom"
+    odom_duration: 0.1
