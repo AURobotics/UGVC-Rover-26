@@ -14,6 +14,7 @@ WAYPOINT_TIMEOUT = 60 # 60 seconds allowed to reach a waypoint before timing out
 # Topics
 LOCALIZATION_TOPIC = '/odometry/unfiltered'
 FACE_RECOGNITION_SERVICE = '/face_recognition/start'
+MANUAL_TOGGLE_TOPIC = '/manual_toggle'
 
 class State(Enum):
     MANUAL = auto() # Manual control mode
@@ -27,6 +28,12 @@ class MissionNode(Node):
         super().__init__("mission_node")
 
         self._declare_fetch_variables()
+
+        self.manual_service_client = self.create_service(
+            SetBool,
+            MANUAL_TOGGLE_TOPIC,
+            self.manual_toggle_callback
+        )
 
         if self.mode == 0:
             self.state = State.MANUAL
@@ -140,7 +147,7 @@ class MissionNode(Node):
 
     def call_face_recognition_service(self, state: bool, reason: str = ""):
         if not self.face_recognition_client.service_is_ready():
-            print("[SESSION] Face recognition service not available", flush=True, file=sys.stdout)
+            self.get_logger().error("[SESSION] Face recognition service not available")
             return
 
         request = SetBool.Request()
@@ -154,9 +161,28 @@ class MissionNode(Node):
         try:
             response = future.result()
             tag = f" ({reason})" if reason else ""
-            print(f"[SESSION] Service response{tag}: {response.message}", flush=True, file=sys.stdout)
+            self.get_logger().info(f"Service response{tag}: {response.message}")
         except Exception as e:
-            print(f"[SESSION] Service call failed: {e}", flush=True, file=sys.stdout)
+            self.get_logger().error(f"Service call failed: {e}")
+
+    # Service callback for manual toggle
+    def manual_toggle_callback(self, request, response):
+        if request.data:
+            self.state = State.MANUAL
+            response.success = True
+            response.message = "Switched to manual control"
+            self.get_logger().info("Switched to manual control")
+        else:
+            if self.state == State.MANUAL:
+                self.state = State.AUTO_LANES
+                response.success = True
+                response.message = "Switched to autonomous lane following"
+                self.get_logger().info("Switched to autonomous lane following")
+            else:
+                response.success = False
+                response.message = "Already in autonomous mode"
+                self.get_logger().info("Already in autonomous mode")
+        return response
 
 def main(args=None):
     rclpy.init(args=args)
