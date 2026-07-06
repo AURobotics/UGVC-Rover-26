@@ -54,13 +54,12 @@ def generate_launch_description():
     #     package="your_lidar_driver", executable="lidar_node",
     #     name="lidar", output="screen",
     # )
-    # localization_node = Node(
-    #     package="robot_localization", executable="ekf_node",
-    #     name="ekf_filter_node", output="screen",
-    #     parameters=[os.path.join(
-    #         get_package_share_directory("YOUR_PACKAGE_NAME"),
-    #         "config", "ekf.yaml")],
-    # )
+    localization_node = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(get_package_share_directory("localization"), "launch", "local_launch.py")
+        ),
+        launch_arguments={"use_sim_time": use_sim_time}.items(),
+    )
 
     # ---- 2. Nav2 navigation stack -------------------------------------------
     navigation = IncludeLaunchDescription(
@@ -81,8 +80,8 @@ def generate_launch_description():
     # /bond, and only launch the node once that returns true.
     mission_manager = Node(
         package="mission_nav2",
-        executable="lane_mode_manager.py",
-        name="lane_mode_manager",
+        executable="all_waypoint_navigation.py",
+        name="mission_manager",
         output="screen",
         parameters=[{"use_sim_time": use_sim_time}],
     )
@@ -92,7 +91,7 @@ def generate_launch_description():
         params_file_arg,
         use_sim_time_arg,
         # lidar_node,
-        # localization_node,
+        localization_node,
         navigation,
         delayed_mission_manager,
     ])

@@ -15,11 +15,6 @@
 #   both the lane-constrained and open-navigation phases of the mission.
 ##############################################################################
 
-amcl:
-  ros__parameters:
-    use_sim_time: False
-    # Fill in / replace with your own localization stack if not using amcl.
-
 bt_navigator:
   ros__parameters:
     use_sim_time: False
@@ -265,6 +260,15 @@ planner_server:
       cost_travel_multiplier: 2.0
       use_final_approach_orientation: false
 
+smoother_server:
+  ros__parameters:
+    smoother_plugins: ["simple_smoother"]
+    simple_smoother:
+      plugin: "nav2_smoother::SimpleSmoother"
+      tolerance: 1.0e-10
+      max_its: 1000
+      do_refinement: True
+
 behavior_server:
   ros__parameters:
     use_sim_time: False
@@ -315,3 +319,48 @@ velocity_smoother:
     max_decel: [-2.5, 0.0, -3.2]
     odom_topic: "odom"
     odom_duration: 0.1
+
+docking_server:
+  ros__parameters:
+    controller_frequency: 50.0
+    initial_perception_timeout: 5.0
+    wait_charge_timeout: 5.0
+    dock_approach_timeout: 30.0
+    undock_linear_tolerance: 0.05
+    undock_angular_tolerance: 0.1
+    max_retries: 3
+    base_frame: "base_link"
+    fixed_frame: "odom"
+    dock_backwards: false
+    dock_prestaging_tolerance: 0.5
+
+    # Types of docks
+    dock_plugins: ['simple_charging_dock']
+    simple_charging_dock:
+      plugin: 'opennav_docking::SimpleChargingDock'
+      docking_threshold: 0.05
+      staging_x_offset: -0.7
+      use_external_detection_pose: true
+      use_battery_status: false # true
+      use_stall_detection: false # true
+
+      external_detection_timeout: 1.0
+      external_detection_translation_x: -0.18
+      external_detection_translation_y: 0.0
+      external_detection_rotation_roll: -1.57
+      external_detection_rotation_pitch: -1.57
+      external_detection_rotation_yaw: 0.0
+      filter_coef: 0.1
+
+lifecycle_manager:
+  ros__parameters:
+    use_sim_time: True
+    autostart:    True
+    node_names:
+      - controller_server
+      - smoother_server
+      - planner_server
+      - behavior_server
+      - bt_navigator
+      - waypoint_follower
+      - velocity_smoother
