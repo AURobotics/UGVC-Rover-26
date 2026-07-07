@@ -1,11 +1,12 @@
-from PySide6.QtWidgets import QMainWindow, QDockWidget, QLabel, QSizePolicy
+from PySide6.QtWidgets import QMainWindow, QDockWidget, QLabel, QSizePolicy, QPushButton
 from PySide6.QtCore import Qt
+from console.ros_nodes.mediator import Mediator
 from console.gui.camera_display import CameraDisplay
 from console.gui.status_widget import StatusWidget
 from console.gui.motor_currents import MotorCurrents
 
 class MainTab(QMainWindow):
-    def __init__(self, mediator, parent=None):
+    def __init__(self, mediator: Mediator, parent=None):
         super().__init__(parent)
 
         self._mediator = mediator
@@ -42,8 +43,14 @@ class MainTab(QMainWindow):
         self.splitDockWidget(self._speedometer_dock, self._compass_dock, Qt.Orientation.Horizontal)
 
         self._position = QLabel("Position: 0, 0")
-        self.statusBar().addPermanentWidget(self._position)
         self._mediator.telemetry_updated.connect(self.update_position)
+        self.statusBar().addPermanentWidget(self._position)
+
+        self._auto = False
+        #self._mediator.set_auto(self._auto)
+        self._mode_button = QPushButton('Switch to automatic')
+        self._mode_button.clicked.connect(self._switch_mode)
+        self.statusBar().addPermanentWidget(self._mode_button)
 
         self.resizeDocks([self._motor_dock, self._cam_dock], [50, 500], Qt.Orientation.Horizontal)
 
@@ -60,6 +67,17 @@ class MainTab(QMainWindow):
         lat = self._mediator.latitude
         lon = self._mediator.longitude
         self._position.setText(f"Position: {lat:.2f}, {lon:.2f}")
+
+    def _switch_mode(self):
+        if self._auto:
+            self._auto = False
+            #self._mediator.set_auto(self._auto)
+            self._mode_button.setText('Switch to automatic')
+        else:
+            self._auto = True
+            #self._mediator.set_auto(self._auto)
+            self._mode_button.setText('Switch to manual')
+
     
     def hideEvent(self, event):
         super().hideEvent(event)
