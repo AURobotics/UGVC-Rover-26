@@ -18,7 +18,7 @@
 bt_navigator:
   ros__parameters:
     use_sim_time: False
-    global_frame: odom   # was "map" -- nothing publishes a map frame yet (no GPS/AMCL). Revisit if you add global localization.
+    global_frame: map   # GPS-based hardware run: navsat_transform + global EKF now publish map -> odom
     robot_base_frame: base_link
     odom_topic: /odom/local
     bt_loop_duration: 10
@@ -195,7 +195,7 @@ global_costmap:
       use_sim_time: False
       update_frequency: 5.0
       publish_frequency: 5.0
-      global_frame: odom   # was "map" -- nothing publishes a map frame yet (no GPS/AMCL). Revisit if you add global localization.
+      global_frame: map   # GPS-based hardware run: navsat_transform + global EKF now publish map -> odom
       robot_base_frame: base_link
       resolution: 0.05
       track_unknown_space: true
