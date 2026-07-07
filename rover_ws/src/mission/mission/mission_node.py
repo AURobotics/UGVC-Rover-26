@@ -4,9 +4,9 @@ import rclpy
 from rclpy.node import Node
 from rclpy.duration import Duration
 from enum import Enum,auto
-from rover_interfaces.msg import RoverStatus, Speed, WheelVel # type: ignore
 from nav_msgs.msg import Odometry
 from std_srvs.srv import SetBool
+from std_msgs.msg import Byte
 
 WAYPOINT_ERROR = 1.25 # 1.5 allowed error in meters for reaching a waypoint (1.25 for safety)
 WAYPOINT_TIMEOUT = 60 # 60 seconds allowed to reach a waypoint before timing out and returning to manual control
@@ -15,12 +15,13 @@ WAYPOINT_TIMEOUT = 60 # 60 seconds allowed to reach a waypoint before timing out
 LOCALIZATION_TOPIC = '/odom/global'
 FACE_RECOGNITION_SERVICE = '/face_recognition/start'
 MANUAL_TOGGLE_TOPIC = '/manual_toggle'
+STATE_TOPIC = '/mission/active_state'
 
 class State(Enum):
-    MANUAL = auto() # Manual control mode
-    AUTO_LANES = auto() # Autonomous lane following mode
-    AUTO_WAYPOINTS = auto() # Autonomous waypoint navigation mode
-    AUTO_WAYPOINT2 = auto() # Face recognition mode
+    MANUAL = 0 # Manual control mode
+    AUTO_LANES = 1 # Autonomous lane following mode
+    AUTO_WAYPOINTS = 2 # Autonomous waypoint navigation mode
+    AUTO_WAYPOINT2 = 3 # Face recognition mode
 
 class Mode(Enum):
     MANUAL = 0
@@ -29,6 +30,8 @@ class Mode(Enum):
 class MissionNode(Node):
     def __init__(self):
         super().__init__("mission_node")
+
+        self.state_topic_publisher = self.create_publisher(Byte, STATE_TOPIC, 10)
 
         self._declare_fetch_variables()
 
@@ -53,12 +56,13 @@ class MissionNode(Node):
     # main loop checking states
     def _control_loop(self):
         if self.state==State.MANUAL:
-            pass
+            self.state_topic_publisher.publish(Byte(data=State.MANUAL.value))
 
         elif self.state==State.AUTO_LANES:
             if self.is_at_waypoint(1):
                 self.state=State.AUTO_WAYPOINTS
                 self.waypoint1_time = self.get_clock().now()
+            self.state_topic_publisher.publish(Byte(data=State.AUTO_LANES.value))
 
         elif self.state==State.AUTO_WAYPOINTS:
             if self.waypoint1_time is not None: 
@@ -77,6 +81,8 @@ class MissionNode(Node):
             elif self.is_at_waypoint(3) or is_timed_out3:
                 self.state=State.AUTO_LANES
 
+                self.state_topic_publisher.publish(Byte(data=State.AUTO_LANES.value))
+        
         elif self.state==State.AUTO_WAYPOINT2:
             is_timed_out2 = self.get_clock().now() - self.waypoint2_time >= Duration(seconds=44)
             if is_timed_out2:
@@ -88,6 +94,8 @@ class MissionNode(Node):
             # or the node that fires the laser
             #self.call_face_recognition_service(False, "Stopping face recognition after completion")
             #self.state=State.AUTO_WAYPOINTS
+
+            self.state_topic_publisher.publish(Byte(data=State.AUTO_WAYPOINT2.value))
 
 # ===== helper functions ================================================================================
 
@@ -105,7 +113,7 @@ class MissionNode(Node):
             self.mode = Mode.MANUAL
             return # if manual mode, no need to declare other variables
         self.mode = Mode.AUTO
-        
+
         # waypoint coordinates (only used in auto mode)
         self.declare_parameter('waypoint1.x', 0.0)
         self.declare_parameter('waypoint1.y', 0.0)
