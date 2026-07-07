@@ -12,7 +12,7 @@ WAYPOINT_ERROR = 1.25 # 1.5 allowed error in meters for reaching a waypoint (1.2
 WAYPOINT_TIMEOUT = 60 # 60 seconds allowed to reach a waypoint before timing out and returning to manual control
 
 # Topics
-LOCALIZATION_TOPIC = '/odometry/unfiltered'
+LOCALIZATION_TOPIC = '/odom/global'
 FACE_RECOGNITION_SERVICE = '/face_recognition/start'
 MANUAL_TOGGLE_TOPIC = '/manual_toggle'
 
@@ -22,6 +22,9 @@ class State(Enum):
     AUTO_WAYPOINTS = auto() # Autonomous waypoint navigation mode
     AUTO_WAYPOINT2 = auto() # Face recognition mode
 
+class Mode(Enum):
+    MANUAL = 0
+    AUTO = 1
 
 class MissionNode(Node):
     def __init__(self):
@@ -29,18 +32,14 @@ class MissionNode(Node):
 
         self._declare_fetch_variables()
 
-        self.manual_service_client = self.create_service(
-            SetBool,
-            MANUAL_TOGGLE_TOPIC,
-            self.manual_toggle_callback
-        )
-
-        if self.mode == 0:
-            self.state = State.MANUAL
-            self._initiate_manual()
-        elif self.mode == 1:
-            self.state = State.AUTO_LANES
-            self._initiate_auto()
+        self.state = State.MANUAL # Initial state is manual control for all modes
+        
+        if self.mode == Mode.AUTO:
+            self.manual_service_client = self.create_service(
+                SetBool,
+                MANUAL_TOGGLE_TOPIC,
+                self.manual_toggle_callback
+            ) # Service is only used in auto to switch to and from manual
 
         self.position_subscriber = self.create_subscription(
             Odometry,
@@ -95,8 +94,18 @@ class MissionNode(Node):
     def _declare_fetch_variables(self):
         # mode of operation:
         self.declare_parameter('mode', 0)  # 0: manual, 1: auto
-        self.mode = self.get_parameter('mode').get_parameter_value().integer_value
-
+        mode_value = self.get_parameter('mode').get_parameter_value().integer_value
+        
+        self.manual_service_client = None
+        # in case of manual mode, Statw = MANUAL and no switching
+        if mode_value not in [0, 1]:
+            self.get_logger().error("Invalid mode parameter. Must be 0 (manual) or 1 (auto).")
+            sys.exit(1)
+        elif mode_value == 0:
+            self.mode = Mode.MANUAL
+            return # if manual mode, no need to declare other variables
+        self.mode = Mode.AUTO
+        
         # waypoint coordinates (only used in auto mode)
         self.declare_parameter('waypoint1.x', 0.0)
         self.declare_parameter('waypoint1.y', 0.0)
