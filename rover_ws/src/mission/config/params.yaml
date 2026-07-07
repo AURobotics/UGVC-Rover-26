@@ -1,6 +1,6 @@
 mission:
   ros__parameters:
-    mode: 0  # 0: manual, 1: auto
+    mode: 1  # 0: manual, 1: auto
     waypoint1:
       x: 0.0
       y: 0.0
