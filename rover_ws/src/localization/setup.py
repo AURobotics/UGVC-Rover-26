@@ -14,7 +14,7 @@ setup(
         ('share/' + package_name + '/launch', glob('launch/*')),
         ('share/' + package_name + '/params', glob('params/*'))
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'numpy', 'scipy'],
     zip_safe=True,
     maintainer='zeyad',
     maintainer_email='zeyad@todo.todo',
@@ -28,7 +28,9 @@ setup(
     entry_points={
         'console_scripts': [
             'odom_node = localization.odom_node:main',
-             'encoder_sim_node = localization.encoder_sim_node:main'
+            'encoder_sim_node = localization.encoder_sim_node:main',
+            'euler_printer = localization.euler_printer:main',
+            'calibration_node = localization.calibration_node:main',
         ],
     },
 )

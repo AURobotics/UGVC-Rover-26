@@ -29,7 +29,8 @@ def generate_launch_description():
             name='navsat_transform_node',
             parameters=[os.path.join(get_package_share_directory("localization"), 'params', 'navsat_config.yaml')],
             remappings=[
-                ('odometry/filtered', '/odom/local')
+                ('odometry/filtered', '/odom/local'),
+                ('gps/fix', '/phyphox/gps')
             ]
         ),
         Node(

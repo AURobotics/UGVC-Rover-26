@@ -75,6 +75,7 @@ class OdomNode(Node):
         #self.get_logger().info('Publishing: "%s"' % msg.data)
 
     def forward_kinematics(self, fl_vel, fr_vel, bl_vel, br_vel):
+
         v_left = (fl_vel + bl_vel) / 2
         v_right = (fr_vel + br_vel) / 2
         linear_velocity = ((v_left + v_right) / 2) * self.wheel_radius #average of velocity values of wheels multiplied by wheel radius so that it becomes linear velocity
