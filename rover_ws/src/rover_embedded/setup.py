@@ -28,7 +28,7 @@ setup(
     entry_points={
         'console_scripts': [
             "stm_node=rover_embedded.stm_node:main",
-            "twist_node=rover_embedded.twist_node:main",
+
         ],
     },
 )

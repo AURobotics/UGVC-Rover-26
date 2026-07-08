@@ -35,18 +35,18 @@ class STM32Node(Node):
         self.get_logger().info(f'Connected to STM32 on {self.stm.port}')
 
         # Publishers
-        self.pub_imu       = self.create_publisher(Imu,               '/imu/data',      10)
+        # self.pub_imu       = self.create_publisher(Imu,               '/imu/data',      10)
         self.pub_gps       = self.create_publisher(NavSatFix,         '/gps/fix',       10)
-        self.pub_status    = self.create_publisher(RoverStatus,         '/stm32/status',  10)
-        self.pub_antenna   = self.create_publisher(NavSatFix,         '/stm32/antenna', 10)
+        self.pub_status    = self.create_publisher(RoverStatus,         '/rover/status',  10)
+        self.pub_antenna   = self.create_publisher(NavSatFix,         '/rover/antenna', 10)
         self.pub_wheel_vel = self.create_publisher(WheelVel,          '/wheel_vel',     10)
 
         # Subscribers
         self.create_subscription(Speed,             '/cmd_speed',           self._cb_cmd_vel, 10)
-        self.create_subscription(Bool,              '/stm32/cmd_laser',   self._cb_laser,   10)
-        self.create_subscription(Float32MultiArray, '/stm32/cmd_servo',   self._cb_servo,   10)
-        self.create_subscription(Bool,              '/stm32/cmd_mode',    self._cb_mode,    10)
-        self.create_subscription(Float32MultiArray, '/stm32/cmd_antenna', self._cb_antenna, 10)
+        self.create_subscription(Bool,              '/rover/cmd_laser',   self._cb_laser,   10)
+        self.create_subscription(Float32MultiArray, '/rover/cmd_servo',   self._cb_servo,   10)
+        self.create_subscription(Bool,              '/rover/cmd_mode',    self._cb_mode,    10)
+        self.create_subscription(Float32MultiArray, '/rover/cmd_antenna', self._cb_antenna, 10)
 
         self.create_timer(0.01, self.poll_serial)  # 100 Hz
     def poll_serial(self):

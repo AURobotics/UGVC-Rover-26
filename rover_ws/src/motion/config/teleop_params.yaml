@@ -1,0 +1,6 @@
+teleop_twist_keyboard:
+     ros__parameters:
+       speed: 0.5
+       turn: 1.0
+       repeat_rate: 10.0
+       key_timeout: 0.6
