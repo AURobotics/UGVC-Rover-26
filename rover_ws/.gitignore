@@ -21,4 +21,4 @@ data/
 # early development files
 navigation/
 
-.vscode/*
+./vscode/*
