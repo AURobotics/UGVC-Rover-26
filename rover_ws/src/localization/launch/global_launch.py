@@ -14,15 +14,15 @@ def generate_launch_description():
     return LaunchDescription([
         IncludeLaunchDescription(
         PythonLaunchDescriptionSource(local_launch)),
-        Node(
-            package='robot_localization',
-            executable='ekf_node',
-            name='ekf_local_node',
-            parameters=[os.path.join(get_package_share_directory("localization"), 'params', 'ekf_local_config.yaml')],
-            remappings=[
-                ('odometry/filtered', '/odom/local')
-            ]
-        ),
+        # Node(
+        #     package='robot_localization',
+        #     executable='ekf_node',
+        #     name='ekf_local_node',
+        #     parameters=[os.path.join(get_package_share_directory("localization"), 'params', 'ekf_local_config.yaml')],
+        #     remappings=[
+        #         ('odometry/filtered', '/odom/local')
+        #     ]
+        # ),
         Node(
             package='robot_localization',
             executable='navsat_transform_node',
@@ -39,7 +39,7 @@ def generate_launch_description():
             name='ekf_global_node',
             parameters=[os.path.join(get_package_share_directory("localization"), 'params', 'ekf_global_config.yaml')],
             remappings=[
-                ('odometry/filtered', '/odometry/global')
+                ('odometry/filtered', '/odom/global')
             ]
         ),
     ])

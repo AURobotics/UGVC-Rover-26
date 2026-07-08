@@ -4,27 +4,48 @@ from rover_interfaces.msg import WheelVel
 from nav_msgs.msg import Odometry
 from tf_transformations import quaternion_from_euler
 from geometry_msgs.msg import Point, Quaternion, Vector3
+from sensor_msgs.msg import MagneticField
 from math import cos, sin
+from modules.calibration_tools import *
 
 class OdomNode(Node):
 
     def __init__(self):
         super().__init__('odom_node')
         #parameters
-        self.declare_parameter('wheel_base', 0.0) #added 0.0 as default just to make the ros2 warning shutup
-        self.declare_parameter('wheel_radius', 0.0)
+        self.declare_parameter('wheel_base', 1.0) #default behaviour: assume m/s input
+        self.declare_parameter('wheel_radius', 1.0)
         self.declare_parameter('position_covariance', [0.0] * 36)
         self.declare_parameter('twist_covariance', [0.0] * 36)
+        self.declare_parameter('hard_iron', [0.0, 0.0, 0.0])
+        self.declare_parameter('soft_iron', [1.0, 0.0, 0.0,
+                                             0.0, 1.0, 0.0,
+                                             0.0, 0.0, 1.0
+                                             ])
 
         self.wheel_base = self.get_parameter('wheel_base').get_parameter_value().double_value
         self.wheel_radius = self.get_parameter('wheel_radius').get_parameter_value().double_value
-
+        hard_iron_param = self.get_parameter('hard_iron').get_parameter_value().double_array_value
+        soft_iron_param = self.get_parameter('soft_iron').get_parameter_value().double_array_value
+        self.hard_iron = np.array(hard_iron_param)
+        self.soft_iron = np.array([
+            soft_iron_param[0:3],
+            soft_iron_param[3:6],
+            soft_iron_param[6:9]
+        ])
         #topics
-        self.publisher_ = self.create_publisher(Odometry, '/odometry/unfiltered', 10)
-        self.subscription = self.create_subscription(
+        self.encoder_pub = self.create_publisher(Odometry, '/odometry/unfiltered', 10)
+        self.mag_pub = self.create_publisher(MagneticField, '/magnetic_field/calibrated', 10)
+
+        self.encoder_sub = self.create_subscription(
             WheelVel,
             '/wheel_vel',
-            self.listener_callback,
+            self.encoder_callback,
+            10)
+        self.mag_sub = self.create_subscription(
+            MagneticField,
+            '/phyphox/magnetic_field',
+            self.magnet_callback,
             10)
         
         #variables
@@ -34,10 +55,10 @@ class OdomNode(Node):
         self.z = 0.0
         self.curr_stamp = -1
         self.prev_stamp = -1
-    def listener_callback(self, msg:WheelVel):
+    def encoder_callback(self, msg:WheelVel):
         self.curr_stamp = msg.header.stamp.sec + (msg.header.stamp.nanosec * 1e-9)
         
-        if(self.prev_stamp is None): #if this is the first message the node receives, initialize the prev stamp parameter and wait for next message
+        if(self.prev_stamp == -1): #if this is the first message the node receives, initialize the prev stamp parameter and wait for next message
             self.prev_stamp = self.curr_stamp
             self.get_logger().info('wheel base: "%f"' % float(self.wheel_base))
             self.get_logger().info('wheel radius: "%f"' % float(self.wheel_radius))
@@ -45,10 +66,22 @@ class OdomNode(Node):
         
         odom_matrix = self.forward_kinematics(msg.front_left, msg.front_right, msg.back_left, msg.back_right)
         self.prev_stamp = self.curr_stamp
-        self.publish(odom_matrix)
+        self.publish_encoders(odom_matrix)
         
+    def magnet_callback(self, msg:MagneticField):
+        #publish calibrated data
+        x,y,z = msg.magnetic_field.x * 10**6, msg.magnetic_field.y * 10**6, msg.magnetic_field.z * 10**6 #convert to microtesla
+        pub_msg = MagneticField()
+        pub_msg.header.stamp = self.get_clock().now().to_msg()
+        pub_msg.header.frame_id = 'base_link'
+        calibrated_field = apply_calibration(np.array([x,y,z]), self.hard_iron, self.soft_iron)
+        #note: x and y axis are rotated 90 degrees
+        pub_msg.magnetic_field.x = calibrated_field[1] * (10**-6) #convert back to tesla
+        pub_msg.magnetic_field.y = - calibrated_field[0] * (10**-6)
+        pub_msg.magnetic_field.z = calibrated_field[2] * (10**-6)
+        self.mag_pub.publish(pub_msg)
 
-    def publish(self, odom_matrix):
+    def publish_encoders(self, odom_matrix):
         msg = Odometry()
         pos_co = self.get_parameter('position_covariance').get_parameter_value().double_array_value
         twist_co = self.get_parameter('twist_covariance').get_parameter_value().double_array_value
@@ -71,7 +104,7 @@ class OdomNode(Node):
         msg.twist.covariance = twist_co
 
         
-        self.publisher_.publish(msg)
+        self.encoder_pub.publish(msg)
         #self.get_logger().info('Publishing: "%s"' % msg.data)
 
     def forward_kinematics(self, fl_vel, fr_vel, bl_vel, br_vel):

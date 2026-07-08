@@ -9,11 +9,9 @@ def generate_launch_description():
             package='localization',
             executable='odom_node',
             name='odom_node',
-            parameters=[{ #wheelbase and wheel radias are set to 1 by default, which means that converting rad/s to m/s is skipped
-                'hard_iron' : [ -0.99204322, 1.47259217, -16.24551697],
-                'soft_base' : [ 7.65365181e-01, -8.19540153e-03, 1.04355360e-03,
-                               -8.19540153e-03, 7.88294900e-01, -2.93878978e-02,
-                               1.04355360e-03, -2.93878978e-02, 1.09936296e+00]
+            parameters=[{ #turtlebot3 parameters
+                'wheel_radius' : 0.033,
+                'wheel_base' : 0.16,
             }]
         ),
         Node(
