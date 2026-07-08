@@ -31,7 +31,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            "mission_node=mission.mission_node:main"
+            "mission_node=mission.mission_node:main",
+            "test_node=mission.test_node:main"
         ],
     },
 )
