@@ -72,4 +72,4 @@ ekf_global_node:
         # both full specification or specification of only the diagonal values.
         process_noise_covariance: [1.0, 1.0, 1e-3, 1e-3, 1e-3, 0.05, 0.5, 0.5, 0.1, 1e-3, 1e-3, 0.2, 0.3, 0.3, 0.3]
     
-        initial_estimate_covariance: [1.0, 1.0, 1e-9, 0.1, 0.1, 2.0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.5, 0.1, 0.1, 0.1]
+        initial_estimate_covariance: [1.0, 1.0, 1e-9, 0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.5, 0.1, 0.1, 0.1]

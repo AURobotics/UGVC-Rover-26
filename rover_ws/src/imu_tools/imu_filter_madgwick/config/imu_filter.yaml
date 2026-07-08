@@ -8,8 +8,8 @@ imu_filter:
     constant_dt: 0.0
     publish_debug_topics: false 
     world_frame: "ENU"
-    gain: 0.2
-    zeta: -0.0001
+    gain: 0.1
+    zeta: 1.5720e-05
     mag_bias_x: 0.0
     mag_bias_y: 0.0
     mag_bias_z: 0.0

@@ -2,9 +2,15 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 import os
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
+    madgwick_launch = os.path.join(get_package_share_directory('imu_filter_madgwick'), 'launch', 'imu_filter.launch.py')
+
     return LaunchDescription([
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(madgwick_launch)),
         Node(
             package='localization',
             executable='odom_node',
@@ -22,5 +28,10 @@ def generate_launch_description():
             remappings=[
                 ('odometry/filtered', '/odom/local')
             ]
+        ),
+        Node(
+            package='localization',
+            executable='encoder_sim_node',
+            name='encoder_sim_node',
         ),
     ])

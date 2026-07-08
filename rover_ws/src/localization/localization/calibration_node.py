@@ -56,10 +56,17 @@ class calibration_node(Node):
             mag_data_list = [self.mag_data['x'], self.mag_data['y'], self.mag_data['z']]
             mag_data_arr = np.array(mag_data_list)
             self.hard_iron, self.soft_iron = get_calib_params(mag_data_arr, self.F)
+            self.format_params()
             response.success = True
-            response.message = f'hard iron parameters: {self.hard_iron}\nsoft iron matrix: {self.soft_iron}'
+            response.message = f'hard iron parameters: {self.hard_iron}       soft iron matrix: {self.soft_iron}'
         return response
     
+    def format_params(self):
+        self.hard_iron = f'[{self.hard_iron[0]}, {self.hard_iron[1]}, {self.hard_iron[2]}]'
+        self.soft_iron = f'''[{self.soft_iron[0][0]}, {self.soft_iron[0][1]}, {self.soft_iron[0][2]},
+                                {self.soft_iron[1][0]}, {self.soft_iron[1][1]}, {self.soft_iron[1][2]},
+                                {self.soft_iron[2][0]}, {self.soft_iron[2][1]}, {self.soft_iron[2][2]}]
+                            '''
     def imu_calibrate(self, request:SetBool.Request, response:SetBool.Response):
         if(request.data == True):
             self.imu_sub = self.create_subscription(
