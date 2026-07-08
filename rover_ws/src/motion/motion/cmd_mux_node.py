@@ -33,12 +33,12 @@ class CmdMuxNode(Node):
 
         # Parameters
         self.declare_parameter('wheel_radius', 0.10)       # meters
-        self.declare_parameter('wheelbase', 0.50)          # meters
-        self.declare_parameter('max_wheel_speed', 10.0)    # rad/s
+        self.declare_parameter('wheelbase', 0.74)          # meters
+        self.declare_parameter('max_wheel_speed', 1.389)   # m/s (5 km/h)
         self.declare_parameter('publish_rate', 50.0)       # Hz
         self.declare_parameter('joy_linear_axis',  0)     # throttle axes index (fwd/back)
         self.declare_parameter('joy_angular_axis',  1)     # steering axes index (left/right)
-        self.declare_parameter('joy_max_linear',   1.0)   # m/s
+        self.declare_parameter('joy_max_linear',   1.389) # m/s (5 km/h)
         self.declare_parameter('joy_max_angular',  2.0)   # rad/s
         self.declare_parameter('joy_deadzone',     0.1)   # 0.0 – 1.0
 
@@ -62,6 +62,7 @@ class CmdMuxNode(Node):
         }
  
         self.joy_msg = None
+        self.last_joy_time = self.get_clock().now()
 
         # Publisher
         self.speed_pub = self.create_publisher(Speed,'/cmd_speed',10)
@@ -95,15 +96,15 @@ class CmdMuxNode(Node):
 
     # Mission State Callback
     def state_callback(self, msg: UInt8):
-        new_state = int(msg.data)
- 
-        if new_state not in STATE_MAP:
-            self.get_logger().warn(f'Unknown state: {new_state}')
+        try:
+            new_state = State(int(msg.data))
+        except ValueError:
+            self.get_logger().warn(f'Unknown state: {msg.data}')
             return
- 
+
         if new_state != self.state:
             self.get_logger().info(f'State changed: {self.state} → {new_state}')
- 
+
         self.state = new_state
 
     def get_active_command(self):
@@ -154,10 +155,12 @@ class CmdMuxNode(Node):
     # Kinematics
     def compute_wheel_speeds(self, v, w):
         half_L = self.wheelbase / 2.0
- 
-        v_left  = (v - w * half_L) / self.wheel_radius
-        v_right = (v + w * half_L) / self.wheel_radius
- 
+
+        # Linear wheel-surface speed in m/s (matches encoder-derived speed
+        # on the STM32 firmware side, no wheel_radius division needed here)
+        v_left  = v - w * half_L
+        v_right = v + w * half_L
+
         v_left  = max(-self.max_wheel_speed, min(self.max_wheel_speed, v_left))
         v_right = max(-self.max_wheel_speed, min(self.max_wheel_speed, v_right))
  
@@ -175,7 +178,7 @@ class CmdMuxNode(Node):
  
         self.get_logger().info(
             f'[{self.state}] v={v:.2f} w={w:.2f} → '
-            f'vL={v_left:.2f} vR={v_right:.2f} rad/s',
+            f'vL={v_left:.2f} vR={v_right:.2f} m/s',
             throttle_duration_sec=1.0
         )
         
