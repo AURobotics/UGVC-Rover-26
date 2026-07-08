@@ -1,29 +1,92 @@
-# Overview:
-* `rover_ws/src/localization`: contains launch files and configuration files for the `robot_localization` nodes as well as the odom node (the node that takes encoders output and outputs /odometry/unfiltered)
+# Table of contents:
 
-* `rover_ws/src/simulation_localization`: contains the fake encoders node, which uses the positional data of the wheels in turtlebot3 as encoder data (use only for simultion)
+1. quick package overview
 
-* `rover_ws/turtlebot3_gazebo`: contains a modified version of the gazebo simulation package of the turtlebot3 simulation repo (more details later)
+2. how to calibrate
 
-# How to simulate?
-* if you do not have turtlebot3 repo already setup, follow the setup instructions: https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup
+3. how to simulate
 
-* navigate to `turtlebot3_ws/src/turtlebot3_simulations` and replace the `turtlebot3_gazebo` directory with the modified one I included in `rover_ws/`
+3. how to run (in the trial and for testing on hardware)
 
-* now you can run the following commands (do not forget to build both the turtbot3 packages, and the rover_ws packages first)
 
-start gazebo simulation(make sure you are in the parent directory of turtlebot3\_ws): `export TURTLEBOT3_MODEL=burger; source turtlebot3_ws/install/setup.bash; ros2 launch turtlebot3_gazebo empty_world.launch.py`
+# quick package overview
 
-start rviz: `source turtlebot3_ws/install/setup.bash; ros2 launch turtlebot3_bringup rviz2.launch.py`
+## `localization` pacakge main directories:
 
-launch the global localization node(make sure you are in the rover\_ws directory): `source install/setup.bash;ros2 launch localization global_launch.py;`
+### launch
 
-launch fake encoder node: `source install/setup.bash; ros2 run localization encoder_sim_node`
+* global_launch.py: lauches everything, (local ekf node, global ekf node, navsat transform (gps) node, sensor fusion node, odom_node (kinematic model and magnetometer correction))
 
-#How to run the nodes with no simulation:
+* local_launch.py: launches global odometry only (sensor fusion, local ekf node, odom_node(kinematic model and magnetometer correction))
 
-you only need to run this: `source install/setup.bash;ros2 launch localization global_launch.py;`
+* global_launch_sim.py, local_launch_sim.py: same thing but for gazebo simulation
 
-#TODO: 
+### localization
 
-add noise to sensors and test how the ekf nodes handle them.
+* calibration_node.py: used for calibrating magnetometer and gyroscope, the calibration_node has 2 services, one for calibrating the magnetometer(`/mag_cal`) and one for calibrating the gyroscope (`/imu_cal`). calibration details are in the how to use section
+
+* encoder_sim_node.py: used in gazebo simulation to simulate an encoder
+
+* euler_printer: reads `imu/data` and prints angles in degrees for debugging
+
+* odom_node: applies forward kinematics on the wheel velocities, and applies hard iron and soft iron calibration (the calibration values are output from the calibration node) on magnetomer data
+
+### modules
+
+* calibration_tools.py: python module used by calibration node and odom_node to calibrate and correct magnetometer data
+
+### params
+
+* contains configuration parameters for the robot_localization nodes
+
+## imu_filter_madgwick:
+
+* this is a package under the imu_tools directory, the documentation for this node can be found at: https://wiki.ros.org/imu_filter_madgwick
+
+### launch:
+
+* config/imu_filter.yaml: DO NOT MESS WITH MAGNETOMETER BIAS, THIS IS HANDLED BY THE ODOM NODE, but after imu calibration, this file will be used to set gyro drift (the zeta parameter)
+
+## turtlebot3_gazebo.zip:
+
+* used for simulation, do not unzip because colcon build is not supposed to build this
+
+# How to calibrate:
+
+do not forget to source the workspace
+
+run calibration node
+
+`ros2 run localization calibration_node`
+
+### imu calibration:
+
+while the calibration node is running, call the service with data set to true, this will make the node collect data from the gyroscope for calibration
+
+`ros2 service call /imu_cal std_srvs/srv/SetBool "{data: true}"`
+
+keep imu stationary for a few seconds (5 should be enough) then run
+
+`ros2 service call /imu_cal std_srvs/srv/SetBool "{data: false}"`
+
+this will print the drift of the gyroscope on the screen, go to `imu/tools/imu_filter_madgwick/config/imu_filter.yaml`
+
+set the zeta to the value of the z axis gyroscope drift, (the last element in the array returned by the calibration node)
+
+### magnetometer calibration:
+
+while the calibration node is running, call:
+
+`ros2 service call /mag_cal std_srvs/srv/SetBool "{data: true}"`
+
+rotate the imu for at least 360 degrees slowly (if the imu is installed in the rover, rotate the rover m3lesh)
+
+then call
+
+`ros2 service call /mag_cal std_srvs/srv/SetBool "{data: false}"`
+
+then go to `localization/launch/local_launch.py` and set the soft_iron and hard_iron parameters according to the output of the service
+
+# How to simulate:
+
+ok I am tired I will continue later
