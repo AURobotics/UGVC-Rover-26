@@ -28,7 +28,7 @@ def generate_launch_description():
 
     declare_autostart = DeclareLaunchArgument(
         'autostart', default_value='true')
-
+    
     use_sim_time = LaunchConfiguration('use_sim_time')
     params_file  = LaunchConfiguration('params_file')
     autostart    = LaunchConfiguration('autostart')
@@ -37,13 +37,13 @@ def generate_launch_description():
     #  Nav2 Servers                                                        #
     # ------------------------------------------------------------------ #
     controller_server = Node(
-        package='nav2_controller',
-        executable='controller_server',
-        name='controller_server',
-        output='screen',
-        parameters=[params_file, {'use_sim_time': use_sim_time}],
-    )
-
+    package='nav2_controller',
+    executable='controller_server',
+    name='controller_server',
+    output='screen',
+    parameters=[params_file, {'use_sim_time': use_sim_time}],
+    remappings=[('cmd_vel_stamped', 'diff_drive_controller/cmd_vel')],
+)
     smoother_server = Node(
         package='nav2_smoother',
         executable='smoother_server',

@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <xacro:property name="camera_tilt" value="0.0"/>  <!-- radians, positive = tilt down -->
+
     <joint name="camera_joint" type="fixed">
-        <parent link="chassis"/>
-        <child link="camera_link"/>
-        <origin xyz="0.335 -0.001 0.09" rpy="0 0 0"/> 
+    <parent link="chassis"/>
+    <child link="camera_link"/>
+    <origin xyz="0.335 -0.001 0.09" rpy="0 ${camera_tilt} 0"/>
     </joint>
 
     <link name="camera_link">
