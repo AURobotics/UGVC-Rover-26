@@ -29,6 +29,7 @@ setup(
         'console_scripts': [
             'cmd_mux_node = motion.cmd_mux_node:main',
             'servo_cam_node = motion.servo_cam_node:main',
+            'twist_node = motion.twist_node:main',
         ],
     },
 )

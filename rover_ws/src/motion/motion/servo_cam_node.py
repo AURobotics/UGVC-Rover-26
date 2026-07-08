@@ -80,10 +80,10 @@ class CameraServoNode(Node):
         self.pub_x.publish(Float32(data=self.pos_x))
         self.pub_y.publish(Float32(data=self.pos_y))
 
-        self.get_logger().info(
-            f'Camera: X={self.pos_x:.1f}°, Y={self.pos_y:.1f}°',
-            throttle_duration_sec=1.0
-        )
+        # self.get_logger().info(
+        #     f'Camera: X={self.pos_x:.1f}°, Y={self.pos_y:.1f}°',
+        #     throttle_duration_sec=1.0
+        # )
 
     def stop_servos(self):
         self.pub_x.publish(Float32(data=90.0))
