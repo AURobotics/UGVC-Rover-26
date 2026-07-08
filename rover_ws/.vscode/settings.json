@@ -1,3 +1,36 @@
 {
-    "python-envs.defaultEnvManager": "ms-python.python:system"
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "ROS2.distro": "jazzy",
+    "python.autoComplete.extraPaths": [
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/rover_nav/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/rover_interfaces/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/rover_embedded/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/rover_controller/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/road_detector/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/opencv_tests/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/motion/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/mission_nav2/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/image_geometry/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/face_recognition/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/explore_lite_msgs/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/cameras/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/cv_bridge/lib/python3.12/site-packages",
+        "/opt/ros/jazzy/lib/python3.12/site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/rover_nav/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/rover_interfaces/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/rover_embedded/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/rover_controller/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/road_detector/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/opencv_tests/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/motion/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/mission_nav2/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/image_geometry/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/face_recognition/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/explore_lite_msgs/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/cameras/lib/python3.12/site-packages",
+        "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/cv_bridge/lib/python3.12/site-packages",
+        "/opt/ros/jazzy/lib/python3.12/site-packages"
+    ]
 }
