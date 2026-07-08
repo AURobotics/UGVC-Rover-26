@@ -10,7 +10,6 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
     rover_embedded_dir = get_package_share_directory('rover_embedded')
     motion_dir = get_package_share_directory('motion')
-
     teleop_params = os.path.join(motion_dir, 'config', 'teleop_params.yaml')
 
     stm_launch = IncludeLaunchDescription(
@@ -19,13 +18,13 @@ def generate_launch_description():
         )
     )
 
-    convertor_node= Node(
+    convertor_node = Node(
         package='motion',
         executable='twist_node',
         name='twist_node',
         output='screen',
         parameters=[{
-            'wheel_base': 0.30,
+            'wheelbase': 0.74,
         }],
     )
 
@@ -37,7 +36,6 @@ def generate_launch_description():
         prefix='gnome-terminal --',
         parameters=[teleop_params],
     )
-
 
     return LaunchDescription([
         stm_launch,
