@@ -19,9 +19,12 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Speed.msg"
   "msg/WheelVel.msg"
   "msg/RoverStatus.msg"
+  "action/GenerateBezierPath.action"
   DEPENDENCIES 
     std_msgs
     geometry_msgs
+    nav_msgs
+    action_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)
