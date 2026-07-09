@@ -6,7 +6,9 @@
 
 3. how to simulate
 
-3. how to run (in the trial and for testing on hardware)
+4. how to run (in the trial and for testing on hardware)
+
+5. topics of each node
 
 
 # quick package overview
@@ -89,4 +91,6 @@ then go to `localization/launch/local_launch.py` and set the soft_iron and hard_
 
 # How to simulate:
 
-ok I am tired I will continue later
+follow the turtlebot3 setup tutorial to setup turtlebot3 gazebo simulation
+
+
