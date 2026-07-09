@@ -12,7 +12,8 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSDurabilityPolicy, QoS
 Lane_error_topic = "lane/error"
 lane_left_topic = "lane/left_x"
 lane_right_topic = "lane/right_x"
-Camera_topic = "/camera/image_raw"
+Camera_topic = "camera/image/raw"
+lane_target_topic = "lane/target_x"
 
 class LaneDetector(Node) : 
     def __init__(self) :
@@ -30,6 +31,8 @@ class LaneDetector(Node) :
         model_path_Lanes = os.path.join(package_share_dir,'models','ModelForLanes.pt')
         self.get_logger().info(f'Loading YOLO Model from : {model_path_Lanes}')
         self.model_Lanes = YOLO(model_path_Lanes)
+
+        self.target_publisher = self.create_publisher(Int32,lane_target_topic,10)
         
         
         qos_profile = QoSProfile(
@@ -155,6 +158,10 @@ class LaneDetector(Node) :
         msg = Int32()
         msg.data = error_pixels
         self.error_publisher.publish(msg)
+
+        target_msg = Int32()
+        target_msg.data = filtered_center
+        self.target_publisher.publish(target_msg)
     
         
 

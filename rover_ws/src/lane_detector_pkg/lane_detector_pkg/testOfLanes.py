@@ -25,7 +25,7 @@ class LaneDetector(Node) :
 
         package_share_dir = get_package_share_directory('lane_detector_pkg')
         model_path_lanes = os.path.join(package_share_dir,'models','ModelForLanes.pt')
-        vedio_path = os.path.join(package_share_dir,'videos','test3.mp4')
+        vedio_path = os.path.join(package_share_dir,'videos','test2.mp4')
 
         self.get_logger().info(f'Loading YOLO Model from : {model_path_lanes}')
         self.model_lanes = YOLO(model_path_lanes)
@@ -44,6 +44,7 @@ class LaneDetector(Node) :
         self.bias = 100
         self.last_left_x = None
         self.last_right_x = None
+        
 
         cv2.namedWindow('lane', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('lane', 800, 600)
@@ -96,12 +97,20 @@ class LaneDetector(Node) :
         right_detected = x_right is not None
 
         if x_left is not None:
-            self.last_left_x = x_left
+            if self.last_left_x is None :
+                self.last_left_x = x_left
+            else : 
+                self.last_left_x = int(self.alpha * x_left +(1 - self.alpha) * self.last_left_x)
+            x_left = self.last_left_x
         else :
             x_left = self.last_left_x
 
         if x_right is not None:
-            self.last_right_x = x_right
+            if self.last_right_x is None :
+                self.last_right_x = x_right
+            else :
+                self.last_right_x = int(self.alpha * x_right +(1 - self.alpha) * self.last_right_x)
+            x_right = self.last_right_x
         else :
             x_right = self.last_right_x
 
