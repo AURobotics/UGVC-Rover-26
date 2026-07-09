@@ -207,7 +207,6 @@ class MissionNode(Node):
         goal_handle = future.result()
         if not goal_handle.accepted:
             self.get_logger().error("Goal REJECTED by server.")
-            rclpy.shutdown()
             return
 
         self.get_logger().info("Goal ACCEPTED by server, waiting for result...")
@@ -236,8 +235,6 @@ class MissionNode(Node):
         else:
             self.get_logger().error(f"[Failed]: {result.message}")
 
-        self.get_logger().info("Shutting down Client Node.")
-        rclpy.shutdown()
 
     def cancel_waypoint_navigation(self, callback = None):
         if self._send_goal_future is not None:
