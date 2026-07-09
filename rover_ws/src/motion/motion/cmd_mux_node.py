@@ -1,23 +1,30 @@
 #!/usr/bin/env python3
 
+from enum import Enum
+
 import rclpy
 from rclpy.node import Node
 
 from geometry_msgs.msg import Twist
-from std_msgs.msg import String
+from std_msgs.msg import String, UInt8
 from rover_interfaces.msg import Speed
 from sensor_msgs.msg import Joy
 
-
+class State(Enum):
+    MANUAL = 0
+    AUTO_LANES=1
+    AUTO_WAYPOINTS=2
+    AUTO_WAYPOINT2=3
+    
 # Mission State Mapping
 STATE_MAP = {
-    'IDLE': None,
-    'LANE': '/cmd_vel/lane_pid',
-    'WP': '/cmd_vel/waypoint',
-    'SEARCH': '/cmd_vel/pothole',
-    'DONE': None,
-    'MANUAL': None,
+    State.MANUAL: None,
+    State.AUTO_LANES: '/cmd_vel/lane_pid',
+    State.AUTO_WAYPOINTS: '/cmd_vel/waypoint',
+    State.AUTO_WAYPOINT2: '/cmd_vel/waypoint',
 }
+
+STATE_TOPIC='/mission/active_state'
 
 class CmdMuxNode(Node):
 
@@ -26,12 +33,12 @@ class CmdMuxNode(Node):
 
         # Parameters
         self.declare_parameter('wheel_radius', 0.10)       # meters
-        self.declare_parameter('wheelbase', 0.50)          # meters
-        self.declare_parameter('max_wheel_speed', 10.0)    # rad/s
+        self.declare_parameter('wheelbase', 0.74)          # meters
+        self.declare_parameter('max_wheel_speed', 1.389)   # m/s (5 km/h)
         self.declare_parameter('publish_rate', 50.0)       # Hz
         self.declare_parameter('joy_linear_axis',  0)     # throttle axes index (fwd/back)
         self.declare_parameter('joy_angular_axis',  1)     # steering axes index (left/right)
-        self.declare_parameter('joy_max_linear',   1.0)   # m/s
+        self.declare_parameter('joy_max_linear',   1.389) # m/s (5 km/h)
         self.declare_parameter('joy_max_angular',  2.0)   # rad/s
         self.declare_parameter('joy_deadzone',     0.1)   # 0.0 – 1.0
 
@@ -46,7 +53,7 @@ class CmdMuxNode(Node):
         self.joy_deadzone = self.get_parameter('joy_deadzone').value
 
         # Internal Variables
-        self.state = 'IDLE'
+        self.state = State.MANUAL
 
         self.latest_cmds = {
             '/cmd_vel/waypoint': None,
@@ -55,6 +62,7 @@ class CmdMuxNode(Node):
         }
  
         self.joy_msg = None
+        self.last_joy_time = self.get_clock().now()
 
         # Publisher
         self.speed_pub = self.create_publisher(Speed,'/cmd_speed',10)
@@ -65,7 +73,7 @@ class CmdMuxNode(Node):
         self.create_subscription(Twist,'/cmd_vel/pothole', self.pothole_callback, 10)
         self.create_subscription(Joy,'/joy', self.joy_callback, 10)
 
-        self.create_subscription(String,'/mission/active_state',self.state_callback,10)
+        self.create_subscription(UInt8,STATE_TOPIC,self.state_callback,10)
 
         # Main Timer
         self.create_timer(1.0 / self.publish_rate,self.publish_speed)
@@ -87,22 +95,22 @@ class CmdMuxNode(Node):
         self.last_joy_time = self.get_clock().now()
 
     # Mission State Callback
-    def state_callback(self, msg: String):
-        new_state = msg.data.strip()
- 
-        if new_state not in STATE_MAP:
-            self.get_logger().warn(f'Unknown state: {new_state}')
+    def state_callback(self, msg: UInt8):
+        try:
+            new_state = State(int(msg.data))
+        except ValueError:
+            self.get_logger().warn(f'Unknown state: {msg.data}')
             return
- 
+
         if new_state != self.state:
             self.get_logger().info(f'State changed: {self.state} → {new_state}')
- 
+
         self.state = new_state
 
     def get_active_command(self):
  
         # MANUAL: compute v/ω from joystick axes
-        if self.state == 'MANUAL':
+        if self.state == State.MANUAL:
             if self.joy_msg is None:
                 self.get_logger().warn(
                     'MANUAL state but no joy message received, outputting zero.',
@@ -129,47 +137,30 @@ class CmdMuxNode(Node):
             w = angular_val * self.joy_max_angular
             return v, w
  
-        elif self.state == 'LANE' :
-            cmd = self.latest_cmds.get('/cmd_vel/lane_pid')
+        # AUTO states
+        topic = STATE_MAP.get(self.state)
+        if topic is not None:
+            cmd = self.latest_cmds.get(topic)
             if cmd is None:
                 self.get_logger().warn(
-                    'LANE state but no lane_pid command received, outputting zero.',
-                    throttle_duration_sec=1.0
-                )
-                return 0.0, 0.0
-            return cmd.linear.x, cmd.angular.z
-    
-        elif self.state == 'WP':
-            cmd = self.latest_cmds.get('/cmd_vel/waypoint')
-            if cmd is None:
-                self.get_logger().warn(
-                    'WP state but no waypoint command received, outputting zero.',
+                    f'{self.state.name} state but no command received on {topic}, outputting zero.',
                     throttle_duration_sec=1.0
                 )
                 return 0.0, 0.0
             return cmd.linear.x, cmd.angular.z
 
-        elif self.state == 'SEARCH':
-            cmd = self.latest_cmds.get('/cmd_vel/pothole')
-            if cmd is None:
-                self.get_logger().warn(
-                    'SEARCH state but no pothole command received, outputting zero.',
-                    throttle_duration_sec=1.0
-                )
-                return 0.0, 0.0
-            return cmd.linear.x, cmd.angular.z
-
-        else:
-        # IDLE / DONE / no message yet → zero
-            return 0.0, 0.0
+        # No mapped topic / unknown -> zero
+        return 0.0, 0.0
 
     # Kinematics
     def compute_wheel_speeds(self, v, w):
         half_L = self.wheelbase / 2.0
- 
-        v_left  = (v - w * half_L) / self.wheel_radius
-        v_right = (v + w * half_L) / self.wheel_radius
- 
+
+        # Linear wheel-surface speed in m/s (matches encoder-derived speed
+        # on the STM32 firmware side, no wheel_radius division needed here)
+        v_left  = v - w * half_L
+        v_right = v + w * half_L
+
         v_left  = max(-self.max_wheel_speed, min(self.max_wheel_speed, v_left))
         v_right = max(-self.max_wheel_speed, min(self.max_wheel_speed, v_right))
  
@@ -187,7 +178,7 @@ class CmdMuxNode(Node):
  
         self.get_logger().info(
             f'[{self.state}] v={v:.2f} w={w:.2f} → '
-            f'vL={v_left:.2f} vR={v_right:.2f} rad/s',
+            f'vL={v_left:.2f} vR={v_right:.2f} m/s',
             throttle_duration_sec=1.0
         )
         

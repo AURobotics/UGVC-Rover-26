@@ -5,7 +5,7 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from rover_interfaces.msg import Speed
 
-WHEEL_BASE = 0.30   # metres — must match stm32_node.py
+WHEEL_BASE = 0.30   
 
 
 class TwistToSpeed(Node):
