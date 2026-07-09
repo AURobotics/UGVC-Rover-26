@@ -46,7 +46,21 @@ cd ~/UGVC-Rover-26/rover_ws
 rm -rf build install log
 colcon build --packages-select lane_detector_pkg
 source install/setup.bash
+ros2 run lane_detector_pkg ObstacleAndLanes
+
+cd ~/UGVC-Rover-26/rover_ws
+rm -rf build install log
+colcon build --packages-select lane_detector_pkg
+source install/setup.bash
 ros2 run lane_detector_pkg testOfLanes
+
+cd ~/UGVC-Rover-26/rover_ws
+rm -rf build install log
+colcon build --packages-select lane_detector_pkg
+source install/setup.bash
+ros2 launch lane_detector_pkg test.launch.py
+
+ 
 # in new terminal
 cd ~/UGVC-Rover-26/rover_ws
 rm -rf build install log
