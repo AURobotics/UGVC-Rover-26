@@ -49,12 +49,15 @@ class JoystickNode(Node):
             controller = self._selected
         if controller is None:
             return None
-        return {"name": controller.name, "guid": controller.guid}
+            
+        controllers = self._controller_manager.get_controllers()
+        idx = controllers.index(controller) if controller in controllers else 0
+        return {"name": f"{idx + 1}: {controller.name}", "guid": str(idx)}
 
     def list_all(self) -> list[dict[str, str]]:
         return [
-            {"name": c.name, "guid": c.guid}
-            for c in self._controller_manager.get_controllers()
+            {"name": f"{i + 1}: {c.name}", "guid": str(i)}
+            for i, c in enumerate(self._controller_manager.get_controllers())
         ]
 
     def select(self, controller: Controller | str) -> bool:
@@ -84,14 +87,17 @@ class JoystickNode(Node):
         super().destroy_node()
 
     def _resolve_controller(
-        self, controller: Controller | str
-    ) -> Controller | None:
-        if isinstance(controller, Controller):
-            return controller
-        for candidate in self._controller_manager.get_controllers():
-            if candidate.guid == controller:
-                return candidate
-        return None
+            self, controller: Controller | str
+        ) -> Controller | None:
+            if isinstance(controller, Controller):
+                return controller
+                
+            controllers = self._controller_manager.get_controllers()
+            try:
+                idx = int(controller)
+                return controllers[idx]
+            except (ValueError, IndexError):
+                return None
 
     def _try_auto_select_initial(self) -> None:
         if not self._auto_select:
@@ -128,6 +134,18 @@ class JoystickNode(Node):
         next_controller = controllers[0] if controllers else None
         self._assign_controller(next_controller)
 
+    def refresh(self) -> None:  #(test)
+        pyglet.input.get_devices()
+        with self._lock:
+            current_controllers = self._controller_manager.get_controllers()
+
+            if self._selected is not None and self._selected not in current_controllers:
+                self._selected = None
+                self._auto_select = True 
+                
+        self._try_auto_select_initial()
+        self._emit_controller_changed()
+
     def _assign_controller(
         self, controller: Controller | None
     ) -> None:
@@ -144,7 +162,7 @@ class JoystickNode(Node):
             controller.open()
 
         with self._lock:
-            self._selected = controller
+            self._selected = controller     
 
         self._emit_controller_changed()
 
