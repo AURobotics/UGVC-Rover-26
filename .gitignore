@@ -1,3 +1,7 @@
+build/
+install/
+log/
+
 # Ignore ROS 2 build artifacts
 src/build/
 src/install/
