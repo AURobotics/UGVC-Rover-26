@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.12...3.40)
 project(rover_interfaces)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -14,9 +14,14 @@ find_package(nav_msgs REQUIRED)
 find_package(action_msgs REQUIRED)    
 
 
+# FIX: Group dependencies into a single declaration list
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "action/GenerateBezierPath.action"
-  DEPENDENCIES std_msgs geometry_msgs nav_msgs action_msgs 
+  "msg/Speed.msg"
+  "msg/WheelVel.msg"
+  "msg/RoverStatus.msg"
+  DEPENDENCIES 
+    std_msgs
+    geometry_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)
