@@ -1,12 +1,14 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:property name="camera_tilt" value="0.0"/>  <!-- radians, positive = tilt down -->
+    <!-- 1. Keep your tilt property here -->
+    <xacro:property name="camera_tilt" value="${15 * pi / 180}"/>
 
+    <!-- 2. Keep the physical housing straight relative to the chassis -->
     <joint name="camera_joint" type="fixed">
-    <parent link="chassis"/>
-    <child link="camera_link"/>
-    <origin xyz="0.335 -0.001 0.09" rpy="0 ${camera_tilt} 0"/>
+        <parent link="chassis"/>
+        <child link="camera_link"/>
+        <origin xyz="0.335 -0.001 0.09" rpy="0 0 0"/>
     </joint>
 
     <link name="camera_link">
@@ -17,22 +19,19 @@
             </geometry>
             <material name="rover_red"/>
         </visual>
-        <!-- <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
-            <geometry>
-                <box size="0.010 0.03 0.03"/>
-            </geometry>
-        </collision> -->
     </link>
 
+    <!-- 3. Inject the camera tilt directly into the optical transform chain -->
+    <!-- Default optical is rpy="${-pi/2} 0 ${-pi/2}". We add the tilt into the Pitch (middle value) -->
     <joint name="camera_optical_joint" type="fixed">
         <parent link="camera_link"/>
         <child link="camera_link_optical"/>
-        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+        <origin xyz="0 0 0" rpy="${-pi/2} ${camera_tilt} ${-pi/2}" />
     </joint>
 
     <link name="camera_link_optical"></link>
 
+    <!-- 4. Revert Gazebo back to tracking the un-tilted base link -->
     <gazebo reference="camera_link">
         <sensor name="camera" type="rgbd_camera">
             <always_on>true</always_on>
