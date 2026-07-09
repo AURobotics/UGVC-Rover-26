@@ -7,7 +7,6 @@ channels = [
     "https://prefix.dev/robostack-jazzy",
     "https://prefix.dev/conda-forge",
 ]
-
 [tasks]
 # Launch RViz2
 rviz = "rviz2"
@@ -44,17 +43,8 @@ ros-jazzy-gz-ros2-control = "*"
 ros-jazzy-ros2-control = "*"
 ros-jazzy-ros2-controllers = "*"
 
-# --- Added TurtleBot3 Dependencies ---
-ros-jazzy-turtlebot3 = "*"
-ros-jazzy-turtlebot3-simulations = "*"
-
 [target.win-64.activation]
 scripts = ["install\\setup.bat"]
-
-# Use a standard table block for environment variables
-[activation.env]
-TURTLEBOT3_MODEL = "burger"
-LDS_MODEL = "LDS-01"
 
 [target.linux.dependencies]
 libgl-devel = "*"
