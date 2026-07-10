@@ -9,7 +9,7 @@ Rectangle {
     color: palette.window
 
     required property var rover
-    property real batteryLevel: 0.6 //temporary value for testing, should be rover.batteryLevel
+    property real batteryLevel: rover.batteryLevel
 
     Repeater {
         model: 2

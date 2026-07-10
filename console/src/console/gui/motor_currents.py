@@ -37,4 +37,13 @@ class MotorCurrents(QWidget):
         self._mediator.telemetry_updated.connect(self._update_currents)
 
     def _update_currents(self):
-        ...
+        
+        fl = self._mediator.motor_fl
+        fr = self._mediator.motor_fr
+        bl = self._mediator.motor_bl
+        br = self._mediator.motor_br
+
+        self._fl_current.setText(f"{fl:.2f} A")
+        self._fr_current.setText(f"{fr:.2f} A")
+        self._bl_current.setText(f"{bl:.2f} A")
+        self._br_current.setText(f"{br:.2f} A")
