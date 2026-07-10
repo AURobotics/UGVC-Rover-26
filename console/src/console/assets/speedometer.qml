@@ -10,7 +10,7 @@ Rectangle {
 
     property int maxSpeed: 12
     required property var rover
-    property real speed: 1 //temporary value for testing, should be rover.speed
+    property real speed: rover.speed
 
     Rectangle {
         id: container

@@ -50,9 +50,6 @@ class Mediator(QObject):
             joystick.set_gui_signal(self.handle_controller_changed)
             self._current_controller = joystick.get_selected()
 
-    @Property(str, notify=telemetry_updated)
-    def statusState(self): return self._status_state
-
     @Property(float, notify=telemetry_updated)
     def latitude(self): return self._latitude
 
