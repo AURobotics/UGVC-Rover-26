@@ -47,7 +47,7 @@ class MainTab(QMainWindow):
         self.statusBar().addPermanentWidget(self._position)
 
         self._auto = False
-        #self._mediator.set_auto(self._auto)
+        self._mediator.set_auto(self._auto)
         self._mode_button = QPushButton('Switch to automatic')
         self._mode_button.clicked.connect(self._switch_mode)
         self.statusBar().addPermanentWidget(self._mode_button)
@@ -63,7 +63,7 @@ class MainTab(QMainWindow):
         )
         return dock
     
-    def update_position(self): #temporary, until we finalize subscriptions
+    def update_position(self): #temporary, until we finalize subscriptions 
         lat = self._mediator.latitude
         lon = self._mediator.longitude
         self._position.setText(f"Position: {lat:.2f}, {lon:.2f}")
@@ -71,11 +71,11 @@ class MainTab(QMainWindow):
     def _switch_mode(self):
         if self._auto:
             self._auto = False
-            #self._mediator.set_auto(self._auto)
+            self._mediator.set_auto(self._auto)
             self._mode_button.setText('Switch to automatic')
         else:
             self._auto = True
-            #self._mediator.set_auto(self._auto)
+            self._mediator.set_auto(self._auto)
             self._mode_button.setText('Switch to manual')
 
     
