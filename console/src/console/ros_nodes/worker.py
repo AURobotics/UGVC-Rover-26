@@ -99,8 +99,8 @@ class WorkerNode(Node):
         self.latest_linear_vel = msg.linear.x
 
     def status_callback(self, msg: RoverStatus) -> None:
-        self.latest_battery_1 = msg.battery_voltage
-        self.latest_battery_2 = msg.battery_voltage2
+        self.latest_battery_1 = msg.battery_voltage_1
+        self.latest_battery_2 = msg.battery_voltage_2
 
         self.latest_motor_fl = msg.motor_fl
         self.latest_motor_fr = msg.motor_fr

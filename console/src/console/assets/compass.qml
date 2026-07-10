@@ -6,7 +6,7 @@ Rectangle {
     id: root
 
     required property var rover
-    property real bearing: 0.0 //temporary value for testing, should be rover.bearing
+    property real bearing: rover.bearing
 
     width: 200
     height: 200
