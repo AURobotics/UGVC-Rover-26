@@ -1,14 +1,19 @@
 #! /usr/bin/env python3
 import traceback
 import threading
-from PySide6.QtCore import QObject, QThread, Signal
+from PySide6.QtCore import QObject, QThread, Signal, Slot
 import rclpy
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDurabilityPolicy
-from sensor_msgs.msg import CompressedImage, Imu, NavSatFix
+from sensor_msgs.msg import CompressedImage, Imu
 from std_msgs.msg import Float32MultiArray, String
+from std_srvs.srv import SetBool
+from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Twist
+from rover_interfaces.msg import RoverStatus
 from console.ros_nodes.joystick_node import JoystickNode
+import math
 
 class RoverSignals(QObject):
     telemetry_received = Signal(dict)
@@ -26,37 +31,48 @@ class WorkerNode(Node):
         self.get_logger().info("Worker node started")
         self.signals = signals
 
-        self.actual_state           = "unknown"
         self.latest_latitude        = 0.0
         self.latest_longitude       = 0.0
         self.latest_imu_z           = 0.0
-        self.latest_battery_v       = 0.0
-        self.latest_left_motor_v    = 0.0
-        self.latest_right_motor_v   = 0.0
-        self.latest_battery_percent = 0.0
+        self.latest_linear_vel      = 0.0
 
-        self.pub_state  = self.create_publisher(String, "rover/state", 10)
-        self.sub_state  = self.create_subscription(String,             "rover/state",  self.state_callback,  10)
-        self.sub_gps    = self.create_subscription(NavSatFix,          "rover/gps",    self.gps_callback,    10)
-        self.sub_imu    = self.create_subscription(Imu,                "rover/imu",    self.imu_callback,    10)
-        self.sub_status = self.create_subscription(Float32MultiArray,  "rover/status", self.status_callback, 10)
+        self.latest_battery_1       = 0.0
+        self.latest_battery_2       = 0.0
 
+        self.latest_motor_fl         = 0.0
+        self.latest_motor_fr         = 0.0
+        self.latest_motor_bl         = 0.0
+        self.latest_motor_br         = 0.0
+
+        self.sub_imu    = self.create_subscription(Imu,                "/imu/data",    self.imu_callback,    10)
+        self.sub_vel    = self.create_subscription(Twist,              "/cmd_vel",     self.vel_callback,    10)
+        self.sub_odom   = self.create_subscription(Odometry,           "/odom/global", self.odom_callback,   10)
+        self.sub_status = self.create_subscription(RoverStatus,        "/rover/status",self.status_callback, 10)
+    
         qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.RELIABLE,
             durability=QoSDurabilityPolicy.VOLATILE,
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=1
         )
-        self.sub_front = self.create_subscription(CompressedImage, "rover/camera/front_raw",   self.front_raw_callback,   qos_profile)
-        self.sub_rear  = self.create_subscription(CompressedImage, "rover/camera/rear_raw",    self.rear_raw_callback,    qos_profile)
-        self.sub_face  = self.create_subscription(CompressedImage, "rover/camera/face_detect", self.face_detect_callback, qos_profile)
-        self.sub_lane  = self.create_subscription(CompressedImage, "rover/camera/lane_detect", self.lane_detect_callback, qos_profile)
-        self.sub_video = self.create_subscription(CompressedImage, "video_stream", self.video_stream_callback, qos_profile)
+        self.sub_front = self.create_subscription(CompressedImage, "/camera1/image_raw",   self.front_raw_callback,   qos_profile)
+        self.sub_rear  = self.create_subscription(CompressedImage, "/camera2/image_raw",    self.rear_raw_callback,    qos_profile)
+       # self.sub_face  = self.create_subscription(CompressedImage, "rover/camera/face_detect", self.face_detect_callback, qos_profile)
+       # self.sub_lane  = self.create_subscription(CompressedImage, "rover/camera/lane_detect", self.lane_detect_callback, qos_profile)
+       # self.sub_video = self.create_subscription(CompressedImage, "video_stream", self.video_stream_callback, qos_profile)
 
+        self.toggle_client = self.create_client(SetBool, '/manual_toggle')
         self.gui_timer = self.create_timer(self.GUI_EMIT_INTERVAL_SEC, self.push_telemetry_to_gui)
 
-    def video_stream_callback(self, msg: CompressedImage) -> None:
-        self.signals.video_received.emit(msg)
+    #def video_stream_callback(self, msg: CompressedImage) -> None:
+    #    self.signals.video_received.emit(msg)
+
+   # def face_detect_callback(self, msg: CompressedImage) -> None:
+   #     self.signals.face_received.emit(msg)
+#
+   # def lane_detect_callback(self, msg: CompressedImage) -> None:
+   #     self.signals.lane_received.emit(msg)
+
 
     def front_raw_callback(self, msg: CompressedImage) -> None:
         self.signals.front_received.emit(msg)
@@ -64,44 +80,59 @@ class WorkerNode(Node):
     def rear_raw_callback(self, msg: CompressedImage) -> None:
         self.signals.rear_received.emit(msg)
 
-    def face_detect_callback(self, msg: CompressedImage) -> None:
-        self.signals.face_received.emit(msg)
-
-    def lane_detect_callback(self, msg: CompressedImage) -> None:
-        self.signals.lane_received.emit(msg)
-
-
-    def state_callback(self, msg: String) -> None:
-        self.actual_state = msg.data
-
-    def gps_callback(self, msg: NavSatFix) -> None:
-        self.latest_latitude  = msg.latitude
-        self.latest_longitude = msg.longitude
+    def odom_callback(self, msg: Odometry) -> None:
+        self.latest_latitude  = msg.pose.pose.position.x
+        self.latest_longitude = msg.pose.pose.position.y
 
     def imu_callback(self, msg: Imu) -> None:
-        self.latest_imu_z = msg.linear_acceleration.z
+        q = msg.orientation
+        siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
+        cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+        yaw_rad = math.atan2(siny_cosp, cosy_cosp)
+        yaw_deg = math.degrees(yaw_rad)
 
-    def status_callback(self, msg: Float32MultiArray) -> None:
-        if len(msg.data) < 4:
-            self.get_logger().warn(f"rover/status expected 4 values, got {len(msg.data)}")
-            return
+        if yaw_deg < 0:
+            yaw_deg += 360.0
+        self.latest_imu_z = yaw_deg 
+
+    def vel_callback(self, msg: Twist) -> None:
+        self.latest_linear_vel = msg.linear.x
+
+    def status_callback(self, msg: RoverStatus) -> None:
+        self.latest_battery_1 = msg.battery_voltage
+        self.latest_battery_2 = msg.battery_voltage2
+
+        self.latest_motor_fl = msg.motor_fl
+        self.latest_motor_fr = msg.motor_fr
+        self.latest_motor_bl = msg.motor_bl
+        self.latest_motor_br = msg.motor_br
         
-        self.latest_battery_v       = msg.data[0]
-        self.latest_left_motor_v    = msg.data[1]
-        self.latest_right_motor_v   = msg.data[2]
-        self.latest_battery_percent = msg.data[3]
+    def auto_switch(self, is_auto: bool):
+        if self.toggle_client.service_is_ready():
+            req = SetBool.Request()
+            req.data = not is_auto 
+            
+            mode_name = "Autonomous" if is_auto else "Manual"
+            self.get_logger().info(f"Requesting switch to {mode_name} mode...")
+            
+            self.toggle_client.call_async(req)
+        else:
+            self.get_logger().warn("Waiting for '/manual_toggle' service...")
 
     def push_telemetry_to_gui(self) -> None:
         self.signals.telemetry_received.emit(
             {
-                "status_state":        self.actual_state,
                 "latitude":            self.latest_latitude,
                 "longitude":           self.latest_longitude,
-                "battery_voltage":     self.latest_battery_v,
-                "left_motor_voltage":  self.latest_left_motor_v,
-                "right_motor_voltage": self.latest_right_motor_v,
-                "battery_percent":     self.latest_battery_percent,
-                "imu_accel_z":         self.latest_imu_z,
+                "imu_z":               self.latest_imu_z,
+                "linear_vel":          self.latest_linear_vel,
+
+                "battery_1":           self.latest_battery_1,
+                "battery_2":           self.latest_battery_2,
+                "motor_fl":            self.latest_motor_fl,
+                "motor_fr":            self.latest_motor_fr,
+                "motor_bl":            self.latest_motor_bl,
+                "motor_br":            self.latest_motor_br,
             }
         )
 
@@ -113,6 +144,11 @@ class ROS2Worker(QThread):
         self._node: WorkerNode | None = None
         self._joystick_node: JoystickNode | None = None
         self._ready_event = threading.Event()
+
+    @Slot(bool)
+    def auto_switch(self, is_auto: bool):
+        if self._node is not None:
+            self._node.auto_switch(is_auto)
 
     def wait_until_ready(self, timeout_ms: int = 5000) -> None:
         """Block the calling thread until run() has finished node construction."""

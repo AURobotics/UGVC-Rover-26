@@ -18,15 +18,15 @@ class CameraDisplay(QWidget):
 
         self._cam_select = QComboBox(self)
         self._cam_select.setStyleSheet("background-color: black;")
-        self._cam_select.addItem('Test Camera', self.mediator.get_video_frame)
+        #self._cam_select.addItem('Test Camera', self.mediator.get_video_frame)
         self._cam_select.addItem('Front Camera', self.mediator.get_frame)
         self._cam_select.addItem('Rear Camera', self.mediator.get_rear_frame)
-        self._cam_select.addItem('Face Detection', self.mediator.get_face_frame)
-        self._cam_select.addItem('Lane Detection', self.mediator.get_lane_frame)
+        #self._cam_select.addItem('Face Detection', self.mediator.get_face_frame)
+        #self._cam_select.addItem('Lane Detection', self.mediator.get_lane_frame)
         self._cam_select.currentIndexChanged.connect(self._on_camera_changed)
 
-        self._frame_getter = self.mediator.get_video_frame  # Default to test camera
-        self._cam_select.setCurrentIndex(0)  # Set default selection to Test Camera
+        self._frame_getter = self.mediator.get_video_frame  # Default to front camera
+        self._cam_select.setCurrentIndex(0)  # Set default selection to front Camera
 
         self._cam_timer = QTimer()
         self._cam_timer.timeout.connect(self._update_camera_display)
