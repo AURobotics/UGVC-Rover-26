@@ -3,6 +3,7 @@ from collections.abc import Callable
 import platform
 from rclpy.parameter import Parameter
 import pyglet
+import pyglet.window 
 if platform.system() == "Linux":
     pyglet.options.headless = True
 from pyglet.input import Controller, ControllerManager
