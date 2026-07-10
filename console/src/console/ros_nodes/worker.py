@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 import traceback
 import threading
 from PySide6.QtCore import QObject, QThread, Signal, Slot
@@ -102,10 +101,10 @@ class WorkerNode(Node):
         self.latest_battery_1 = msg.battery_voltage_1
         self.latest_battery_2 = msg.battery_voltage_2
 
-        self.latest_motor_fl = msg.motor_fl
-        self.latest_motor_fr = msg.motor_fr
-        self.latest_motor_bl = msg.motor_bl
-        self.latest_motor_br = msg.motor_br
+        self.latest_motor_fl = msg.motor_current_fl
+        self.latest_motor_fr = msg.motor_current_fr
+        self.latest_motor_bl = msg.motor_current_bl
+        self.latest_motor_br = msg.motor_current_br
         
     def auto_switch(self, is_auto: bool):
         if self.toggle_client.service_is_ready():

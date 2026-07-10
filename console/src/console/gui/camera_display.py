@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QWidget, QLabel, QComboBox
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtCore import Slot, QTimer
 from sensor_msgs.msg import CompressedImage
-from cv_bridge import CvBridge #converts ros2 img to numpy array
+from cv_bridge import CvBridge
 from console.ros_nodes.mediator import Mediator
 
 class CameraDisplay(QWidget):
@@ -25,12 +25,12 @@ class CameraDisplay(QWidget):
         #self._cam_select.addItem('Lane Detection', self.mediator.get_lane_frame)
         self._cam_select.currentIndexChanged.connect(self._on_camera_changed)
 
-        self._frame_getter = self.mediator.get_video_frame  # Default to front camera
-        self._cam_select.setCurrentIndex(0)  # Set default selection to front Camera
+        self._frame_getter = self.mediator.get_frame
+        self._cam_select.setCurrentIndex(0)
 
         self._cam_timer = QTimer()
         self._cam_timer.timeout.connect(self._update_camera_display)
-        self._cam_timer.setInterval(33)  # Approximately 30 FPS
+        self._cam_timer.setInterval(15)
         self._cam_timer.start()
 
     @Slot(object)
