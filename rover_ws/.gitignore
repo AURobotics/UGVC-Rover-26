@@ -1,6 +1,7 @@
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+pixi.lock
 
 # ROS2 build artifacts
 /build/
@@ -10,4 +11,4 @@
 # Models
 face_detection_yunet_2023mar.onnx
 face_recognition_sface_2021dec.onnx
-/.vscode/*
+.vscode/
