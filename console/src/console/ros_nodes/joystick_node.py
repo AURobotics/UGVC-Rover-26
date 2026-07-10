@@ -134,18 +134,6 @@ class JoystickNode(Node):
         next_controller = controllers[0] if controllers else None
         self._assign_controller(next_controller)
 
-    #def refresh(self) -> None:  #(test)
-    #    pyglet.input.get_devices()
-    #    with self._lock:
-    #        current_controllers = self._controller_manager.get_controllers()
-#
-    #        if self._selected is not None and self._selected not in current_controllers:
-    #            self._selected = None
-    #            self._auto_select = True 
-    #            
-    #    self._try_auto_select_initial()
-    #    self._emit_controller_changed()
-
     def _assign_controller(
         self, controller: Controller | None
     ) -> None:

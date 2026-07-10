@@ -13,6 +13,13 @@ ros-jazzy-std-msgs = ">=5.3.6,<6"
 ros-jazzy-rclpy = ">=7.1.9,<8"
 ros-jazzy-cv-bridge = ">=4.1.0,<5"
 ros-jazzy-joy = ">=3.3.0,<4"
+cmake = ">=4.4.0,<5"
+pkg-config = ">=0.29.2,<0.30"
+colcon-common-extensions = ">=0.3.0,<0.4"
+make = ">=4.4.1,<5"
+ninja = ">=1.13.2,<2"
+rosdep = ">=0.26.0,<0.27"
+compilers = ">=1.11.0,<2"
 
 [tasks]
 vid_test = "python src/testing/video_stream_node.py"
@@ -23,3 +30,6 @@ tel_test = "python src/testing/test_telemetry.py"
 [pypi-dependencies]
 console = { path = ".", editable = true }
 pyglet = ">=2.1.14, <3"
+
+[target.win-64.activation]
+scripts = ["install\\setup.bat"]

@@ -14,7 +14,7 @@ class VideoStreamNode(Node):
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=1
         )
-        self.publisher_ = self.create_publisher(CompressedImage, 'video_stream', qos_profile)
+        self.publisher_ = self.create_publisher(CompressedImage, '/camera1/image_raw', qos_profile)
         self.bridge = CvBridge()
         self.cap = cv2.VideoCapture(0)
         cam_interval = 1 / 30
