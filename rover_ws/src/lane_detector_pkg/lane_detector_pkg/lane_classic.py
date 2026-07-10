@@ -268,6 +268,151 @@ class RoadFeatureDetector:
             "left":  self.lane_to_ground_line(left_fit, height),
             "right": self.lane_to_ground_line(right_fit, height),
         }
+    
+    def offsetx_lane(self, frame):
+        edges, white_mask = self.detect_edges(frame)
+        lines = self.detect_lines(edges)
+
+        frame_center = frame.shape[1] / 2
+        height = frame.shape[0]
+
+        if lines is None:
+            return 0.0, frame  # no lines detected
+
+        left_x, right_x = self._right_left_lane_x(lines, height)
+
+        if left_x is not None and right_x is not None:
+            lane_center = (left_x + right_x) / 2
+        elif left_x is not None:
+            lane_center = left_x + (frame.shape[1] * 0.25)
+        elif right_x is not None:
+            lane_center = right_x - (frame.shape[1] * 0.25)
+        else:
+            return 0.0, frame  # no lanes detected
+
+        y_eval = height - 1  # row near the bottom of the image (close to the vehicle)
+
+        X_lane, _   = self.bev.pixel_to_ground(lane_center, y_eval)
+        X_center, _ = self.bev.pixel_to_ground(frame_center, y_eval)
+
+        offset_meters = X_lane - X_center
+
+        cv2.circle(frame, (int(lane_center), height - 50), 10, (255, 0, 0), -1)
+
+        return offset_meters, frame
+    
+    def _right_left_lane_x(self, lines, y_eval):
+        left_lines = []
+        right_lines = []
+    
+        if lines is not None:
+            for line in lines:
+                x1, y1, x2, y2 = line[0]
+                if x2 == x1:
+                    continue
+                slope = (y2 - y1) / (x2 - x1)
+                if abs(slope) < 0.3:
+                    continue
+                if slope < 0:
+                    left_lines.append((x1, y1, x2, y2))
+                else:
+                    right_lines.append((x1, y1, x2, y2))
+    
+        def average_x_at_y(lines_group, y_target):
+            if not lines_group:
+                return None
+            xs = []
+            for x1, y1, x2, y2 in lines_group:
+                slope = (y2 - y1) / (x2 - x1)
+                intercept = y1 - slope * x1
+                xs.append((y_target - intercept) / slope)
+            return np.mean(xs)
+
+        left_x = average_x_at_y(left_lines, y_eval)
+        right_x = average_x_at_y(right_lines, y_eval)
+        return left_x, right_x
+
+    # ======================================================
+    # OFFSET TO WIDEST GAP BETWEEN CIRCLES (HOLES/OBSTACLES)
+    # ======================================================
+    def offsetx_circle(self, frame):
+        """
+        Detect circles (holes/obstacles) inside the current lane, find the
+        widest gap between them (or between a lane edge and the nearest
+        circle), and return the lateral offset in meters from the frame
+        center to the center of that gap.
+        """
+        edges, white_mask = self.detect_edges(frame)
+        lines = self.detect_lines(edges)
+        circles = self.detect_circles(frame, white_mask)
+
+        height, width = frame.shape[:2]
+        y_eval = height - 1
+        frame_center_px = width / 2.0
+
+        X_frame_center, _ = self.bev.pixel_to_ground(frame_center_px, y_eval)
+
+        # figure out lane edges (in pixels) at the same row used for offsetx_lane
+        x_left_px, x_right_px = self._right_left_lane_x(lines, y_eval)
+        if x_left_px is None:
+            x_left_px = 0
+        if x_right_px is None:
+            x_right_px = width
+
+        X_left, _  = self.bev.pixel_to_ground(x_left_px, y_eval)
+        X_right, _ = self.bev.pixel_to_ground(x_right_px, y_eval)
+
+        # keep only circles whose center falls within the lane
+        lane_circles = [c for c in circles if x_left_px <= c[0] <= x_right_px]
+
+        if not lane_circles:
+            return 0.0, frame  # no circles in the lane -> no correction needed
+
+        lane_circles.sort(key=lambda c: c[0])  # sort by pixel x (left to right)
+
+        # convert each circle's left/right edge to ground meters
+        ground_edges = []
+        for (cx, cy, r) in lane_circles:
+            Xg1, _ = self.bev.pixel_to_ground(cx - r, cy)
+            Xg2, _ = self.bev.pixel_to_ground(cx + r, cy)
+            ground_edges.append((min(Xg1, Xg2), max(Xg1, Xg2)))
+
+        # build gaps: lane_left -> circle1 -> circle2 -> ... -> lane_right
+        gaps = [{"start": X_left, "end": ground_edges[0][0]}]
+        for i in range(len(ground_edges) - 1):
+            gaps.append({"start": ground_edges[i][1], "end": ground_edges[i + 1][0]})
+        gaps.append({"start": ground_edges[-1][1], "end": X_right})
+
+        for gap in gaps:
+            gap["width"] = gap["end"] - gap["start"]
+
+        best_gap = max(gaps, key=lambda g: g["width"])
+        target_center_m = (best_gap["start"] + best_gap["end"]) / 2.0
+
+        offset_meters = target_center_m - X_frame_center
+
+        # visualize detected circles + chosen target
+        for (cx, cy, r) in lane_circles:
+            cv2.circle(frame, (cx, cy), r, (0, 0, 255), 2)
+
+        return offset_meters, frame
+
+    # ======================================================
+    # COMBINED OFFSET: LANE + CIRCLES/OBSTACLES TOGETHER
+    # ======================================================
+    def get_total_offset(self, frame):
+        """
+        Runs both the lane offset and the circle/obstacle offset on the same
+        frame and returns them individually plus their sum (all in meters),
+        along with the annotated frame.
+        """
+        lane_offset_m, frame = self.offsetx_lane(frame)
+        circle_offset_m, frame = self.offsetx_circle(frame)
+
+        total_offset_m = lane_offset_m + circle_offset_m
+
+        return lane_offset_m, circle_offset_m, total_offset_m, frame
+
     # ======================================================
     # FULL PIPELINE
     # ======================================================
@@ -341,9 +486,10 @@ if __name__ == "__main__":
         output, edges, lines, ground_circles, circle_clouds, bev = detector.process(frame, draw_bev=True)
         print("Ground circles:", ground_circles)
         #print("lines:", lines)
-        right_x, left_x = detector.get_lanes(frame, height=img_h)
-        print(f"Right lane x: {right_x}, Left lane x: {left_x}")
-        
+
+        lane_offset_m, circle_offset_m, total_offset_m, output = detector.get_total_offset(output)
+        print(f"Lane offset: {lane_offset_m:.3f} m | Circle offset: {circle_offset_m:.3f} m | Total: {total_offset_m:.3f} m")
+
         for i, cloud in enumerate(circle_clouds):
             print(f"  circle {i+1} cloud points: {len(cloud)}")
 
