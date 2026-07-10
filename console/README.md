@@ -13,12 +13,18 @@ After cloning the mono-repo, open the `console/` folder inside your favorite tex
 
 #### Installing Pixi [↗️](https://pixi.prefix.dev/latest/installation/)
 
-Windows
+**Windows**
+Pixi
 ```pwsh
 winget install prefix-dev.pixi
 ```
+and MSVC
+```pwsh
+winget install --id Microsoft.VisualStudio.2022.BuildTools --source winget --force --accept-package-agreements --accept-source-agreements --override "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --wait /norestart"
+```
 
-Linux/ MacOS
+
+**Linux/ MacOS**
 ```sh
 curl -fsSL https://pixi.sh/install.sh | bash
 ```
@@ -33,6 +39,11 @@ pixi shell
 Then, run:
 ```sh
 pixi install
+```
+
+Then:
+```sh
+colcon build
 ```
 
 ### Startup

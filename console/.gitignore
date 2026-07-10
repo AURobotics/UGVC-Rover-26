@@ -7,3 +7,9 @@ pixi.lock
 *__pycache__/
 
 .vscode/settings.json
+
+# colcon build
+
+build/
+install/
+log/

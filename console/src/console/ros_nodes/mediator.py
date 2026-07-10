@@ -156,10 +156,6 @@ class Mediator(QObject):
         if joystick is not None:
             joystick.set_deadzone(value)
 
-    def refresh(self):
-        if self._worker and self._worker._joystick_node:
-            self._worker._joystick_node.refresh() 
-
     def get_frame(self): 
         return self.front_raw_image if self.telemetry_exists else None
     
