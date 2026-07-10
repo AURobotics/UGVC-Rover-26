@@ -10,7 +10,7 @@ Rectangle {
 
     property int maxSpeed: 12
     required property var rover
-    property real speed: rover.speed
+    property real speed: rover.linear_vel
 
     Rectangle {
         id: container
