@@ -4,18 +4,22 @@ import Qt5Compat.GraphicalEffects
 
 Rectangle {
     id: root
-    width: 100
-    height: 100
+    width: 200
+    height: 150
     color: palette.window
 
     required property var rover
-    property real batteryLevel: rover.batteryLevel
 
     Repeater {
         model: 2
         delegate: Item {
-            id: batteryContainer
             required property int index
+            id: batteryContainer
+            
+            // Logic: Select battery by index, normalize 0-24V to 0.0-1.0
+            property real rawVoltage: (index === 0) ? rover.battery_1 : rover.battery_2
+            property real normalizedLevel: Math.max(0.0, Math.min(1.0, rawVoltage / 24.0))
+
             anchors.margins: 10
             anchors.left: root.left
             anchors.right: root.right
@@ -27,20 +31,17 @@ Rectangle {
                 anchors.fill: parent
 
                 Rectangle {
-                    id: batteryLevel
-                    width: (batteryBody.width - 4) * root.batteryLevel
+                    id: batteryLevelRect
+                    width: (batteryBody.width - 4) * normalizedLevel
                     height: batteryBody.height - 4
                     anchors.left: batteryBody.left
                     anchors.verticalCenter: batteryBody.verticalCenter
                     anchors.margins: 2
+                    
                     color: {
-                        if (root.batteryLevel > 0.5) {
-                            return "green"
-                        } else if (root.batteryLevel > 0.2) {
-                            return "#f4d03f"
-                        } else {
-                            return "red"
-                        }
+                        if (normalizedLevel > 0.5) return "green"
+                        else if (normalizedLevel > 0.2) return "#f4d03f"
+                        else return "red"
                     }
 
                     layer.enabled: true
@@ -71,6 +72,7 @@ Rectangle {
                     border.color: (palette.window.hsvValue > 0.5) ? "#1f1f1f" : "#cccccc"
                     border.width: 2
                 }
+
                 Rectangle {
                     id: batteryTip
                     width: parent.width * 0.05
@@ -79,6 +81,7 @@ Rectangle {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
                     color: (palette.window.hsvValue > 0.5) ? "#1f1f1f" : "#cccccc"
+                    
                     Rectangle {
                         id: tipPadding
                         width: parent.width * 0.5
@@ -94,8 +97,8 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 color: (palette.window.hsvValue > 0.5) ? "#1f1f1f" : "#cccccc"
-                text: root.batteryLevel * 100 + "%"
-                font.pixelSize: Math.min(parent.height < parent.width ? parent.height * 0.4 : parent.width * 0.4, 22)
+                text: (normalizedLevel * 100).toFixed(0) + "% (" + rawVoltage.toFixed(1) + "V)"
+                font.pixelSize: Math.min(parent.height * 0.4, 22)
                 font.bold: true
             }
         }
