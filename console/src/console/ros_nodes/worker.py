@@ -34,7 +34,6 @@ class WorkerNode(Node):
         self.latest_latitude        = 0.0
         self.latest_longitude       = 0.0
         self.latest_bearing         = 0.0
-        self.latest_imu_z           = 0.0
         self.latest_linear_vel      = 0.0
 
         self.latest_battery_1       = 0.0
@@ -84,12 +83,6 @@ class WorkerNode(Node):
     def odom_callback(self, msg: Odometry) -> None:
         self.latest_latitude  = msg.pose.pose.position.x
         self.latest_longitude = msg.pose.pose.position.y
-        q = msg.pose.pose.orientation
-        quaternion = (q.x, q.y, q.z, q.w)
-        euler = tf_transformations.euler_from_quaternion(quaternion)
-        yaw = euler[2]
-        self.latest_bearing = math.degrees(yaw)
-
 
     def imu_callback(self, msg: Imu) -> None:
         q = msg.orientation
@@ -100,7 +93,7 @@ class WorkerNode(Node):
 
         if yaw_deg < 0:
             yaw_deg += 360.0
-        self.latest_imu_z = yaw_deg 
+        self.latest_bearing = yaw_deg 
 
     def vel_callback(self, msg: Twist) -> None:
         self.latest_linear_vel = msg.linear.x
@@ -132,7 +125,6 @@ class WorkerNode(Node):
                 "latitude":            self.latest_latitude,
                 "longitude":           self.latest_longitude,
                 "bearing":             self.latest_bearing,
-                "imu_z":               self.latest_imu_z,
                 "linear_vel":          self.latest_linear_vel,
 
                 "battery_1":           self.latest_battery_1,
