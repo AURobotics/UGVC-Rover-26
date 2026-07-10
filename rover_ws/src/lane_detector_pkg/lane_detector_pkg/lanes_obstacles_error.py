@@ -23,6 +23,7 @@ circle_detected_topic = "circle/detected" #PUBLISHER
 total_error_topic = "total/error" #PUBLISHER
 start_service_topic = "/obstacle_detector/start" #SERVICE
 
+ROI_HEIGHT = 0.7 # fraction of image height to evaluate lane/circle/obstacle errors
 
 class ObstacleDetector(Node):
     """
@@ -49,10 +50,13 @@ class ObstacleDetector(Node):
 
         # camera / homography calibration
         self.K = np.array([
-            [1000, 0, 960],
-            [0, 1000, 540],
+            [793.79768697, 0, 290.78702859],
+            [0, 813.96117996, 241.57106901],
             [0, 0, 1]
         ], dtype=np.float64)
+
+        self.dist_coeffs = np.array([-4.97661814e-01, 8.05356640e+00, 9.44660547e-03, -2.64434172e-02, -4.33974203e+01], dtype=np.float64)
+
         self.camera_height = 1.2
         self.pitch_deg = -30
         self.yaw_deg = 0
@@ -127,7 +131,10 @@ class ObstacleDetector(Node):
                 pitch_deg=self.pitch_deg,
                 yaw_deg=self.yaw_deg,
                 roll_deg=self.roll_deg,
-                image_size=(width, height)
+                image_size=(width, height),
+                dist_coeffs=self.dist_coeffs,
+                min_radius= 10, 
+                max_radius= 200
             )
 
         # ---------- lane offset (meters, relative to frame center) ----------
@@ -179,7 +186,7 @@ class ObstacleDetector(Node):
         edges, _ = self.lane_detector.detect_edges(frame)
         lines = self.lane_detector.detect_lines(edges)
         left_fit, right_fit = self.lane_detector._fit_left_right_lanes(lines)
-        look_ahead_y = int(frame.shape[0] * 0.7)
+        look_ahead_y = int(frame.shape[0] * ROI_HEIGHT)
 
         x_left = None
         x_right = None
@@ -200,18 +207,20 @@ class ObstacleDetector(Node):
         obstacles = []
 
         for box in results_obstacles.boxes:
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
+            x1, y1, x2, y2 = map(int, box.xyxy[0]) # top-left and bottom-right corners
             confidence = float(box.conf[0])
             if confidence < 0.3:
                 continue
             bottom_x = (x1 + x2) // 2
             obstacles.append({"x1": x1, "x2": x2, "y2": y2, "bottom_x": bottom_x, "conf": confidence})
 
+        # ATTENTION - may need change?
         if x_left is None or x_right is None:
             self.publish_bool(self.obstacle_detected_publisher, False)
             self.publish_float(self.obstacle_error_publisher, 0.0)
             return 0.0
 
+        # bound calculations to lane edges
         X_left, _ = self.lane_detector.bev.pixel_to_ground(x_left, y_eval)
         X_right, _ = self.lane_detector.bev.pixel_to_ground(x_right, y_eval)
         X_frame_center, _ = self.lane_detector.bev.pixel_to_ground(frame.shape[1] / 2.0, y_eval)
@@ -229,6 +238,7 @@ class ObstacleDetector(Node):
         for o in lane_obstacles:
             Xg1, _ = self.lane_detector.bev.pixel_to_ground(o["x1"], o["y2"])
             Xg2, _ = self.lane_detector.bev.pixel_to_ground(o["x2"], o["y2"])
+            # print(f"Obstacle detected: Xg1={Xg1:.2f}, Xg2={Xg2:.2f}, conf={o['conf']:.2f}", flush=True, file=sys.stdout)
             ground_edges.append({"start": min(Xg1, Xg2), "end": max(Xg1, Xg2)})
 
         gaps = [{"start": X_left, "end": ground_edges[0]["start"]}]

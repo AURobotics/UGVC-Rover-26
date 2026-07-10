@@ -25,7 +25,7 @@ opencv = ">=4.12.0,<5"
 
 # cv dependencies
 ultralytics = "*"
-torchvision = "*"
+torchvision = "=0.25"
 numpy = "*"
 ros-jazzy-cv-bridge = "*"
 
