@@ -13,6 +13,7 @@ class Mediator(QObject):
         self._latitude            = 0.0
         self._longitude           = 0.0
         self._imu_z               = 0.0
+        self._bearing             = 0.0
         self._linear_vel          = 0.0
 
         self._battery_1     = 0.0
@@ -55,6 +56,9 @@ class Mediator(QObject):
 
     @Property(float, notify=telemetry_updated)
     def longitude(self): return self._longitude
+
+    @Property(float, notify=telemetry_updated)
+    def bearing(self): return self._bearing
 
     @Property(float, notify=telemetry_updated)
     def imu_z(self): return self._imu_z
@@ -109,6 +113,7 @@ class Mediator(QObject):
 
     def handle_telemetry(self, telemetry: dict) -> None:
         self._latitude            = telemetry.get("latitude",            self._latitude)
+        self._bearing      = telemetry.get("bearing", self._bearing)
         self._longitude           = telemetry.get("longitude",           self._longitude)
         self._imu_z               = telemetry.get("imu_z",               self._imu_z)
         self._linear_vel          = telemetry.get("linear_vel",          self._linear_vel)
