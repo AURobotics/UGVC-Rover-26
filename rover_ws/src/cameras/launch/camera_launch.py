@@ -9,7 +9,7 @@ def generate_launch_description():
             executable='camera_node',
             name='camera1',
             parameters=[{
-                'device_index': 0,
+                'device_index': 2,
                 'publish_rate': 15.0,
                 'topic': '/camera1/image_raw',
                 'frame_id': 'camera1',
@@ -21,7 +21,7 @@ def generate_launch_description():
             executable='camera_node',
             name='camera2',
             parameters=[{
-                'device_index': 2,
+                'device_index': 4,
                 'publish_rate': 15.0,
                 'topic': '/camera2/image_raw',
                 'frame_id': 'camera2',

@@ -32,5 +32,6 @@
         "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/cameras/lib/python3.12/site-packages",
         "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/install/cv_bridge/lib/python3.12/site-packages",
         "/opt/ros/jazzy/lib/python3.12/site-packages"
-    ]
+    ],
+    "cmake.sourceDirectory": "/home/habibarezq/aur-26/UGVC-Rover-26/rover_ws/src/rover_bringup"
 }
