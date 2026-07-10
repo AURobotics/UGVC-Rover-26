@@ -7,7 +7,7 @@ road_detector:
     output_costmap_topic: "/road_detector/stats"
     
     # Camera calibration
-    camera_height: 0.09
+    camera_height: 0.1
     pitch_deg: -90.0
     yaw_deg: 0.0
     roll_deg: 0.0
@@ -30,7 +30,7 @@ road_detector:
     max_forward_range: 5.0
     
     # Debug Options
-    publish_debug_images: False
+    publish_debug_images: True
     publish_performance_stats: False
 
     # Point cloud parameters

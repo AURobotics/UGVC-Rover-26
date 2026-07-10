@@ -2,13 +2,13 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- 1. Keep your tilt property here -->
-    <xacro:property name="camera_tilt" value="${15 * pi / 180}"/>
+    <xacro:property name="camera_tilt" value="${0 * pi / 180}"/>
 
     <!-- 2. Keep the physical housing straight relative to the chassis -->
     <joint name="camera_joint" type="fixed">
         <parent link="chassis"/>
         <child link="camera_link"/>
-        <origin xyz="0.335 -0.001 0.09" rpy="0 0 0"/>
+        <origin xyz="0.335 -0.001 0.1" rpy="0 ${camera_tilt} 0"/>
     </joint>
 
     <link name="camera_link">
@@ -26,7 +26,7 @@
     <joint name="camera_optical_joint" type="fixed">
         <parent link="camera_link"/>
         <child link="camera_link_optical"/>
-        <origin xyz="0 0 0" rpy="${-pi/2} ${camera_tilt} ${-pi/2}" />
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
     </joint>
 
     <link name="camera_link_optical"></link>
@@ -47,12 +47,12 @@
                 </image>
                 <clip>
                     <near>0.01</near>
-                    <far>10.0</far>
+                    <far>90.0</far>
                 </clip>
                 <depth_camera>
                     <clip>
                         <near>0.1</near>
-                        <far>10.0</far>
+                        <far>90.0</far>
                     </clip>
                 </depth_camera>
             </camera>

@@ -3,11 +3,12 @@
   <model name="course">
     <static>true</static>
     <link name="course_link">
+      
       <collision name="course_collision">
         <geometry>
           <plane>
             <normal>0 0 1</normal>
-            <size>8 8</size>
+            <size>15 15</size> 
           </plane>
         </geometry>
         <surface>
@@ -19,21 +20,19 @@
           </friction>
         </surface>
       </collision>
+      
       <visual name="course_visual">
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
             <normal>0 0 1</normal>
-            <size>10 10</size>
+            <size>15 15</size> 
           </plane>
         </geometry>
        <material>
           <diffuse>1.0 1.0 1.0 1.0</diffuse>
-          
           <specular>0.0 0.0 0.0 1.0</specular>
-          
           <emissive>0.0 0.0 0.0 1.0</emissive> 
-          
           <pbr>
             <metal>
               <albedo_map>model://turtlebot3_autorace_2020/course/materials/textures/course.png</albedo_map>
@@ -43,6 +42,7 @@
           </pbr>
         </material>
       </visual>
+      
     </link>
   </model>
 </sdf>

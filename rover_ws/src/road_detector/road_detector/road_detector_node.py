@@ -311,7 +311,18 @@ class RoadDetectorNode(Node):
             if pc_msg is not None:
                 self.pc_pub.publish(pc_msg)
             # self.get_logger().info(f"Published {len(lane_points)} lane points")
-            
+            else:
+                # Create and publish an EMPTY point cloud heartbeat
+                from std_msgs.msg import Header
+                from sensor_msgs_py import point_cloud2
+                
+                empty_header = Header()
+                empty_header.stamp = msg.header.stamp
+                empty_header.frame_id = "base_link"  # Ensure this matches your camera's frame
+                
+                # Publish an empty list [] to trigger the subscriber with 0 points
+                empty_pc = point_cloud2.create_cloud_xyz32(empty_header, [])
+                self.pc_pub.publish(empty_pc)
             # Publish circle point clouds
             for i, cloud in enumerate(circle_clouds):
                 if len(cloud) > 0:
@@ -386,7 +397,7 @@ class RoadDetectorNode(Node):
             self.get_logger().info(stats_msg.data)
     
     def create_pointcloud2(self, points, msg) -> PointCloud2|None:
-        source_frame = "camera_link"
+        source_frame = "base_link"  # Assuming the camera frame is named "camera_link"
 
         # 2. Filter points first
         pts = np.array(points, dtype=np.float32)
@@ -417,7 +428,7 @@ class RoadDetectorNode(Node):
         modified_points = np.zeros_like(pts)
         modified_points[:, 0] = pts[:, 1]  # x becomes original y
         modified_points[:, 1] = -pts[:, 0]  # y becomes original x
-        modified_points[:, 2] = -self.camera_height  # set z to -camera_height -> ground
+        modified_points[:, 2] = 0.0  # set z to -camera_height -> ground
 
         return point_cloud2.create_cloud_xyz32(header, modified_points)
     
