@@ -28,7 +28,7 @@ setup(
         #'lane_detector_node = lane_detector_pkg.lane_detector_node:main',
         #'testOfLanes = lane_detector_pkg.testOfLanes:main',
         'lanes_obstacles_error = lane_detector_pkg.lanes_obstacles_error:main',
-        'decision_node = lane_detector_pkg.decision_node:main',
+        # 'decision_node = lane_detector_pkg.decision_node:main',
         'vedioPublisher = lane_detector_pkg.vedioPublisher:main'
     ],
 }
