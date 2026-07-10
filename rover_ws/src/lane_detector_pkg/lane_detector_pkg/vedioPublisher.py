@@ -1,7 +1,7 @@
 # use live vedio to test 
 
 Camera_topic = "camera/image/raw" #publisher
-rover_error_topic = "rover/error" #subscriber
+rover_error_topic = "total/error" #subscriber
 
 
 import os 
@@ -10,7 +10,7 @@ import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-from std_msgs.msg import Int32
+from std_msgs.msg import Float32
 from ament_index_python.packages import get_package_share_directory
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSDurabilityPolicy, QoSHistoryPolicy
 
@@ -30,7 +30,7 @@ class CameraPublisher(Node):
         self.publisher = self.create_publisher(Image,Camera_topic,qos_profile)
 
         self.error_subscribtion = self.create_subscription(
-            Int32,
+            Float32,
             rover_error_topic,
             self.error_callback,
             qos_profile

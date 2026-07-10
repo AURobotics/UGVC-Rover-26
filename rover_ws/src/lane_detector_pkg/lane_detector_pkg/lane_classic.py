@@ -10,7 +10,7 @@ except ImportError:  # pragma: no cover - allows direct script execution
 
 class RoadFeatureDetector:
 
-    def __init__(self, K, camera_height, pitch_deg,yaw_deg,roll_deg, image_size, dist_coeffs=None,
+    def __init__(self, K, camera_height, pitch_deg, yaw_deg, roll_deg, image_size, dist_coeffs=None,
                  min_radius=10, max_radius=200):
 
         self.bev = HomographyBEV(
@@ -103,10 +103,10 @@ class RoadFeatureDetector:
 
         blurred = cv2.GaussianBlur(white_mask, (9, 9), 2)
         circles = cv2.HoughCircles(
-        blurred, cv2.HOUGH_GRADIENT, dp=1.2, minDist=30,
-        param1=50, param2=30,
-        minRadius=self.min_radius, maxRadius=self.max_radius
-    )
+            blurred, cv2.HOUGH_GRADIENT, dp=1.2, minDist=30,
+            param1=50, param2=30,
+            minRadius=self.min_radius, maxRadius=self.max_radius
+        )
 
         detected = []
         if circles is not None:
@@ -206,7 +206,6 @@ class RoadFeatureDetector:
         m, b = np.polyfit(ys, xs, 1)  # x as a function of y (stable for near-vertical lines)
         return m, b
 
-
     # ======================================================
     # SPLIT LINES INTO LEFT / RIGHT AND FIT EACH
     # ======================================================
@@ -232,7 +231,6 @@ class RoadFeatureDetector:
 
         return left_fit, right_fit
 
-
     # ======================================================
     # CONVERT A FITTED LANE LINE TO GROUND-FRAME POINTS
     # ======================================================
@@ -253,7 +251,6 @@ class RoadFeatureDetector:
 
         return (X1, Y1), (X2, Y2)
 
-
     # ======================================================
     # FULL PIPELINE: FRAME -> LEFT/RIGHT LANE LINES IN METERS
     # ======================================================
@@ -268,8 +265,16 @@ class RoadFeatureDetector:
             "left":  self.lane_to_ground_line(left_fit, height),
             "right": self.lane_to_ground_line(right_fit, height),
         }
-    
+
     def offsetx_lane(self, frame):
+        """
+        Standalone lane-offset helper (NOT used by the ROS node's
+        camera_callback — kept here for standalone/debug use only).
+        Re-detects edges/lines internally, so calling this AND
+        offsetx_circle separately in the same frame would duplicate
+        detection work; the ROS node instead computes lane edges once
+        and calls offsetx_circle directly with those values.
+        """
         edges, white_mask = self.detect_edges(frame)
         lines = self.detect_lines(edges)
 
@@ -279,7 +284,7 @@ class RoadFeatureDetector:
         if lines is None:
             return 0.0, frame  # no lines detected
 
-        left_x, right_x = self._right_left_lane_x(lines, height)
+        left_x, right_x = self._right_left_lane_x(lines, height - 1)
 
         if left_x is not None and right_x is not None:
             lane_center = (left_x + right_x) / 2
@@ -290,7 +295,7 @@ class RoadFeatureDetector:
         else:
             return 0.0, frame  # no lanes detected
 
-        y_eval = height - 1  # row near the bottom of the image (close to the vehicle)
+        y_eval = height - 1
 
         X_lane, _   = self.bev.pixel_to_ground(lane_center, y_eval)
         X_center, _ = self.bev.pixel_to_ground(frame_center, y_eval)
@@ -300,11 +305,37 @@ class RoadFeatureDetector:
         cv2.circle(frame, (int(lane_center), height - 50), 10, (255, 0, 0), -1)
 
         return offset_meters, frame
-    
+
+    def get_total_offset(self, frame):
+        """
+        Standalone helper (NOT used by the ROS node) that runs offsetx_lane
+        and a self-contained circle offset on the same frame independently.
+        Kept for debug/standalone scripts only.
+        """
+        edges, white_mask = self.detect_edges(frame)
+        lines = self.detect_lines(edges)
+        circles = self.detect_circles(frame, white_mask)
+        height, width = frame.shape[:2]
+        y_eval = height - 1
+
+        lane_offset_m, frame = self.offsetx_lane(frame)
+
+        x_left_px, x_right_px = self._right_left_lane_x(lines, y_eval)
+        if x_left_px is None:
+            x_left_px = 0.0
+        if x_right_px is None:
+            x_right_px = float(width)
+
+        circle_offset_m, frame = self.offsetx_circle(frame, circles, x_left_px, x_right_px, y_eval)
+
+        total_offset_m = lane_offset_m + circle_offset_m
+
+        return lane_offset_m, circle_offset_m, total_offset_m, frame
+
     def _right_left_lane_x(self, lines, y_eval):
         left_lines = []
         right_lines = []
-    
+
         if lines is not None:
             for line in lines:
                 x1, y1, x2, y2 = line[0]
@@ -317,7 +348,7 @@ class RoadFeatureDetector:
                     left_lines.append((x1, y1, x2, y2))
                 else:
                     right_lines.append((x1, y1, x2, y2))
-    
+
         def average_x_at_y(lines_group, y_target):
             if not lines_group:
                 return None
@@ -335,30 +366,26 @@ class RoadFeatureDetector:
     # ======================================================
     # OFFSET TO WIDEST GAP BETWEEN CIRCLES (HOLES/OBSTACLES)
     # ======================================================
-    def offsetx_circle(self, frame):
+    def offsetx_circle(self, frame, circles, x_left_px, x_right_px, y_eval):
         """
-        Detect circles (holes/obstacles) inside the current lane, find the
-        widest gap between them (or between a lane edge and the nearest
-        circle), and return the lateral offset in meters from the frame
-        center to the center of that gap.
-        """
-        edges, white_mask = self.detect_edges(frame)
-        lines = self.detect_lines(edges)
-        circles = self.detect_circles(frame, white_mask)
+        Given already-detected circles and already-computed lane edges (in
+        pixels, at row y_eval) for THIS frame, find the widest gap between
+        circles (or between a lane edge and the nearest circle), and return
+        the lateral offset in meters from the frame center to that gap's
+        center.
 
+        This function does NOT re-run edge/line/circle detection itself.
+        The caller (camera_callback) computes edges/lines/circles and the
+        lane corridor (x_left_px, x_right_px, y_eval) ONCE per frame and
+        passes them in here, so that lane_error, obstacle_error, and
+        circle_error all agree on the exact same lane boundaries instead
+        of each being computed from a separate, possibly inconsistent,
+        re-detection.
+        """
         height, width = frame.shape[:2]
-        y_eval = height - 1
         frame_center_px = width / 2.0
 
         X_frame_center, _ = self.bev.pixel_to_ground(frame_center_px, y_eval)
-
-        # figure out lane edges (in pixels) at the same row used for offsetx_lane
-        x_left_px, x_right_px = self._right_left_lane_x(lines, y_eval)
-        if x_left_px is None:
-            x_left_px = 0
-        if x_right_px is None:
-            x_right_px = width
-
         X_left, _  = self.bev.pixel_to_ground(x_left_px, y_eval)
         X_right, _ = self.bev.pixel_to_ground(x_right_px, y_eval)
 
@@ -391,35 +418,18 @@ class RoadFeatureDetector:
 
         offset_meters = target_center_m - X_frame_center
 
-        # visualize detected circles + chosen target
+        # visualize detected circles
         for (cx, cy, r) in lane_circles:
             cv2.circle(frame, (cx, cy), r, (0, 0, 255), 2)
 
         return offset_meters, frame
 
     # ======================================================
-    # COMBINED OFFSET: LANE + CIRCLES/OBSTACLES TOGETHER
-    # ======================================================
-    def get_total_offset(self, frame):
-        """
-        Runs both the lane offset and the circle/obstacle offset on the same
-        frame and returns them individually plus their sum (all in meters),
-        along with the annotated frame.
-        """
-        lane_offset_m, frame = self.offsetx_lane(frame)
-        circle_offset_m, frame = self.offsetx_circle(frame)
-
-        total_offset_m = lane_offset_m + circle_offset_m
-
-        return lane_offset_m, circle_offset_m, total_offset_m, frame
-
-    # ======================================================
-    # FULL PIPELINE
+    # FULL PIPELINE (standalone / debug use — draws lines + circles)
     # ======================================================
     def process(self, frame, draw_bev=False):
 
         # --- Lanes ---
-        #roi = self.region_of_interest(frame)
         edges, white_mask = self.detect_edges(frame)
         lines = self.detect_lines(edges)
         output = self.draw_lines(frame.copy(), lines)
@@ -440,7 +450,7 @@ class RoadFeatureDetector:
 
 
 # ======================================================
-# MAIN LOOP
+# MAIN LOOP (standalone / debug entry point)
 # ======================================================
 if __name__ == "__main__":
 
@@ -453,8 +463,9 @@ if __name__ == "__main__":
     camera_height = 1.2
     pitch_deg = -30
 
-    
-    cap = cv2.VideoCapture("D:\\Software_work\\rover_26\\UGVC-Rover-26\\rover_ws\\src\\errors_lane\\errors_lane\\vision\\test.mp4")
+    cap = cv2.VideoCapture(
+        "D:\\Software_work\\rover_26\\UGVC-Rover-26\\rover_ws\\src\\errors_lane\\errors_lane\\vision\\test.mp4"
+    )
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
     if not cap.isOpened():
@@ -477,15 +488,15 @@ if __name__ == "__main__":
         yaw_deg=0,
         roll_deg=0
     )
-    
+
     while True:
         ret, frame = cap.read()
         if not ret:
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
+
         output, edges, lines, ground_circles, circle_clouds, bev = detector.process(frame, draw_bev=True)
         print("Ground circles:", ground_circles)
-        #print("lines:", lines)
 
         lane_offset_m, circle_offset_m, total_offset_m, output = detector.get_total_offset(output)
         print(f"Lane offset: {lane_offset_m:.3f} m | Circle offset: {circle_offset_m:.3f} m | Total: {total_offset_m:.3f} m")
@@ -493,15 +504,12 @@ if __name__ == "__main__":
         for i, cloud in enumerate(circle_clouds):
             print(f"  circle {i+1} cloud points: {len(cloud)}")
 
-        #roi = detector.region_of_interest(frame)
         cv2.namedWindow("Video", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("Video", 640, 480)
-        #cv2.imshow("ROI", roi)
         cv2.imshow("Video", output)
         cv2.imshow("Edges", edges)
         if bev is not None:
             cv2.imshow("BEV", bev)
-            
 
         if cv2.waitKey(1) == 27:
             break
