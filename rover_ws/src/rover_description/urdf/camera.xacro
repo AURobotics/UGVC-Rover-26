@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <!-- 1. Define your camera tilt (e.g., 15 degrees down) -->
-    <xacro:property name="camera_tilt" value="${15 * pi / 180}" />
+    <!-- 1. Keep your tilt property here -->
+    <xacro:property name="camera_tilt" value="${0 * pi / 180}"/>
 
-    <!-- 2. Apply the physical tilt HERE. This tilts both the physical box and the sensor -->
     <joint name="camera_joint" type="fixed">
-        <parent link="chassis" />
-        <child link="camera_link" />
-        <origin xyz="0.335 -0.001 0.09" rpy="0 ${camera_tilt} 0" />
+    <parent link="chassis"/>
+    <child link="camera_link"/>
+    <origin xyz="0.335 -0.001 0.09" rpy="0 ${camera_tilt} 0"/>
     </joint>
 
     <link name="camera_link">
@@ -21,16 +20,14 @@
         </visual>
     </link>
 
-    <!-- 3. Return the optical joint to its standard, static ROS rotation -->
     <joint name="camera_optical_joint" type="fixed">
-        <parent link="camera_link" />
-        <child link="camera_link_optical" />
-        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+        <parent link="camera_link"/>
+        <child link="camera_link_optical"/>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
     </joint>
 
     <link name="camera_link_optical"></link>
 
-    <!-- 4. Gazebo Sensor Configuration -->
     <gazebo reference="camera_link">
         <sensor name="camera" type="rgbd_camera">
             <always_on>true</always_on>
@@ -49,12 +46,12 @@
                 </image>
                 <clip>
                     <near>0.01</near>
-                    <far>10.0</far>
+                    <far>90.0</far>
                 </clip>
                 <depth_camera>
                     <clip>
                         <near>0.1</near>
-                        <far>10.0</far>
+                        <far>90.0</far>
                     </clip>
                 </depth_camera>
             </camera>

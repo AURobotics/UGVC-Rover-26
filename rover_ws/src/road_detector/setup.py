@@ -50,6 +50,8 @@ setup(
             'video_publisher_node = road_detector.video_publisher_node:main',
             'pointcloud_logger_node = road_detector.pointcloud_logger_node:main',
             'video_viewer_node = road_detector.video_viewer_node:main',
+            "lane_follower_node = road_detector.lane_follower_node:main",
+            "mock_lane_publisher = road_detector.mock_lane_publisher:main",
         ],
     },
 )
