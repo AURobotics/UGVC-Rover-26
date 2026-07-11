@@ -220,6 +220,13 @@ def generate_launch_description():
         )])
     )
 
+    lane_follower = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('road_detector'),
+            'launch', 'lane_follower_launch.py',
+        )])
+    )
+
     return LaunchDescription([
         declare_use_sim_time,
         # declare_slam_params,
@@ -229,10 +236,11 @@ def generate_launch_description():
         startup_msg,
         noisy_controller,
         # localization,
-        nav2_launch,
+        # nav2_launch,
         # virtual_wall_node,
         # lane_follower,
         rviz,            # ← now uses shared rviz.launch.py
         twist_stamper,
         road_detector,  
+        lane_follower
     ])

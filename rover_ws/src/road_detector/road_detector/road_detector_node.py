@@ -60,6 +60,8 @@ class RoadDetectorNode(Node):
         # Topic parameters
         self.declare_parameter('camera_topic', '/camera/image_raw')
         self.declare_parameter('output_pointcloud_topic', '/road_detector/pointcloud')
+        self.declare_parameter('output_lane_topic', '/road_detector/lanes')
+        self.declare_parameter('output_potholes_topic', '/road_detector/potholes')
         self.declare_parameter('output_lane_mask_topic', '/road_detector/debug/lane_mask')
         self.declare_parameter('output_bev_topic', '/road_detector/debug/bev_image')
         self.declare_parameter('output_stats_topic', '/road_detector/stats')
@@ -98,6 +100,8 @@ class RoadDetectorNode(Node):
         # Topic parameters
         self.camera_topic = self.get_parameter('camera_topic').value
         self.pc_topic = self.get_parameter('output_pointcloud_topic').value
+        self.lane_topic = self.get_parameter('output_lane_topic').value
+        self.potholes_topic = self.get_parameter('output_potholes_topic').value
         self.lane_mask_topic = self.get_parameter('output_lane_mask_topic').value
         self.bev_topic = self.get_parameter('output_bev_topic').value
         self.stats_topic = self.get_parameter('output_stats_topic').value
@@ -183,6 +187,18 @@ class RoadDetectorNode(Node):
         )
         self.get_logger().info(f"PointCloud2 publisher created on topic: {self.pc_topic}")
         
+        self.lane_pub = self.create_publisher(
+            PointCloud2,
+            self.lane_topic,
+            reliable_qos
+        )
+
+        self.potholes_pub = self.create_publisher(
+            PointCloud2,
+            self.potholes_topic,
+            reliable_qos
+        )
+
         if self.publish_debug_images:
             self.img_pub = self.create_publisher(
                 Image, 
@@ -310,6 +326,7 @@ class RoadDetectorNode(Node):
             pc_msg = self.create_pointcloud2(lane_points, msg)
             if pc_msg is not None:
                 self.pc_pub.publish(pc_msg)
+                self.lane_pub.publish(pc_msg)  # Publish lane points to lane topic
             # self.get_logger().info(f"Published {len(lane_points)} lane points")
             else:
                 # Create and publish an EMPTY point cloud heartbeat
@@ -323,6 +340,7 @@ class RoadDetectorNode(Node):
                 # Publish an empty list [] to trigger the subscriber with 0 points
                 empty_pc = point_cloud2.create_cloud_xyz32(empty_header, [])
                 self.pc_pub.publish(empty_pc)
+                self.lane_pub.publish(empty_pc)  # Publish empty lane points
             # Publish circle point clouds
             for i, cloud in enumerate(circle_clouds):
                 if len(cloud) > 0:
@@ -333,6 +351,7 @@ class RoadDetectorNode(Node):
                     pc_msg = self.create_pointcloud2(cloud, msg)
                     if pc_msg is not None:
                         self.pc_pub.publish(pc_msg)
+                        self.potholes_pub.publish(pc_msg)  # Publish potholes points
                     self.get_logger().debug(f"Published circle cloud {i} with {len(cloud)} points")
             
             # Publish debug images

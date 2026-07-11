@@ -1,9 +1,11 @@
 lane_follower_node:
   ros__parameters:
     # --- Topic Configuration ---
-    pointcloud_topic: "/road_detector/pointcloud"
+    lane_topic: "/road_detector/lanes"
+    potholes_topic: "/road_detector/potholes"
+    obstacles_topic: "/rplidar/obstacles"
 
-    cmd_vel_topic: "/cmd_vel"
+    cmd_vel_topic: "/diff_drive_controller/cmd_vel"
     
     # --- Vision Horizon (Meters) ---
     min_look_ahead: 0.15                  # Pulls vision right up to the bumper

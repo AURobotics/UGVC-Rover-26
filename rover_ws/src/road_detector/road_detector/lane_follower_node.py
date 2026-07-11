@@ -12,7 +12,9 @@ class LaneFollowerNode(Node):
         super().__init__('lane_follower_node')
         
         # --- Declare All Parameters (Small Robot Defaults) ---
-        self.declare_parameter('pointcloud_topic', '/road_detector/pointcloud')
+        self.declare_parameter('lane_topic', '/road_detector/lanes')
+        self.declare_parameter('potholes_topic', '/road_detector/potholes')
+        self.declare_parameter('obstacles_topic', '/rplidar/obstacles')
         self.declare_parameter('cmd_vel_topic', '/cmd_vel')
         
         self.declare_parameter('min_look_ahead', 0.15)
@@ -25,13 +27,15 @@ class LaneFollowerNode(Node):
         self.declare_parameter('single_wall_speed_multiplier', 0.85)
 
         # --- Fetch Topic Names ---
-        pc_topic = self.get_parameter('pointcloud_topic').value
+        lane_topic = self.get_parameter('lane_topic').value
+        potholes_topic = self.get_parameter('potholes_topic').value
+        obstacles_topic = self.get_parameter('obstacles_topic').value
         vel_topic = self.get_parameter('cmd_vel_topic').value
         
         # --- Subscribers & Publishers ---
         self.cloud_sub = self.create_subscription(
             PointCloud2,
-            pc_topic, 
+            lane_topic, 
             self.cloud_callback,
             10
         )
@@ -42,7 +46,7 @@ class LaneFollowerNode(Node):
         self.cmd_vel_pub = self.create_publisher(Twist, vel_topic, 10)
         
         self.get_logger().info(f"Lane Follower Node initialized for Small Robot.")
-        self.get_logger().info(f"Listening to: {pc_topic} | Publishing to: {vel_topic}")
+        self.get_logger().info(f"Listening to: {lane_topic} | Publishing to: {vel_topic}")
 
     def cloud_callback(self, msg):
         # Fetch current dynamic tuning parameters

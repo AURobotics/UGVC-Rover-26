@@ -44,7 +44,7 @@ ros-jazzy-cv-bridge = ">=4.1.0,<5"
 ros-jazzy-gz-ros2-control = "*"
 ros-jazzy-ros2-control = "*"
 ros-jazzy-ros2-controllers = "*"
-filelock = ">=3.29.5,<4"
+filelock = ">=3.29.5,<4" # important for loading wheels from urdf?
 
 # --- Added TurtleBot3 Dependencies ---
 ros-jazzy-turtlebot3 = "*"
