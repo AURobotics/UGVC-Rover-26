@@ -16,6 +16,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 from rover_interfaces.action import GenerateBezierPath
 
 EARTH_RADIUS_M = 6_371_000.0
+MIN_DIST_TO_GOAL = 0.25
 
 
 def gps_to_xy(lat, lon, origin_lat, origin_lon):
@@ -310,7 +311,7 @@ class BezierPathServer(Node):
         min_dist_to_goal = math.hypot(self.current_path_nodes[-1][0] - self.robot_x, self.current_path_nodes[-1][1] - self.robot_y)
 
         # إذا وصلنا في حدود نطاق السماح (25 سم) نوقف الروبوت وننهي الحركة بنجاح
-        if min_dist_to_goal < 0.25:
+        if min_dist_to_goal < MIN_DIST_TO_GOAL:
             self.get_logger().info("🎯 Goal target region achieved. Stopping controller loop.")
             self.controller_active = False
             self._stop_robot()
