@@ -17,6 +17,8 @@ WAYPOINT_TIMEOUT = 60 # 60 seconds allowed to reach a waypoint before timing out
 WAYPOINT2_TIMEOUT = 44 # 45 seconds allowed for face recognition to complete before timing out and returning to waypoint navigation
 
 EARTH_RADIUS_M = 6_371_000.0
+# START_LAN = 
+# START_LON = 
 
 # Topics
 LOCALIZATION_TOPIC = '/odom/global'
@@ -201,52 +203,15 @@ class MissionNode(Node):
         self.current_lat = msg.latitude
         self.current_lon = msg.longitude
 
-    # @staticmethod
-    # def _haversine_distance(lat1, lon1, lat2, lon2):
-    #     """Great-circle distance in meters between two lat/lon points."""
-    #     phi1, phi2 = math.radians(lat1), math.radians(lat2)
-    #     dphi = math.radians(lat2 - lat1)
-    #     dlambda = math.radians(lon2 - lon1)
-    #     a = math.sin(dphi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0) ** 2
-    #     return 2 * EARTH_RADIUS_M * math.asin(math.sqrt(a))
-
-    # def is_at_waypoint(self, waypoint_number):
-    #     """True if the robot's current GPS fix is within WAYPOINT_ERROR meters of the
-    #     given waypoint (1-indexed, matching self.waypoints keys 0..2)."""
-    #     if self.current_lat is None or self.current_lon is None:
-    #         return False
-
-    #     target = self.waypoints[waypoint_number - 1]
-    #     dist = self._haversine_distance(
-    #         self.current_lat, self.current_lon,
-    #         target['latitude'], target['longitude']
-    #     )
-    #     return dist <= WAYPOINT_ERROR
-
-    def gps_to_xy(self, lat, lon, origin_lat, origin_lon):
-        """
-            Convert GPS coordinates to local Cartesian coordinates (x, y) in meters.
-            x is the Easting (longitude), y is the Northing (latitude).
-        """
-        phi1, phi2 = math.radians(origin_lat), math.radians(lat)
-        dphi = math.radians(lat - origin_lat)
-        dlambda = math.radians(lon - origin_lon)
-
+    @staticmethod
+    def _haversine_distance(lat1, lon1, lat2, lon2):
+        """Great-circle distance in meters between two lat/lon points."""
+        phi1, phi2 = math.radians(lat1), math.radians(lat2)
+        dphi = math.radians(lat2 - lat1)
+        dlambda = math.radians(lon2 - lon1)
         a = math.sin(dphi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0) ** 2
-        c = 2 * math.asin(math.sqrt(a))
-        distance = EARTH_RADIUS_M * c
+        return 2 * EARTH_RADIUS_M * math.asin(math.sqrt(a))
 
-        # Calculate bearing from origin to target
-        y = math.sin(dlambda) * math.cos(phi2)
-        x = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(dlambda)
-        bearing = math.atan2(y, x)
-
-        # Convert polar coordinates (distance, bearing) to Cartesian (x, y)
-        x_local = distance * math.cos(bearing)
-        y_local = distance * math.sin(bearing)
-
-        return x_local, y_local
-    
     def is_at_waypoint(self, waypoint_number):
         """True if the robot's current GPS fix is within WAYPOINT_ERROR meters of the
         given waypoint (1-indexed, matching self.waypoints keys 0..2)."""
@@ -254,12 +219,49 @@ class MissionNode(Node):
             return False
 
         target = self.waypoints[waypoint_number - 1]
-        x_local, y_local = self.gps_to_xy(
-            START_LAT, START_LON,
+        dist = self._haversine_distance(
+            self.current_lat, self.current_lon,
             target['latitude'], target['longitude']
         )
-        distance = ((x_local-)**2 + (y_local-)**2)**0.5  # Calculate Euclidean distance in local frame
-        return distance <= WAYPOINT_ERROR
+        return dist <= WAYPOINT_ERROR
+
+    # def gps_to_xy(self, lat, lon, origin_lat, origin_lon):
+    #     """
+    #         Convert GPS coordinates to local Cartesian coordinates (x, y) in meters.
+    #         x is the Easting (longitude), y is the Northing (latitude).
+    #     """
+    #     phi1, phi2 = math.radians(origin_lat), math.radians(lat)
+    #     dphi = math.radians(lat - origin_lat)
+    #     dlambda = math.radians(lon - origin_lon)
+
+    #     a = math.sin(dphi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0) ** 2
+    #     c = 2 * math.asin(math.sqrt(a))
+    #     distance = EARTH_RADIUS_M * c
+
+    #     # Calculate bearing from origin to target
+    #     y = math.sin(dlambda) * math.cos(phi2)
+    #     x = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(dlambda)
+    #     bearing = math.atan2(y, x)
+
+    #     # Convert polar coordinates (distance, bearing) to Cartesian (x, y)
+    #     x_local = distance * math.cos(bearing)
+    #     y_local = distance * math.sin(bearing)
+
+    #     return x_local, y_local
+    
+    # def is_at_waypoint(self, waypoint_number):
+    #     """True if the robot's current GPS fix is within WAYPOINT_ERROR meters of the
+    #     given waypoint (1-indexed, matching self.waypoints keys 0..2)."""
+    #     if self.current_lat is None or self.current_lon is None:
+    #         return False
+
+    #     target = self.waypoints[waypoint_number - 1]
+    #     x_local, y_local = self.gps_to_xy(
+    #         START_LAT, START_LON,
+    #         target['latitude'], target['longitude']
+    #     )
+    #     distance = ((x_local-self.position.x)**2 + (y_local-self.position.y)**2)**0.5  # Calculate Euclidean distance in local frame
+    #     return distance <= WAYPOINT_ERROR
 
     #waypoint navigation
     def navigate_to_waypoint(self, waypoint_number):
