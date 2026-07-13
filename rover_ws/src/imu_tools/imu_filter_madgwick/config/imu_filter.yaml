@@ -9,9 +9,9 @@ imu_filter:
     publish_debug_topics: false 
     world_frame: "ENU"
     gain: 0.1
-    zeta: 1.5720e-05
+    zeta: 2.8507e-5
     mag_bias_x: 0.0
     mag_bias_y: 0.0
     mag_bias_z: 0.0
-    orientation_stddev: 0.0
+    orientation_stddev: 0.0002
     remove_gravity_vector: true
