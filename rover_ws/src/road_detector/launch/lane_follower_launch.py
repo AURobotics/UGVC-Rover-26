@@ -27,7 +27,15 @@ def generate_launch_description():
         ],
     )
 
+    relay_cmd_vel = Node(
+            package='topic_tools',
+            executable='relay',
+            name='cmd_vel_relay',
+            arguments=['/cmd_vel_stamped', '/diff_drive_controller/cmd_vel']
+        )
+
     return LaunchDescription([
         declare_params_file,
-        lane_follower_node
+        lane_follower_node,
+        relay_cmd_vel
     ])

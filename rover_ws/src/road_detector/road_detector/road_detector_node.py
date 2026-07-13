@@ -416,7 +416,7 @@ class RoadDetectorNode(Node):
             self.get_logger().info(stats_msg.data)
     
     def create_pointcloud2(self, points, msg) -> PointCloud2|None:
-        source_frame = "base_link"  # Assuming the camera frame is named "camera_link"
+        source_frame = "base_link"
 
         # 2. Filter points first
         pts = np.array(points, dtype=np.float32)

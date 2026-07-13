@@ -53,6 +53,8 @@ ros-jazzy-turtlebot3-description = ">=2.3.6,<3"
 
 ros-jazzy-rmw-cyclonedds-cpp = "*"
 
+ros-jazzy-topic-tools = "*"
+
 [target.win-64.activation]
 scripts = ["install\\setup.bat"]
 
