@@ -12,11 +12,12 @@ class PotholePIDNode(Node):
         self.declare_parameter('ki', 0.0)
         self.declare_parameter('kd', 1.0)
         self.declare_parameter('safe_distance', 1.0) # Target stay 1 meter away
+        self.declare_parameter('max_integral', 1.0) # Target stay 1 meter away
+
         
         self.current_distance = 5.0
         self.prev_error = 0.0
         self.integral = 0.0
-        self.max_integral = 1.0
         self.prev_time = self.get_clock().now()
         
         self.create_subscription(Float32, '/pothole/error', self.error_cb, 10)
@@ -33,6 +34,8 @@ class PotholePIDNode(Node):
         ki = self.get_parameter('ki').value
         kd = self.get_parameter('kd').value
         safe_dist = self.get_parameter('safe_distance').value
+        self.max_integral = self.get_parameter('max_integral').value
+
         
         current_time = self.get_clock().now()
         dt = (current_time - self.prev_time).nanoseconds / 1e9
