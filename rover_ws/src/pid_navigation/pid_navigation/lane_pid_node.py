@@ -10,9 +10,11 @@ class LanePIDNode(Node):
         # ROS Parameters for runtime tuning
         self.declare_parameter('kp', 3.0)
         self.declare_parameter('ki', 0.0)
-        self.declare_parameter('kd', 5)
+        self.declare_parameter('kd', 5.0)
         self.declare_parameter('base_linear_vel', 1.38) # Forward speed
         self.declare_parameter('max_angular_vel', 1.5)  # Steering limit
+        self.declare_parameter('max_integral', 1.0)  # Steering limit
+
         
         self.current_error = 0.0
         self.prev_error = 0.0
@@ -37,6 +39,8 @@ class LanePIDNode(Node):
         kd = self.get_parameter('kd').value
         base_vel = self.get_parameter('base_linear_vel').value
         max_ang = self.get_parameter('max_angular_vel').value
+        self.max_integral = self.get_parameter('max_integral').value
+
         
         current_time = self.get_clock().now()
         dt = (current_time - self.prev_time).nanoseconds / 1e9
