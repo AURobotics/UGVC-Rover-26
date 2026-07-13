@@ -1,5 +1,17 @@
 .vscode/
+rover_ws/.vscode/c_cpp_properties.json
+rover_ws/.vscode/settings.json
+rover_ws/src/.vscode/*
+build/
+install/
+log/
+
+# Ignore ROS 2 build artifacts
+src/build/
+src/install/
+src/log/
 build/
 install/
 log/
 .vscode/
+*.pyc
