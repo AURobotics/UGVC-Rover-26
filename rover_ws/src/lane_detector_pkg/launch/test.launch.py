@@ -16,4 +16,10 @@ def generate_launch_description():
             executable='lanes_obstacles_error',
             output='screen'
         ),
+
+       # Node(
+       #     package='lane_detector_pkg',
+       #     executable='errors_percentage',
+       #     output='screen'
+       # ),
     ])
