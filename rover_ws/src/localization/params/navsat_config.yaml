@@ -4,7 +4,7 @@ navsat_transform_node:
 
 # Delay time, in seconds, before we calculate the transform from the UTM frame to your world frame. This is especially
 # important if you have use_odometry_yaw set to true. Defaults to 0.
-        delay: 3.0 #?
+        delay: 1.5 #?
 
 # see http://www.ngdc.noaa.gov/geomag-web/ (make sure to convert the value to radians). This parameter is mandatory.
 #degrees: 4.73° E  ± 0.30°
@@ -27,7 +27,7 @@ navsat_transform_node:
 # /odometry/filtered topic coming from one of robot_localization's state estimation nodes). BE CAREFUL when using this!
 # The yaw value in your odometry source *must* be world-referenced, e.g., you cannot use your odometry source for yaw
 # if your yaw data is based purely on integrated velocities. Defaults to false.
-        use_odometry_yaw: true 
+        use_odometry_yaw: false 
 
 # If true, will retrieve the datum from the 'datum' parameter below, if available. If no 'datum' parameter exists,
 # navsat_transform_node will wait until the user calls the 'datum' service with the SetDatum service message.
@@ -36,7 +36,7 @@ navsat_transform_node:
 # Instead of using the first GPS location and IMU-based heading for the local-frame origin, users can specify the
 # origin (datum) using this parameter. The fields in the parameter represent latitude and longitude in decimal degrees,
 # and heading in radians. As navsat_transform_node assumes an ENU standard, a 0 heading corresponds to east.
-        datum: [30.049469947760716, 31.233460193749572, 0.0] #?
+        # datum: [30.049469947760716, 31.233460193749572, 0.0] #?
 
 # Earth frame ID for ECEF coordinates (REP-105 compliant). Defaults to "earth".
         earth_frame_id: "earth"

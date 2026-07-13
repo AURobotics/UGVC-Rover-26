@@ -29,8 +29,9 @@ def generate_launch_description():
             name='navsat_transform_node',
             parameters=[os.path.join(get_package_share_directory("localization"), 'params', 'navsat_config.yaml')],
             remappings=[
-                ('odometry/filtered', '/odom/local'),
-                ('gps/fix', '/phyphox/gps')
+                ('odometry/filtered', '/odom/global'),
+                ('gps/fix', '/phyphox/gps'),
+                ('imu', '/imu/data')
             ]
         ),
         Node(
@@ -39,7 +40,13 @@ def generate_launch_description():
             name='ekf_global_node',
             parameters=[os.path.join(get_package_share_directory("localization"), 'params', 'ekf_global_config.yaml')],
             remappings=[
-                ('odometry/filtered', '/odom/global')
+                ('odometry/filtered', '/odom/global'),
+                ('/odometry/gps', '/odometry/gps/sim')
             ]
+        ),
+        Node(
+            package='localization',
+            executable='navsat_sim_node',
+            name='navsat_sim_node',
         ),
     ])

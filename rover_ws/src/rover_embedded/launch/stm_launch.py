@@ -6,7 +6,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-   
+    
     stm32_node = Node(
         package='rover_embedded',       
         executable='stm_node',
@@ -15,8 +15,15 @@ def generate_launch_description():
         emulate_tty=True,
 
     )
+    twist_node = Node(
+        package='motion',       
+        executable='twist_node',
+        name='twist_node',
+        output='screen',
+
+    )
 
     return LaunchDescription([
         stm32_node,
-        
+        twist_node
     ])

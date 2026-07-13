@@ -12,7 +12,7 @@ ekf_local_node:
         #debug
         print_diagnostics: true #publishes on /diagnostics_agg
         debug: false #prints EVERYTHING going on in the node, impacts performance
-        debug_out_file: /path/to/debug/file.txt 
+        debug_out_file: /home/zeyad/what_the_hell.txt
 
         # Whether we'll allow old measurements to cause a re-publication of the updated state
         permit_corrected_publication: false #?
@@ -23,7 +23,7 @@ ekf_local_node:
 
         map_frame: map              # Defaults to "map" if unspecified
         odom_frame: odom            # Defaults to "odom" if unspecified
-        base_link_frame: base_footprint  # Defaults to "base_link" if unspecified
+        base_link_frame: base_link  # Defaults to "base_link" if unspecified
         world_frame: odom           # Defaults to the value of odom_frame if unspecified
 
         #encoders
@@ -49,11 +49,11 @@ ekf_local_node:
                       false, false, false,
                       false,  false,  false,
                       true,  true,  false]
-        imu0_differential: false
+        imu0_differential: true
         imu0_relative: false
         imu0_queue_size: 2 #?
 
-        imu0_remove_gravitational_acceleration: true
+        imu0_remove_gravitational_acceleration: false
 
 
         # ordered as x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az. Defaults to the matrix below if
@@ -81,4 +81,4 @@ ekf_local_node:
         # question. Users should take care not to use large values for variables that will not be measured directly. The values
         # are ordered as x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az. Defaults to the diagonal values below
         # if unspecified. In this example, we specify only the diagonal of the matrix.
-        initial_estimate_covariance: [1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1.0, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9]
+        initial_estimate_covariance: [1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 10.0, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9]
