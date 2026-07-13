@@ -1,0 +1,12 @@
+mission_node:
+  ros__parameters:
+    mode: 1  # 0: manual, 1: auto
+    waypoint1:
+      x: 100.0
+      y: 100.0
+    waypoint2:
+      x: 200.0
+      y: 200.0
+    waypoint3:
+      x: 300.0
+      y: 300.0
