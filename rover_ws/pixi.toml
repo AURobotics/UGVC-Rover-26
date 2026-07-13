@@ -43,6 +43,9 @@ ros-jazzy-gz-ros2-control = "*"
 ros-jazzy-ros2-control = "*"
 ros-jazzy-ros2-controllers = "*"
 
+[pypi-dependencies]
+pyserial = ">=3.5, <4"
+
 [target.win-64.activation]
 scripts = ["install\\setup.bat"]
 
