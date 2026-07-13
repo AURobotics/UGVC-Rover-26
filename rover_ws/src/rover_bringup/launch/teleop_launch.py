@@ -37,6 +37,15 @@ def generate_launch_description():
         parameters=[teleop_params],
     )
 
+    teleop_node_fedora = Node(
+        package='teleop_twist_keyboard',
+        executable='teleop_twist_keyboard',
+        name='teleop_twist_keyboard',
+        output='screen',
+        prefix='ptyxis --',
+        parameters=[teleop_params],
+    )
+
     return LaunchDescription([
         stm_launch,
         convertor_node,
