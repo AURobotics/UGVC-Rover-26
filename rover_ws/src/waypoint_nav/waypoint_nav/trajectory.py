@@ -185,9 +185,17 @@ class BezierPathServer(Node):
         origin_lat = raw_gps_poses[0].pose.position.x
         origin_lon = raw_gps_poses[0].pose.position.y
 
+        # gps_to_xy() zeroes the path at raw_gps_poses[0] (the robot's GPS fix at the
+        # moment this goal was sent). /odom/global does NOT re-zero per goal -- it has
+        # its own persistent origin -- so self.robot_x/self.robot_y is generally NOT
+        # (0, 0) right now. Snapshot it and offset every path point by it so the path
+        # frame lines up with the frame _control_loop_callback tracks against.
+        odom_origin_offset = np.array([self.robot_x, self.robot_y])
+
         meter_waypoints = []
         for p in raw_gps_poses:
             xy = gps_to_xy(p.pose.position.x, p.pose.position.y, origin_lat, origin_lon)
+            xy += odom_origin_offset
             meter_waypoints.append(xy.tolist())
 
         try:

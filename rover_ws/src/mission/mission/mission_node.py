@@ -62,10 +62,10 @@ class MissionNode(Node):
         # Instantiate clients in constructor
         self.face_recognition_client = self.create_client(SetBool, FACE_RECOGNITION_SERVICE)
 
-        self.waypoint_navigation_client = self._action_client = ActionClient(self,
-                                                                GenerateBezierPath,
-                                                                WAYPOINT_NAVIGATION_SERVICE
-                                                                )
+        self._action_client = ActionClient(self,
+                                            GenerateBezierPath,
+                                            WAYPOINT_NAVIGATION_SERVICE
+                                            )
 
         self._declare_fetch_variables()
 
@@ -85,8 +85,6 @@ class MissionNode(Node):
             10
         )
 
-        # Raw GPS fix: needed both to test "am I at the waypoint?" and to build the
-        # 2-point (current -> target) GPS path the Bezier action server requires.
         self.gps_subscriber = self.create_subscription(
             NavSatFix,
             GPS_TOPIC,
@@ -120,7 +118,7 @@ class MissionNode(Node):
             if self.waypoint3_time is not None:
                 is_timed_out3 = (self.get_clock().now() - self.waypoint3_time) >= Duration(seconds=WAYPOINT_TIMEOUT * 2) # double timeout for waypoint 3 since it is the last waypoint and we want to give it more time to reach
 
-            elif is_timed_out1:
+            if is_timed_out1:
                 self.get_logger().error("Timeout reached at waypoint 2. Skipping to waypoint 3.")
                 self.waypoint2_done = True   # skip face recognition, we never reached waypoint 2
                 self.waypoint1_time = None   # stop re-triggering this branch
@@ -130,6 +128,8 @@ class MissionNode(Node):
                 self.reached_waypoint3()
                 if is_timed_out3:
                     self.get_logger().error("Timeout reached at waypoint 3. Returning to lane following.")
+                
+                return
 
             self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINTS.value))
 
@@ -158,15 +158,18 @@ class MissionNode(Node):
         self.waypoint1_time = self.get_clock().now()
         self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINTS.value))
         self.navigate_to_waypoint(2)
+        self.get_logger().info("Reached waypoint 1, navigating to waypoint 2.")
 
     def reached_waypoint2(self):
         self.state = State.AUTO_WAYPOINT2
         self.waypoint2_time = self.get_clock().now()
         self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINT2.value))
         self.start_waypoint2()
+        self.get_logger().info("Reached waypoint 2, starting face recognition.")
 
     def reached_waypoint3(self):
         self.state = State.AUTO_LANES
+        self.get_logger().info("Reached waypoint 3, returning to lane following.")
 
 # ===== helper functions ================================================================================
 
