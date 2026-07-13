@@ -3,8 +3,11 @@ import rclpy
 from rclpy.node import Node
 from rclpy.duration import Duration
 from enum import Enum
-from nav_msgs.msg import Odometry
+from nav_msgs.msg import Odometry, Path
 from std_srvs.srv import SetBool
+from rclpy.action.client import ActionClient
+from geometry_msgs.msg import PoseStamped
+from rover_interfaces.action import GenerateBezierPath #type: ignore
 from std_msgs.msg import UInt8
 
 WAYPOINT_ERROR = 1.25 # 1.5 allowed error in meters for reaching a waypoint (1.25 for safety)
@@ -14,6 +17,7 @@ WAYPOINT2_TIMEOUT = 44 # 45 seconds allowed for face recognition to complete bef
 # Topics
 LOCALIZATION_TOPIC = '/odom/global'
 FACE_RECOGNITION_SERVICE = '/face_recognition/start'
+WAYPOINT_NAVIGATION_SERVICE = 'generate_bezier_path'
 MANUAL_TOGGLE_TOPIC = '/manual_toggle'
 STATE_TOPIC = '/mission/active_state'
 
@@ -47,6 +51,11 @@ class MissionNode(Node):
         # Instantiate clients in constructor
         self.face_recognition_client = self.create_client(SetBool, FACE_RECOGNITION_SERVICE)
 
+        self.waypoint_navigation_client = self._action_client = ActionClient(self,
+                                                                GenerateBezierPath,
+                                                                WAYPOINT_NAVIGATION_SERVICE
+                                                                )
+
         self._declare_fetch_variables()
 
         self.state = State.MANUAL # Initial state is manual control for all modes
@@ -76,6 +85,7 @@ class MissionNode(Node):
                 self.state = State.AUTO_WAYPOINTS
                 self.waypoint1_time = self.get_clock().now()
                 self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINTS.value))
+                self.navigate_to_waypoint(2)
                 return
             
             self.state_topic_publisher.publish(UInt8(data=State.AUTO_LANES.value))
@@ -87,16 +97,22 @@ class MissionNode(Node):
             
             is_timed_out3 = False
             if self.waypoint3_time is not None:
-                is_timed_out3 = (self.get_clock().now() - self.waypoint3_time) >= Duration(seconds=WAYPOINT_TIMEOUT * 2) 
+                is_timed_out3 = (self.get_clock().now() - self.waypoint3_time) >= Duration(seconds=WAYPOINT_TIMEOUT * 2) # double timeout for waypoint 3 since it is the last waypoint and we want to give it more time to reach
 
-            if (self.is_at_waypoint(2) or is_timed_out1) and not self.waypoint2_done:
+            if self.is_at_waypoint(2) and not self.waypoint2_done:
                 self.state = State.AUTO_WAYPOINT2
                 self.waypoint2_time = self.get_clock().now()
                 self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINT2.value))
                 self.start_waypoint2()
                 return
+            elif is_timed_out1:
+                self.get_logger().error("Timeout reached at waypoint 2.go to waypoint 3")
+                self.waypoint3_time = self.get_clock().now()
+                self.cancel_waypoint_navigation(self.navigate_to_waypoint(3))
             elif self.is_at_waypoint(3) or is_timed_out3:
                 self.state = State.AUTO_LANES
+                if is_timed_out3:
+                    self.get_logger().error("Timeout reached at waypoint 3. Returning to lane following.")
             
             self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINTS.value))
         
@@ -105,17 +121,18 @@ class MissionNode(Node):
             if self.waypoint2_time is not None:
                 is_timed_out2 = (self.get_clock().now() - self.waypoint2_time) >= Duration(seconds=WAYPOINT2_TIMEOUT)
             
-            if is_timed_out2:
+            done = False # placeholder for future feedback as mentioned in TODO below
+            if is_timed_out2 or done:
                 self.call_face_recognition_service(False, "Stopping face recognition after 45 seconds")
                 self.waypoint2_done = True
                 self.state = State.AUTO_WAYPOINTS
                 self.waypoint3_time = self.get_clock().now()
+                self.navigate_to_waypoint(3)
                 return
-            #if WAYPOINT2 is completed: (node for servo movement to center the face isn't written yet)
+            #TODO
+            # or if WAYPOINT2 is completed: (node for servo movement to center the face isn't written yet)
             # I will wait to take feedback from this node since it is the one that will be firing the laser
             # or the node that fires the laser
-            #self.call_face_recognition_service(False, "Stopping face recognition after completion")
-            #self.state=State.AUTO_WAYPOINTS
 
             self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINT2.value))
 
@@ -160,6 +177,75 @@ class MissionNode(Node):
         distance = ((self.position.x - self.waypoints[waypoint_number-1][0]) ** 2 + 
                     (self.position.y - self.waypoints[waypoint_number-1][1]) ** 2) ** 0.5
         return distance <= WAYPOINT_ERROR
+    
+    #waypoint navigation
+    def navigate_to_waypoint(self, waypoint_number):
+        gps_path_msg = Path()
+        gps_path_msg.header.frame_id = "wgs84"
+        gps_path_msg.header.stamp = self.get_clock().now().to_msg()
+
+        waypoint = PoseStamped()
+        waypoint.pose.position.x = float(self.waypoints[waypoint_number-1][0])
+        waypoint.pose.position.y = float(self.waypoints[waypoint_number-1][1])
+        waypoint.pose.position.z = 0.0
+        gps_path_msg.poses.append(waypoint)
+
+        goal_msg = GenerateBezierPath.Goal()
+        goal_msg.raw_gps_path = gps_path_msg
+
+        self.get_logger().info("Waiting for Path Action ")
+        self._action_client.wait_for_server()
+
+        self.get_logger().info("Sending GPS Waypoint to Server...")
+        self._send_goal_future = self._action_client.send_goal_async(
+            goal_msg,
+            feedback_callback=self._waypoint_navigation_feedback_callback
+        )
+        self._send_goal_future.add_done_callback(self._waypoint_navigation_goal_response_callback)
+
+    def _waypoint_navigation_goal_response_callback(self, future):
+        goal_handle = future.result()
+        if not goal_handle.accepted:
+            self.get_logger().error("Goal REJECTED by server.")
+            return
+
+        self.get_logger().info("Goal ACCEPTED by server, waiting for result...")
+        self._get_result_future = goal_handle.get_result_async()
+        self._get_result_future.add_done_callback(self._waypoint_navigation_result_callback)
+
+    def _waypoint_navigation_feedback_callback(self, feedback_msg):
+        status = feedback_msg.feedback.status
+        self.get_logger().info(f"[Feedback State]: {status}")
+
+    def _waypoint_navigation_result_callback(self, future):
+        result = future.result().result
+        if result.success:
+            self.get_logger().info(f"[Success]: {result.message}")
+            self.get_logger().info(
+                f"Total dense points built and published: {result.total_generated_points}"
+            )
+    
+            if result.leg_start_indices:
+                self.get_logger().info(
+                    f"Leg start indices: {list(result.leg_start_indices)}"
+                )
+                self.get_logger().info(
+                    f"Leg point counts:  {list(result.leg_point_counts)}"
+                )
+        else:
+            self.get_logger().error(f"[Failed]: {result.message}")
+
+
+    def cancel_waypoint_navigation(self, callback = None):
+        if self._send_goal_future is not None:
+            goal_handle = self._send_goal_future.result()
+            if goal_handle.accepted:
+                cancel_future = goal_handle.cancel_goal_async()
+                cancel_future.add_done_callback(callback)
+            else:
+                self.get_logger().info("No active goal to cancel.")
+        else:
+            self.get_logger().info("No active goal to cancel.")
     
     # WAYPOINT 2: Face recognition Functions
     def start_waypoint2(self):        
