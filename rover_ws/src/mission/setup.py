@@ -32,7 +32,11 @@ setup(
     entry_points={
         'console_scripts': [
             "mission_node=mission.mission_node:main",
-            "test_node=mission.test_node:main"
+            "test_node=mission.test_node:main", # <-- Added missing comma here
+
+            # test nodes here if they are in the source tree:
+            'fake_bezier_action_server = mission.fake_bezier_action_server:main',
+            'gps_waypoint_simulator = mission.gps_waypoint_simulator:main',
         ],
     },
 )
