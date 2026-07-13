@@ -15,13 +15,15 @@ class OdomNode(Node):
         #parameters
         self.declare_parameter('wheel_base', 1.0) #default behaviour: assume m/s input
         self.declare_parameter('wheel_radius', 1.0)
-        self.declare_parameter('position_covariance', [0.0] * 36)
-        self.declare_parameter('twist_covariance', [0.0] * 36)
+        self.declare_parameter('position_covariance', [0.001] * 36)
+        self.declare_parameter('twist_covariance', [0.01] * 36)
         self.declare_parameter('hard_iron', [0.0, 0.0, 0.0])
         self.declare_parameter('soft_iron', [1.0, 0.0, 0.0,
                                              0.0, 1.0, 0.0,
                                              0.0, 0.0, 1.0
                                              ])
+        self.declare_parameter('linear_scale_factor', 1.0)
+        self.declare_parameter('angular_scale_factor', 1.0)
 
         self.wheel_base = self.get_parameter('wheel_base').get_parameter_value().double_value
         self.wheel_radius = self.get_parameter('wheel_radius').get_parameter_value().double_value
@@ -33,6 +35,9 @@ class OdomNode(Node):
             soft_iron_param[3:6],
             soft_iron_param[6:9]
         ])
+        self.linear_scale_factor = self.get_parameter('linear_scale_factor').get_parameter_value().double_value
+        self.angular_scale_factor = self.get_parameter('angular_scale_factor').get_parameter_value().double_value
+
         #topics
         self.encoder_pub = self.create_publisher(Odometry, '/odometry/unfiltered', 10)
         self.mag_pub = self.create_publisher(MagneticField, '/magnetic_field/calibrated', 10)
@@ -53,8 +58,8 @@ class OdomNode(Node):
         self.x = 0.0
         self.y = 0.0
         self.z = 0.0
-        self.curr_stamp = -1
-        self.prev_stamp = -1
+        self.curr_stamp = -1.0
+        self.prev_stamp = -1.0
     def encoder_callback(self, msg:WheelVel):
         self.curr_stamp = msg.header.stamp.sec + (msg.header.stamp.nanosec * 1e-9)
         
@@ -62,24 +67,14 @@ class OdomNode(Node):
             self.prev_stamp = self.curr_stamp
             self.get_logger().info('wheel base: "%f"' % float(self.wheel_base))
             self.get_logger().info('wheel radius: "%f"' % float(self.wheel_radius))
+            self.get_logger().info('linear drift: "%f"' % float(self.linear_scale_factor))
+
             return
         
         odom_matrix = self.forward_kinematics(msg.front_left, msg.front_right, msg.back_left, msg.back_right)
         self.prev_stamp = self.curr_stamp
         self.publish_encoders(odom_matrix)
         
-    def magnet_callback(self, msg:MagneticField):
-        #publish calibrated data
-        x,y,z = msg.magnetic_field.x * 10**6, msg.magnetic_field.y * 10**6, msg.magnetic_field.z * 10**6 #convert to microtesla
-        pub_msg = MagneticField()
-        pub_msg.header.stamp = self.get_clock().now().to_msg()
-        pub_msg.header.frame_id = 'base_link'
-        calibrated_field = apply_calibration(np.array([x,y,z]), self.hard_iron, self.soft_iron)
-        #note: x and y axis are rotated 90 degrees
-        pub_msg.magnetic_field.x = calibrated_field[1] * (10**-6) #convert back to tesla
-        pub_msg.magnetic_field.y = - calibrated_field[0] * (10**-6)
-        pub_msg.magnetic_field.z = calibrated_field[2] * (10**-6)
-        self.mag_pub.publish(pub_msg)
 
     def publish_encoders(self, odom_matrix):
         msg = Odometry()
@@ -115,15 +110,33 @@ class OdomNode(Node):
         angular_velocity = (v_right - v_left) * self.wheel_radius / self.wheel_base
         elapsed_time = self.curr_stamp - self.prev_stamp
         self.angle += angular_velocity * elapsed_time
-        x_dot = linear_velocity * cos(self.angle)
-        y_dot = linear_velocity * sin(self.angle)
-        z_dot = 0.0
+        x_dot = linear_velocity * cos(self.angle + (angular_velocity * elapsed_time * self.angular_scale_factor/ 2))
+        y_dot = linear_velocity * sin(self.angle + (angular_velocity * elapsed_time * self.angular_scale_factor/ 2))
         #no z_dot
-        self.x += x_dot * elapsed_time
-        self.y += y_dot * elapsed_time
+        self.x += x_dot * elapsed_time * self.linear_scale_factor
+        self.y += y_dot * elapsed_time * self.linear_scale_factor
         #no z
-        return [[self.x, self.y, self.z], [0.0, 0.0, self.angle], [x_dot, y_dot, z_dot], [0.0, 0.0, angular_velocity]] 
+        return [[self.x, self.y, self.z],
+                [0.0, 0.0, self.angle],
+                [linear_velocity, 0.0, 0.0],
+                [0.0, 0.0, angular_velocity]] 
 
+    def magnet_callback(self, msg:MagneticField):
+        #publish calibrated data
+        x,y,z = msg.magnetic_field.x * 10**6, msg.magnetic_field.y * 10**6, msg.magnetic_field.z * 10**6 #convert to microtesla
+        pub_msg = MagneticField()
+        pub_msg.header.stamp = self.get_clock().now().to_msg()
+        pub_msg.header.frame_id = 'base_link'
+        calibrated_field = apply_calibration(np.array([x,y,z]), self.hard_iron, self.soft_iron)
+        #note: x and y axis are rotated 90 degrees
+        pub_msg.magnetic_field.x = calibrated_field[1] * (10**-6) #convert back to tesla
+        pub_msg.magnetic_field.y = - calibrated_field[0] * (10**-6)
+        pub_msg.magnetic_field.z = calibrated_field[2] * (10**-6)
+        # pub_msg.magnetic_field.x = calibrated_field[0] * (10**-6) #convert back to tesla
+        # pub_msg.magnetic_field.y = calibrated_field[1] * (10**-6)
+        # pub_msg.magnetic_field.z = calibrated_field[2] * (10**-6)
+
+        self.mag_pub.publish(pub_msg)
 
 
 def main(args=None):

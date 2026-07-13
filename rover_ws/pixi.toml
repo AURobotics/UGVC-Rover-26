@@ -43,9 +43,6 @@ ros-jazzy-gz-ros2-control = "*"
 ros-jazzy-ros2-control = "*"
 ros-jazzy-ros2-controllers = "*"
 
-[pypi-dependencies]
-pyserial = ">=3.5, <4"
-
 [target.win-64.activation]
 scripts = ["install\\setup.bat"]
 
@@ -55,3 +52,4 @@ libgl-devel = "*"
 [pypi-dependencies]
 requests = ">=2.34.2, <3"
 adbutils = ">=2.12.0, <3"
+pyserial = ">=3.5, <4"
