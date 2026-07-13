@@ -11,14 +11,19 @@ class encoder_sim_node(Node):
 
         #topics
         self.publisher_ = self.create_publisher(WheelVel, '/wheel_vel', 10)
+        self.timer = self.create_timer(0.02, self.timer_callback)
         self.subscription = self.create_subscription(
             JointState,
             '/joint_states',
             self.listener_callback,
             10)
-        
+        self.current_msg = None
+    def timer_callback(self):
+        if(self.current_msg != None):
+            self.current_msg.header.stamp = self.get_clock().now().to_msg()
+            self.publish(self.current_msg)
     def listener_callback(self, msg:JointState):
-        self.publish(msg)
+        self.current_msg = msg
     def publish(self, input:JointState):
         msg = WheelVel()
         msg.header.frame_id = 'base_link'

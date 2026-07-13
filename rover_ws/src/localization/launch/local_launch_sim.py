@@ -18,6 +18,8 @@ def generate_launch_description():
             parameters=[{ #turtlebot3 parameters
                 'wheel_radius' : 0.033,
                 'wheel_base' : 0.16,
+                'linear_scale_factor': 0.82,
+                'angular_scale_factor': 0.7272
             }]
         ),
         Node(
@@ -34,4 +36,9 @@ def generate_launch_description():
             executable='encoder_sim_node',
             name='encoder_sim_node',
         ),
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'base_link', 'burger/imu_link/tb3_imu']
+        )
     ])

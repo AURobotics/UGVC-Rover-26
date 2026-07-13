@@ -6,6 +6,7 @@ from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Vector3
 import math
 import numpy as np
+from tf_transformations import euler_from_quaternion
 
 class QuaternionToEuler(Node):
     def __init__(self):
@@ -39,29 +40,6 @@ class QuaternionToEuler(Node):
         self.get_logger().info('Subscribing to: /imu/data')
         self.get_logger().info('Publishing to: /imu/euler')
 
-    def quaternion_to_euler(self, x, y, z, w):
-        """
-        Convert quaternion to Euler angles (roll, pitch, yaw)
-        Returns angles in radians
-        """
-        # Roll (x-axis rotation)
-        sinr_cosp = 2.0 * (w * x + y * z)
-        cosr_cosp = 1.0 - 2.0 * (x * x + y * y)
-        roll = math.atan2(sinr_cosp, cosr_cosp)
-        
-        # Pitch (y-axis rotation)
-        sinp = 2.0 * (w * y - z * x)
-        if abs(sinp) >= 1:
-            pitch = math.copysign(math.pi / 2, sinp)  # Use 90 degrees if out of range
-        else:
-            pitch = math.asin(sinp)
-        
-        # Yaw (z-axis rotation)
-        siny_cosp = 2.0 * (w * z + x * y)
-        cosy_cosp = 1.0 - 2.0 * (y * y + z * z)
-        yaw = math.atan2(siny_cosp, cosy_cosp)
-        
-        return roll, pitch, yaw
 
     def imu_callback(self, msg):
         """Callback function for IMU messages"""
@@ -72,8 +50,9 @@ class QuaternionToEuler(Node):
         qw = msg.orientation.w
         
         # Convert to Euler angles
-        roll, pitch, yaw = self.quaternion_to_euler(qx, qy, qz, qw)
-        
+        # roll, pitch, yaw = self.quaternion_to_euler(qx, qy, qz, qw)
+        angles = euler_from_quaternion([qx, qy, qz, qw])
+        roll, pitch, yaw = angles[0], angles[1], angles[2]
         # Convert to degrees
         roll_deg = math.degrees(roll)
         pitch_deg = math.degrees(pitch)
