@@ -423,6 +423,18 @@ class RoadFeatureDetector:
             cv2.circle(frame, (cx, cy), r, (0, 0, 255), 2)
 
         return offset_meters, frame
+    
+    def draw_circles(circles, frame):
+        for x, y, r in circles:
+            cv2.circle(frame, (x, y), r, (255, 0, 0), 2)
+        return frame
+    
+    def draw_obstacle(obstacles, frame):
+        for obstacle in obstacles:
+            x1, y1, x2, y2 = map(int, obstacle.xyxy[0])
+            cv2.rectangle(frame, (x1, y1), (x1+x2, y1+y2), (0, 0, 255))
+        return frame
+
 
     # ======================================================
     # FULL PIPELINE (standalone / debug use — draws lines + circles)

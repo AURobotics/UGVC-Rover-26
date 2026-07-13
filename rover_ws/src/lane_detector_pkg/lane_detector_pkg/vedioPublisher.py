@@ -47,7 +47,7 @@ class CameraPublisher(Node):
         package_share_dir = get_package_share_directory("lane_detector_pkg")
         vedio_path = os.path.join(package_share_dir,"videos","test3.mp4")
 
-        self.cap = cv2.VideoCapture(vedio_path)
+        self.cap = cv2.VideoCapture(2)
 
         if not self.cap.isOpened() :
             self.get_logger().error(f"Can't open {vedio_path}")
@@ -121,8 +121,8 @@ class CameraPublisher(Node):
         (255, 0, 0),   # أزرق
         -1
     )
-        cv2.imshow("Rover Test", frame)
-        cv2.waitKey(1)
+       # cv2.imshow("Rover Test", frame)
+       # cv2.waitKey(1)
 
 def main(args = None):
     rclpy.init(args = args)
