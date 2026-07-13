@@ -1,0 +1,20 @@
+lane_follower_node:
+  ros__parameters:
+    # --- Topic Configuration ---
+    pointcloud_topic: "/road_detector/pointcloud"
+
+    cmd_vel_topic: "/cmd_vel"
+    
+    # --- Vision Horizon (Meters) ---
+    min_look_ahead: 0.15                  # Pulls vision right up to the bumper
+    max_look_ahead: 3.0                  # Short window for tight toy-track corners
+    
+    # --- Kinematics & Control ---
+    target_linear_velocity: 0.15          # Slow, safe speed for a desktop robot
+    kp_steering: 1.0                      # Softened steering to prevent twitching
+    
+    # --- Track Safety Strategies ---
+    wall_hug_distance: 0.75               # Keeps it dead-center in a 0.5m lane
+    single_wall_speed_multiplier: 0.85    # Slowdown factor when missing a lane line
+
+    
