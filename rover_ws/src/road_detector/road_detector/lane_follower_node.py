@@ -42,13 +42,22 @@ class LaneFollowerNode(Node):
         
         self.lost_frames_count = 0
         self.max_coast_frames = 10  # Coast for 10 frames before giving up (adjust based on your camera FPS)
-        
+        self.stop = False
+
         self.cmd_vel_pub = self.create_publisher(Twist, vel_topic, 10)
         
         self.get_logger().info(f"Lane Follower Node initialized for Small Robot.")
         self.get_logger().info(f"Listening to: {lane_topic} | Publishing to: {vel_topic}")
 
     def cloud_callback(self, msg):
+        if self.stop:
+            self.get_logger().warn("Obstacle too close! Stopping the robot.", throttle_duration_sec=1.0)
+            stop_msg = Twist()
+            stop_msg.linear.x = 0.0
+            stop_msg.angular.z = 0.0
+            self.cmd_vel_pub.publish(stop_msg)
+            return
+        
         # Fetch current dynamic tuning parameters
         min_x = self.get_parameter('min_look_ahead').value
         max_x = self.get_parameter('max_look_ahead').value
@@ -64,6 +73,8 @@ class LaneFollowerNode(Node):
         for p in pc2.read_points(msg, field_names=("x", "y"), skip_nans=True):
             x, y = p[0], p[1]
             if min_x <= x <= max_x:
+                if abs(y) < 0.25:  # if too close STOP
+                    self.stop = True
                 if y > 0.0:
                     left_y_coords.append(y)
                 else:
