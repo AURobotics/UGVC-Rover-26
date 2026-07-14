@@ -1,0 +1,9 @@
+obstacle_node:
+  ros__parameters:    
+    safe_distance : 0.7      # meters, start slowing/steering
+    stop_distance : 0.4       # meters, hard stop distance
+    cruise_speed : 0.8         # m/s forward speed when clear
+    turn_speed : 1.0           # rad/s when avoiding
+    front_angle_deg : 60.0     # total width of "front" cone
+    scan_topic : '/scan'
+    cmd_vel_topic : '/cmd_vel'
