@@ -50,7 +50,6 @@ numpy = "*"
 [target.win-64.activation]
 scripts = ["install\\setup.bat"]
 
-
 [target.linux.dependencies]
 libgl-devel = "*"
 
