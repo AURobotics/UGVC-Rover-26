@@ -12,10 +12,10 @@ class ObstacleAvoidance(Node):
     def __init__(self):
         super().__init__('obstacle_node')
 
-        self.declare_parameter('safe_distance', 0.6)      # meters, start slowing/steering
+        self.declare_parameter('safe_distance', 0.7)      # meters, start slowing/steering
         self.declare_parameter('stop_distance', 0.4)       # meters, hard stop distance
-        self.declare_parameter('cruise_speed', 0.2)         # m/s forward speed when clear
-        self.declare_parameter('turn_speed', 0.6)           # rad/s when avoiding
+        self.declare_parameter('cruise_speed', 0.8)         # m/s forward speed when clear
+        self.declare_parameter('turn_speed', 1.0)           # rad/s when avoiding
         self.declare_parameter('front_angle_deg', 60.0)     # total width of "front" cone
         self.declare_parameter('scan_topic', '/scan')
         self.declare_parameter('cmd_vel_topic', '/cmd_vel')
@@ -38,7 +38,6 @@ class ObstacleAvoidance(Node):
             f'Obstacle avoidance node started. Listening on "{scan_topic}", '
             f'publishing to "{cmd_vel_topic}".'
         )
-
     def scan_callback(self, msg: LaserScan):
         ranges = msg.ranges
         n = len(ranges)
@@ -49,26 +48,31 @@ class ObstacleAvoidance(Node):
         angle_increment = msg.angle_increment
 
         def clean(r):
-            # Filter out inf/nan/out-of-range readings.
             if r is None or math.isnan(r) or math.isinf(r):
                 return float('inf')
             if r < msg.range_min or r > msg.range_max:
                 return float('inf')
             return r
 
-        # Index helper: convert an angle (radians, 0 = straight ahead) to array index.
         def angle_to_index(angle):
             idx = int(round((angle - angle_min) / angle_increment))
             return max(0, min(n - 1, idx))
 
         half_front = self.front_angle / 2.0
 
-        front_start = angle_to_index(-half_front)
-        front_end = angle_to_index(half_front)
-        left_start = angle_to_index(half_front)
-        left_end = angle_to_index(math.pi / 2.0)
-        right_start = angle_to_index(-math.pi / 2.0)
-        right_end = angle_to_index(-half_front)
+        # Front is centered at 180 degrees (+/- pi), which straddles the
+        # array's wraparound point (array runs angle_min -> angle_max, i.e.
+        # roughly -pi -> +pi). Split into two slices and combine.
+        edge_a = angle_to_index(math.pi - half_front)    # near end of array
+        edge_b = angle_to_index(-math.pi + half_front)   # near start of array
+
+        front_slice = list(ranges[edge_a:]) + list(ranges[:edge_b + 1])
+        front_min = min((clean(r) for r in front_slice), default=float('inf'))
+
+        right_start = angle_to_index(half_front)
+        right_end = angle_to_index(math.pi - half_front)
+        left_start = angle_to_index(-math.pi + half_front)
+        left_end = angle_to_index(-half_front)
 
         def min_in_range(a, b):
             if a > b:
@@ -76,7 +80,6 @@ class ObstacleAvoidance(Node):
             segment = [clean(r) for r in ranges[a:b + 1]]
             return min(segment) if segment else float('inf')
 
-        front_min = min_in_range(front_start, front_end)
         left_min = min_in_range(left_start, left_end)
         right_min = min_in_range(right_start, right_end)
 

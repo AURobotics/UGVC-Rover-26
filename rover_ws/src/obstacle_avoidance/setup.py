@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             "obstacle_node = obstacle_avoidance.obstacle_node:main",
+            "test_mock_node = obstacle_avoidance.test_mock_node:main",
         ],
     },
 )
