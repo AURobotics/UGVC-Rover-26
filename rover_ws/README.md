@@ -40,12 +40,3 @@ Then, run:
 ```sh
 pixi install
 ```
-
-### Devcontainer
-
-To open this project's devcontainer locally, navigate to the [monorepo root](../) and choose the configuration under [`.devcontainer/rover_ws-pixi/`](../.devcontainer/rover_ws-pixi/).
-
-You can also open the devcontainer via [GitHub Codespaces ↗️](https://github.com/codespaces/new?hide_repo_select=true&repo=1162024079&skip_quickstart=true&ref=ros/dev&devcontainer_path=.devcontainer/rover_ws-pixi/devcontainer.json).
-
-> [!WARNING]
-> Note that GitHub Codespaces will be difficult to configure for ROS2-based communication. For these tasks, please use develop locally even if using the devcontainer.
