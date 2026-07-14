@@ -49,11 +49,12 @@ class ObstacleDetector(Node):
 
         self.dist_coeffs = np.array([-4.97661814e-01, 8.05356640e+00, 9.44660547e-03, -2.64434172e-02, -4.33974203e+01], dtype=np.float64)
 
-        self.camera_height = 1.2
-        self.pitch_deg = -30
-        self.yaw_deg = 0
-        self.roll_deg = 0
+        self.camera_height = 1.2 #changed
+        self.pitch_deg = -30  #changed 
+        self.yaw_deg = 0      #changed 
+        self.roll_deg = 0      #changed 
         self.lane_detector = None  # RoadFeatureDetector, created on first frame
+        self.total_error = 0.0
 
         #smothing state
         self.prev_left_x = None
@@ -63,7 +64,7 @@ class ObstacleDetector(Node):
 
         # YOLO obstacle model
         package_share_dir = get_package_share_directory('lane_detector_pkg')
-        model_path_obstacle = os.path.join(package_share_dir, 'models', 'ModelForObstecale.pt')
+        model_path_obstacle = os.path.join(package_share_dir, 'models', 'ModelForObstacle.pt')
         self.model_obstacle = YOLO(model_path_obstacle)
 
         # subscriber
@@ -91,7 +92,7 @@ class ObstacleDetector(Node):
         )
 
         cv2.namedWindow("Live Detection Result",cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("Live Detection",640,480)
+        cv2.resizeWindow("Live Detection Result",640,480)
 
         print("[OBSTACLE_DETECTOR] Node started — call /obstacle_detector/start to start", flush=True, file=sys.stdout)
 
@@ -133,18 +134,23 @@ class ObstacleDetector(Node):
                 roll_deg=self.roll_deg,
                 image_size=(width, height)
             )
-        #-----------Display Frame------------#
+
+        #-----------Display Frame--------------#
         dispaly_frame = frame.copy()
-        frame_width = frame.shape[1]
+
         #----------- YOLO Model ---------------#
-        results = self.model_obstacle(frame,conf = 0.3)[0]
+        results = self.model_obstacle(frame,conf = 0.25)[0]
         if hasattr(RoadFeatureDetector,'draw_obstacle'):
             frame = RoadFeatureDetector.draw_obstacle(results.boxes,frame)
+
+
         # ---------- lane offset (current frame only, no memory) ----------
         edges, white_mask = self.lane_detector.detect_edges(frame)
         lines = self.lane_detector.detect_lines(edges)
         x_left_px, x_right_px, look_ahead_y = self.get_lane_data(frame, edges)
         frame = self.lane_detector.draw_lines(frame,lines)
+
+        
 
         # missing left  -> left edge of frame (x = 0)
         # missing right -> right edge of frame (x = frame_width)
@@ -152,11 +158,10 @@ class ObstacleDetector(Node):
         if x_left_px is None:
             x_left_px = 0.0
         if x_right_px is None:
-            x_right_px = float(frame_width)
+            x_right_px = float(frame.shape[1])
 
-        X_frame_center, _ = self.lane_detector.bev.pixel_to_ground(frame_width / 2.0, look_ahead_y)
-        X_left, _ = self.lane_detector.bev.pixel_to_ground(x_left_px, look_ahead_y)
-        X_right, _ = self.lane_detector.bev.pixel_to_ground(x_right_px, look_ahead_y)
+        
+
         
         obstacle_error = self.detect_obstacles(
             results,
@@ -166,10 +171,10 @@ class ObstacleDetector(Node):
             look_ahead_y
         )
 
-        lane_center_m = (X_left + X_right) / 2.0
-        lane_error = lane_center_m - X_frame_center
-
-        self.publish_float(self.lane_error_publisher, lane_error)
+        lane_center_m = (x_left_px + x_right_px) / 2.0
+        lane_error = lane_center_m - (frame.shape[1] / 2.0)
+        lane_error_percent = lane_error / (frame.shape[1] / 2.0)  
+        self.publish_float(self.lane_error_publisher, lane_error_percent)
 
         # ---------- circle (hole) offset — reuses the SAME lane edges as ----------
         # ---------- lane_error / obstacle_error, computed once above     ----------
@@ -200,7 +205,6 @@ class ObstacleDetector(Node):
 
         cv2.imshow("Live Detection Result",frame)
         cv2.waitKey(1)
-
     # ------------------------------------------------------------------
     # LANE HELPER (thin wrapper around RoadFeatureDetector)
     # ------------------------------------------------------------------
@@ -239,10 +243,8 @@ class ObstacleDetector(Node):
             bottom_x = (x1 + x2) // 2
             obstacles.append({"x1": x1, "x2": x2, "y2": y2, "bottom_x": bottom_x, "conf": confidence})
 
-        X_left, _ = self.lane_detector.bev.pixel_to_ground(x_left, y_eval)
-        X_right, _ = self.lane_detector.bev.pixel_to_ground(x_right, y_eval)
-        X_frame_center, _ = self.lane_detector.bev.pixel_to_ground(frame.shape[1] / 2.0, y_eval)
-
+        
+       
         lane_obstacles = [o for o in obstacles if x_left <= o["bottom_x"] <= x_right]
         lane_obstacles.sort(key=lambda o: o["x1"])
 
@@ -254,24 +256,25 @@ class ObstacleDetector(Node):
 
         ground_edges = []
         for o in lane_obstacles:
-            Xg1, _ = self.lane_detector.bev.pixel_to_ground(o["x1"], o["y2"])
-            Xg2, _ = self.lane_detector.bev.pixel_to_ground(o["x2"], o["y2"])
-            ground_edges.append({"start": min(Xg1, Xg2), "end": max(Xg1, Xg2)})
-
-        gaps = [{"start": X_left, "end": ground_edges[0]["start"]}]
+            ground_edges.append({"start" : o['x1'],"end" : o['x2']})
+        
+        gaps = [{"start":x_left, "end": ground_edges[0]["start"]}]
         for i in range(len(ground_edges) - 1):
             gaps.append({"start": ground_edges[i]["end"], "end": ground_edges[i + 1]["start"]})
-        gaps.append({"start": ground_edges[-1]["end"], "end": X_right})
+        gaps.append({"start": ground_edges[-1]["end"], "end": x_right})
 
         for gap in gaps:
             gap["width"] = gap["end"] - gap["start"]
 
+        
         best_gap = max(gaps, key=lambda g: g["width"])
         target_center = (best_gap["start"] + best_gap["end"]) / 2.0
-        obstacle_error = target_center - X_frame_center
+        obstacle_error = target_center - (frame.shape[1] / 2.0)
+        obstacle_error_percent = obstacle_error / (frame.shape[1] / 2.0)
+        print(f"[DEBUG] target_center={target_center:.1f} frame_center={frame.shape[1]/2:.1f} obstacle_error={obstacle_error:.2f} percent={obstacle_error_percent:.4f}", flush=True)
 
-        self.publish_float(self.obstacle_error_publisher, obstacle_error)
-        return obstacle_error
+        self.publish_float(self.obstacle_error_publisher, obstacle_error_percent)
+        return obstacle_error_percent
 
     def compute_navigation_error(self,frame,results,circles,x_left_px,x_right_px,y_eval):
 
@@ -300,12 +303,7 @@ class ObstacleDetector(Node):
         # =====================================================
 
         for x1, x2, y2 in lane_obstacles:
-
-            X1, _ = self.lane_detector.bev.pixel_to_ground(x1,y2)
-
-            X2, _ = self.lane_detector.bev.pixel_to_ground(x2,y2)
-
-            occupied.append({"start": min(X1, X2),"end": max(X1, X2)})
+            occupied.append({"start": min(x1, x2),"end": max(x1,x2)})
 
         # =====================================================
         # Convert circles to occupied intervals
@@ -319,11 +317,11 @@ class ObstacleDetector(Node):
 
                 lane_circles.append((cx, cy, r))
 
-                X1, _ = self.lane_detector.bev.pixel_to_ground(cx - r,cy)
+                #X1, _ = self.lane_detector.bev.pixel_to_ground(cx - r,cy)
 
-                X2, _ = self.lane_detector.bev.pixel_to_ground(cx + r,cy)
+                #X2, _ = self.lane_detector.bev.pixel_to_ground(cx + r,cy)
 
-                occupied.append({"start": min(X1, X2),"end": max(X1, X2)})
+                occupied.append({"start": cx - r,"end": cy + r})
 
         self.publish_bool(self.circle_detected_publisher,len(lane_circles) > 0)
 
@@ -331,11 +329,11 @@ class ObstacleDetector(Node):
         # lane boundaries
         # =====================================================
 
-        X_left, _ = self.lane_detector.bev.pixel_to_ground(x_left_px,y_eval)
+        #X_left, _ = self.lane_detector.bev.pixel_to_ground(x_left_px,y_eval)
 
-        X_right, _ = self.lane_detector.bev.pixel_to_ground(x_right_px,y_eval)
+        #X_right, _ = self.lane_detector.bev.pixel_to_ground(x_right_px,y_eval)
 
-        X_center, _ = self.lane_detector.bev.pixel_to_ground(frame.shape[1] / 2,y_eval)
+        #X_center, _ = self.lane_detector.bev.pixel_to_ground(frame.shape[1] / 2,y_eval)
 
         # =====================================================
         # Nothing detected
@@ -343,9 +341,12 @@ class ObstacleDetector(Node):
 
         if not occupied:
 
-            lane_center = (X_left + X_right) / 2.0
+            lane_center = (x_left_px + x_right_px) / 2.0
+            lane_center_error = lane_center - (frame.shape[1] / 2.0)
+            cv2.circle(frame, (int(lane_center), int(y_eval)),
+             radius=8, color=(0, 255, 0), thickness=-1)
 
-            return lane_center - X_center
+            return (lane_center_error / (frame.shape[1] / 2.0))*54.0
 
         # =====================================================
         # Merge intervals
@@ -374,7 +375,7 @@ class ObstacleDetector(Node):
 
         gaps = []
 
-        gaps.append({"start": X_left,"end": merged[0]["start"]})
+        gaps.append({"start": x_left_px,"end": merged[0]["start"]})
 
         for i in range(len(merged)-1):
 
@@ -389,7 +390,7 @@ class ObstacleDetector(Node):
 
         gaps.append({
             "start": merged[-1]["end"],
-            "end": X_right
+            "end": x_right_px
         })
 
         gaps = [
@@ -412,10 +413,12 @@ class ObstacleDetector(Node):
         )
 
         target_center = (best_gap["start"] + best_gap["end"]) / 2.0
+        cv2.circle(frame, (int(target_center), int(y_eval)),
+        radius=10, color=(0, 165, 255), thickness=-1)
+        total_error = (target_center - frame.shape[1] / 2)
+        self.total_error = (total_error / (frame.shape[1] / 2.0))*54.0
 
-        total_error = (target_center - X_center)
-
-        return total_error
+        return self.total_error
 
     # ------------------------------------------------------------------
     # SMALL PUBLISH HELPERS
@@ -439,7 +442,7 @@ class ObstacleDetector(Node):
             publisher.publish(msg)
         except Exception as e:
             self.get_logger().error(f"Failed to publish image: {e}")
-            
+
 
 def main(args=None):
     rclpy.init(args=args)

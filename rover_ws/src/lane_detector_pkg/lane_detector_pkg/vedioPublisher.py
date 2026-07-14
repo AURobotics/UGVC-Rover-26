@@ -1,7 +1,7 @@
 # use live vedio to test 
 
 Camera_topic = "camera/image/raw" #publisher
-rover_error_topic = "rover/error" #subscriber
+rover_error_topic = "total/error" #subscriber
 
 
 import os 
@@ -10,7 +10,7 @@ import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-from std_msgs.msg import Int32
+from std_msgs.msg import Float32
 from ament_index_python.packages import get_package_share_directory
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSDurabilityPolicy, QoSHistoryPolicy
 
@@ -30,7 +30,7 @@ class CameraPublisher(Node):
         self.publisher = self.create_publisher(Image,Camera_topic,qos_profile)
 
         self.error_subscribtion = self.create_subscription(
-            Int32,
+            Float32,
             rover_error_topic,
             self.error_callback,
             qos_profile
@@ -47,7 +47,7 @@ class CameraPublisher(Node):
         package_share_dir = get_package_share_directory("lane_detector_pkg")
         vedio_path = os.path.join(package_share_dir,"videos","test3.mp4")
 
-        self.cap = cv2.VideoCapture(vedio_path)
+        self.cap = cv2.VideoCapture(2)
 
         if not self.cap.isOpened() :
             self.get_logger().error(f"Can't open {vedio_path}")
@@ -121,8 +121,8 @@ class CameraPublisher(Node):
         (255, 0, 0),   # أزرق
         -1
     )
-        cv2.imshow("Rover Test", frame)
-        cv2.waitKey(1)
+       # cv2.imshow("Rover Test", frame)
+       # cv2.waitKey(1)
 
 def main(args = None):
     rclpy.init(args = args)
