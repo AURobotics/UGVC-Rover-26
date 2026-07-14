@@ -37,6 +37,7 @@ setup(
             # test nodes here if they are in the source tree:
             'fake_bezier_action_server = mission.fake_bezier_action_server:main',
             'gps_waypoint_simulator = mission.gps_waypoint_simulator:main',
+            'auto_led = mission.auto_led:main',
         ],
     },
 )
