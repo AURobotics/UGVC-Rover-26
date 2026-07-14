@@ -13,6 +13,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'models'), glob('models/*')),
+        # (os.path.join('share', package_name, 'videos'), glob('lane_detector_pkg/lane_detector_pkg/videos/*')),
         (os.path.join('share',package_name,'launch'),
         glob('launch/*.launch.py')),
     ],
@@ -31,5 +32,5 @@ setup(
         'vedioPublisher = lane_detector_pkg.vedioPublisher:main',
         #'errors_percentage = lane_detector_pkg.errors_percentage:main'
         ],
-}
+    }
 )
