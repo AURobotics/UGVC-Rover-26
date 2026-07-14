@@ -15,3 +15,12 @@ install/
 log/
 .vscode/
 *.pyc
+# Ignore colcon build artifacts at the root level
+build/
+install/
+log/
+.venv
+
+# Ignore YOLO models and weights
+*.pt
+**/models/
