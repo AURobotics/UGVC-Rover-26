@@ -1,0 +1,45 @@
+{
+    "name": "Console (Local Linux)",
+
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
+
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/console",
+
+    "containerEnv": {
+        "PIXI_CACHE_DIR": "/home/vscode/.cache/pixi",
+        "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
+        "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
+        "QT_QPA_PLATFORM": "wayland",
+        "GDK_BACKEND": "wayland"
+    },
+
+    "mounts": [
+        "source=pixi-cache,target=/home/vscode/.cache/pixi,type=volume",
+        "source=${localEnv:XDG_RUNTIME_DIR}/${localEnv:WAYLAND_DISPLAY},target=${localEnv:XDG_RUNTIME_DIR}/${localEnv:WAYLAND_DISPLAY},type=bind",
+        "source=/run/udev,target=/run/udev,type=bind,readonly",
+        "source=/dev/input,target=/dev/input,type=bind"
+    ],
+
+    "runArgs": [
+        "--security-opt",
+        "label=disable",
+        "--security-opt",
+        "no-new-privileges:false",
+        "--userns=keep-id",
+        "--group-add",
+        "keep-groups"
+    ],
+
+    "updateContentCommand": "echo 'eval \"$(pixi shell-hook)\"' >> /home/vscode/.bashrc",
+
+    "postCreateCommand": "pixi install",
+    "customizations": {
+        "vscode": {
+            "extensions": ["ms-python.python"]
+        }
+    }
+}

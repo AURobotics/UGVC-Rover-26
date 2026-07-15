@@ -31,6 +31,8 @@ setup(
             'encoder_sim_node = localization.encoder_sim_node:main',
             'euler_printer = localization.euler_printer:main',
             'calibration_node = localization.calibration_node:main',
+            'navsat_sim_node = localization.navsat_sim_node:main',
+
         ],
     },
 )
