@@ -1,0 +1,12 @@
+# Goal
+nav_msgs/Path raw_gps_path
+---
+# Result
+bool success
+int32 total_generated_points
+int32[] leg_start_indices
+int32[] leg_point_counts
+string message
+---
+# Feedback
+string status
