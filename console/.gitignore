@@ -1,15 +1,3 @@
 # pixi environments
 .pixi/*
 !.pixi/config.toml
-pixi.lock
-
-# pycache
-*__pycache__/
-
-.vscode/settings.json
-
-# colcon build
-
-build/
-install/
-log/

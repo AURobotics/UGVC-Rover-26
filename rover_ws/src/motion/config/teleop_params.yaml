@@ -1,6 +1,0 @@
-teleop_twist_keyboard:
-     ros__parameters:
-       speed: 0.5 # please change when using teleop for actual rover
-       turn: 1.0 # please change when using teleop for actual rover
-       repeat_rate: 10.0
-       key_timeout: 0.6
