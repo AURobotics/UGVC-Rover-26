@@ -38,6 +38,6 @@ def generate_launch_description():
     return LaunchDescription([
         stm_launch,
         cmd_mux_launch,
-        servo_cam_launch,
-        mission_launch,
+        # servo_cam_launch,
+        # mission_launch,
     ])

@@ -12,7 +12,9 @@ class LaneFollowerNode(Node):
         super().__init__('lane_follower_node')
         
         # --- Declare All Parameters (Small Robot Defaults) ---
-        self.declare_parameter('pointcloud_topic', '/road_detector/pointcloud')
+        self.declare_parameter('lane_topic', '/road_detector/lanes')
+        self.declare_parameter('potholes_topic', '/road_detector/potholes')
+        self.declare_parameter('obstacles_topic', '/rplidar/obstacles')
         self.declare_parameter('cmd_vel_topic', '/cmd_vel')
         
         self.declare_parameter('min_look_ahead', 0.15)
@@ -25,26 +27,37 @@ class LaneFollowerNode(Node):
         self.declare_parameter('single_wall_speed_multiplier', 0.85)
 
         # --- Fetch Topic Names ---
-        pc_topic = self.get_parameter('pointcloud_topic').value
+        lane_topic = self.get_parameter('lane_topic').value
+        potholes_topic = self.get_parameter('potholes_topic').value
+        obstacles_topic = self.get_parameter('obstacles_topic').value
         vel_topic = self.get_parameter('cmd_vel_topic').value
         
         # --- Subscribers & Publishers ---
         self.cloud_sub = self.create_subscription(
             PointCloud2,
-            pc_topic, 
+            lane_topic, 
             self.cloud_callback,
             10
         )
         
         self.lost_frames_count = 0
         self.max_coast_frames = 10  # Coast for 10 frames before giving up (adjust based on your camera FPS)
-        
+        self.stop = False
+
         self.cmd_vel_pub = self.create_publisher(Twist, vel_topic, 10)
         
         self.get_logger().info(f"Lane Follower Node initialized for Small Robot.")
-        self.get_logger().info(f"Listening to: {pc_topic} | Publishing to: {vel_topic}")
+        self.get_logger().info(f"Listening to: {lane_topic} | Publishing to: {vel_topic}")
 
     def cloud_callback(self, msg):
+        if self.stop:
+            self.get_logger().warn("Obstacle too close! Stopping the robot.", throttle_duration_sec=1.0)
+            stop_msg = Twist()
+            stop_msg.linear.x = 0.0
+            stop_msg.angular.z = 0.0
+            self.cmd_vel_pub.publish(stop_msg)
+            return
+        
         # Fetch current dynamic tuning parameters
         min_x = self.get_parameter('min_look_ahead').value
         max_x = self.get_parameter('max_look_ahead').value
@@ -60,6 +73,8 @@ class LaneFollowerNode(Node):
         for p in pc2.read_points(msg, field_names=("x", "y"), skip_nans=True):
             x, y = p[0], p[1]
             if min_x <= x <= max_x:
+                if abs(y) < 0.25:  # if too close STOP
+                    self.stop = True
                 if y > 0.0:
                     left_y_coords.append(y)
                 else:

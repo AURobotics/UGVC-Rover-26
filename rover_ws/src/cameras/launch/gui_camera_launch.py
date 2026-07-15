@@ -6,25 +6,13 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='cameras',
-            executable='camera_node',
+            executable='external_camera_node',
             name='camera1',
-            parameters=[{
-                'device_index': 2,
-                'publish_rate': 15.0,
-                'topic': '/camera1/image_raw',
-                'frame_id': 'camera1',
-            }],
-            output='screen'
-        ),
-        Node(
-            package='cameras',
-            executable='camera_node',
-            name='camera2',
             parameters=[{
                 'device_index': 4,
                 'publish_rate': 15.0,
-                'topic': '/camera2/image_raw',
-                'frame_id': 'camera2',
+                'topic': '/camera1/image_raw',
+                'frame_id': 'camera1',
             }],
             output='screen'
         ),

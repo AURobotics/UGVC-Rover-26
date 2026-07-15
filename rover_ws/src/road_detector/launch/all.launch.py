@@ -6,7 +6,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
    
-    declare_params_file = DeclareLaunchArgument(
+    declare_lane_follower_params_file = DeclareLaunchArgument(
         'params_file',
         default_value=PathJoinSubstitution([
             FindPackageShare('road_detector'),
@@ -27,15 +27,30 @@ def generate_launch_description():
         ],
     )
 
-    relay_cmd_vel = Node(
-            package='topic_tools',
-            executable='relay',
-            name='cmd_vel_relay',
-            arguments=['/cmd_vel_stamped', '/diff_drive_controller/cmd_vel']
-        )
+    declare_road_detector_params_file = DeclareLaunchArgument(
+        'params_file',
+        default_value=PathJoinSubstitution([
+            FindPackageShare('road_detector'),
+            'config',
+            'params.yaml'
+        ]),
+        description='Path to YAML parameter file'
+    )
+
+    road_detector_node = Node(
+        package='road_detector',
+        executable='road_detector_node',
+        name='road_detector',
+        output='screen',
+        emulate_tty=True,  # Better logging for debugging
+        parameters=[
+            LaunchConfiguration('params_file'),
+        ],
+    )
 
     return LaunchDescription([
-        declare_params_file,
-        lane_follower_node,
-        relay_cmd_vel
+        declare_road_detector_params_file,
+        road_detector_node,
+        declare_lane_follower_params_file,
+        lane_follower_node
     ])

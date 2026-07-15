@@ -28,7 +28,7 @@ setup(
     entry_points={
         'console_scripts': [
             "stm_node=rover_embedded.stm_node:main",
-
+            "linear_vel=rover_embedded.linear_vel:main",
         ],
     },
 )

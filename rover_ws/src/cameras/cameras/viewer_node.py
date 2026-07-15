@@ -8,7 +8,7 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDur
 
 class Viewer(Node):
     def __init__(self):
-        super().__init__('video_viewer')
+        super().__init__('viewer_node')
         self.bridge = CvBridge()
 
         qos_profile = QoSProfile(

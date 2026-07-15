@@ -19,7 +19,7 @@ class State(Enum):
 # Mission State Mapping
 STATE_MAP = {
     State.MANUAL: None,
-    State.AUTO_LANES: '/cmd_vel/lane_pid',
+    State.AUTO_LANES: '/cmd_vel',
     State.AUTO_WAYPOINTS: '/cmd_vel/waypoint',
     State.AUTO_WAYPOINT2: '/cmd_vel/waypoint',
 }
@@ -69,7 +69,7 @@ class CmdMuxNode(Node):
 
         # Subscribers
         self.create_subscription(Twist,'/cmd_vel/waypoint', self.waypoint_callback, 10)
-        self.create_subscription(Twist,'/cmd_vel/lane_pid', self.lane_pid_callback, 10)
+        self.create_subscription(Twist,'/cmd_vel', self.lane_pid_callback, 10)
         self.create_subscription(Twist,'/cmd_vel/pothole', self.pothole_callback, 10)
         self.create_subscription(Joy,'/joy', self.joy_callback, 10)
 
@@ -85,7 +85,7 @@ class CmdMuxNode(Node):
         self.latest_cmds['/cmd_vel/waypoint'] = msg
  
     def lane_pid_callback(self, msg: Twist):
-        self.latest_cmds['/cmd_vel/lane_pid'] = msg
+        self.latest_cmds['/cmd_vel'] = msg
  
     def pothole_callback(self, msg: Twist):
         self.latest_cmds['/cmd_vel/pothole'] = msg
