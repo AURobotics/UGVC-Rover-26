@@ -1,0 +1,39 @@
+road_detector:
+  ros__parameters:
+    camera_topic: "/camera/image_raw"
+    output_pointcloud_topic: "/road_detector/pointcloud"
+    output_lane_topic: "/road_detector/lanes"
+    output_potholes_topic: "/road_detector/potholes"
+    output_lane_mask_topic: "/road_detector/debug/lane_mask"
+    output_bev_topic: "/road_detector/debug/bev_image"
+    output_costmap_topic: "/road_detector/stats"
+    
+    # Camera calibration
+    camera_height: 0.09
+    pitch_deg: -75.0
+    yaw_deg: 0.0
+    roll_deg: 0.0
+    fx: 614.66257
+    fy: 614.66257
+    cx: 320.0
+    cy: 240.0
+    dist_coeffs: [0.0,0.0,0.0,0.0,0.0]
+    
+    # Detection parameters
+    min_radius: 5
+    max_radius: 200
+
+    # Ground-plane projection safety limits
+    # horizon_margin_px: extra pixels below the mathematical horizon row
+    #   to exclude, since points very close to it are numerically unstable.
+    # max_forward_range: ground points beyond this distance (meters) are
+    #   dropped as unreliable.
+    horizon_margin_px: 20
+    max_forward_range: 5.0
+    
+    # Debug Options
+    publish_debug_images: True
+    publish_performance_stats: True
+
+    # Point cloud parameters
+    max_points_per_cloud: 10000
