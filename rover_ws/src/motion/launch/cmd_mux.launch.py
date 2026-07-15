@@ -12,8 +12,8 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='motion',
-            executable='cmd_mux_node',
-            name='cmd_mux_node',
+            executable='twist_node',
+            name='twist_node',
             output='screen',
             emulate_tty=True,
             parameters=[params],

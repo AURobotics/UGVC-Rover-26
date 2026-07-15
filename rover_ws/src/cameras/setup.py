@@ -38,7 +38,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'camera_node = cameras.camera_node:main',
+            'external_camera_node = cameras.external_camera_node:main',
+            'internal_camera_node = cameras.internal_camera_node:main',
             'viewer_node = cameras.viewer_node:main',
         ],
     },

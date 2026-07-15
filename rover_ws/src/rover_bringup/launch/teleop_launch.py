@@ -49,5 +49,6 @@ def generate_launch_description():
     return LaunchDescription([
         stm_launch,
         convertor_node,
-        teleop_node,
+        # teleop_node,
+        teleop_node_fedora
     ])

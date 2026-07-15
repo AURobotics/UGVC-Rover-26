@@ -23,7 +23,15 @@ def generate_launch_description():
 
     )
 
+    linear_speed = Node(
+        package='rover_embedded',
+        executable='linear_vel',
+        name='linear_vel_node',
+        output='screen',
+    )
+
     return LaunchDescription([
         stm32_node,
-        twist_node
+        linear_speed,
+        # twist_node
     ])
