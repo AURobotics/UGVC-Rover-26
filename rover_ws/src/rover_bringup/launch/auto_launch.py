@@ -58,7 +58,7 @@ def generate_launch_description():
     # FIXED: Wrapped in IncludeLaunchDescription
     camera = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(camera_dir, 'launch', 'camera_launch.py')
+            os.path.join(camera_dir, 'launch', 'auto_camera_launch.py')
         )
     )
 
