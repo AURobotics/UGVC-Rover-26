@@ -1,0 +1,150 @@
+#ifndef MESSAGES_H
+#define MESSAGES_H
+
+#include <stdint.h>
+
+// ── Protocol constants ─────────────────────────────────────────────────
+#define PROTOCOL_SYNC_BYTE 0xFF
+#define MAX_PAYLOAD_SIZE 64
+
+// ── Message type enum ──────────────────────────────────────────────────
+// Upstream  = STM32 → ROS
+// Downstream = ROS → STM32
+enum Message_Type : uint8_t
+{
+
+    READY_MSG = 0x00,    // flow control — no payload
+    // Upstream
+    MSG_IMU = 0x01,      // 50 Hz  — quaternion + euler + accel
+    MSG_GPS = 0x02,      // 10 Hz  — lat + lon + altitude
+    MSG_ENCODERS = 0x03, // 50 Hz  — 4-wheel speeds
+    MSG_STATUS = 0x05,   // 10 Hz  — battery + current + servo + flags
+    //MSG_ANTENNA = 0x06,  // as needed — station position
+
+    // Downstream
+    MSG_CMD_VEL = 0x07,   // wheel velocities (already converted by ROS)
+    MSG_SERVO = 0x08,     // servo1 + servo2 angles
+    MSG_LASER = 0x09,     // on/off
+    MSG_MODE = 0x0A,      // 0=manual 1=autonomous
+   // MSG_HEARTBEAT = 0x14, // 1 Hz — watchdog feed
+
+    // Bidirectional
+    MSG_ACK = 0xA0, // acknowledge READY or other control msgs
+};
+
+struct __attribute__((packed)) Ready_msg
+{
+    uint8_t sync_byte;
+    uint8_t msg_type;
+};
+
+// ── Upstream payload structs ───────────────────────────────────────────
+
+struct __attribute__((packed)) IMUPayload
+{
+    // Fused orientation from BNO055 (NOT raw magnetometer)
+    uint8_t sync_byte;
+    uint8_t msg_type;
+    float q1, q2, q3, q4;            // quaternion — 16 bytes
+    float alpha, beta, Psi;          // euler angles (rad) — 12 bytes
+    float accel_x, accel_y, accel_z; // linear accel m/s² — 12 bytes
+    // Total = 40 bytes
+};
+
+struct __attribute__((packed)) GPSPayload
+{
+    uint8_t sync_byte;
+    uint8_t msg_type;
+    float latitude;            // degrees
+    float longitude;           // degrees
+    float position_covariance; // m² — required by ROS NavSatFix
+    // Total = 16 bytes
+};
+
+struct __attribute__((packed)) EncodersPayload
+{
+    // Four wheels — matches rover geometry: FL BL FR BR
+    uint8_t sync_byte;
+    uint8_t msg_type;
+	uint8_t msg_length;
+    float front_left;  // m/s
+    float back_left;   // m/s
+    float front_right; // m/s
+    float back_right;  // m/s
+    // Note: odometry computation happens in stm_node.py, not here
+};
+
+struct __attribute__((packed)) StatusPayload
+{
+    uint8_t sync_byte;
+    uint8_t msg_type;
+	uint8_t msg_length;
+    float bat_voltage_1;      // volts
+    float bat_voltage_2;      // volts
+    float motor_current[4];   // amps: FL BL FR BR
+    //float servo1_angle;       // degrees
+    //float servo2_angle;       // degrees
+    //uint8_t led_state;        // 0=off 1=on
+    //uint8_t laser_state;      // 0=off 1=on
+    //uint8_t emergency_active; // 0=normal 1=estop triggered
+    //uint8_t imu_cal[4];       // BNO055 calibration: sys gyro accel mag (0-3)
+    // Total = 44 bytes  ← fits within MAX_PAYLOAD_SIZE=64
+};
+
+/*struct __attribute__((packed)) AntennaPayload
+{
+    float longitude; // station GPS longitude
+    float latitude;  // station GPS latitude
+    // Total = 8 bytes
+};*/
+
+// ── Downstream payload structs ─────────────────────────────────────────
+
+struct __attribute__((packed)) CmdVelPayload
+{
+    // Pre-converted by ROS node from cmd_vel Twist
+    // STM32 receives wheel speeds directly — no kinematics needed here
+    uint8_t sync_byte;
+    uint8_t msg_type;
+	uint8_t msg_length;
+    float left_wheel;
+    float right_wheel;
+};
+
+struct __attribute__((packed)) ServoPayload
+{
+    uint8_t sync_byte;
+    uint8_t msg_type;
+	uint8_t msg_length;
+    float servo1_angle; // degrees
+    float servo2_angle; // degrees
+    // Total = 8 bytes
+};
+
+struct __attribute__((packed)) LaserPayload
+{
+    uint8_t sync_byte;
+    uint8_t msg_type;
+	uint8_t msg_length;
+    uint8_t status; // 0=off 1=on
+    // Total = 1 byte
+};
+
+struct __attribute__((packed)) ModePayload
+{
+    uint8_t sync_byte;
+    uint8_t msg_type;
+    uint8_t mode; // 0=manual 1=autonomous
+    // Total = 1 byte
+};
+
+struct __attribute__((packed)) HeartbeatPayload
+{
+    uint8_t sync_byte;
+    uint8_t msg_type;
+    uint8_t sequence; // increments each send — detect missed beats
+    // Total = 1 byte
+};
+
+
+#endif // MESSAGES_H
