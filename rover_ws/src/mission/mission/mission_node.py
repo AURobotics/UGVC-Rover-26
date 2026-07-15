@@ -1,4 +1,5 @@
 import sys
+import math
 import rclpy
 from rclpy.node import Node
 from rclpy.duration import Duration
@@ -9,13 +10,19 @@ from rclpy.action.client import ActionClient
 from geometry_msgs.msg import PoseStamped
 from rover_interfaces.action import GenerateBezierPath #type: ignore
 from std_msgs.msg import UInt8
+from sensor_msgs.msg import NavSatFix
 
 WAYPOINT_ERROR = 1.25 # 1.5 allowed error in meters for reaching a waypoint (1.25 for safety)
 WAYPOINT_TIMEOUT = 60 # 60 seconds allowed to reach a waypoint before timing out and returning to manual control
 WAYPOINT2_TIMEOUT = 44 # 45 seconds allowed for face recognition to complete before timing out and returning to waypoint navigation
 
+EARTH_RADIUS_M = 6_371_000.0
+# START_LAN = 
+# START_LON = 
+
 # Topics
 LOCALIZATION_TOPIC = '/odom/global'
+GPS_TOPIC = '/gps/fix'                       # raw lat/lon fix, used for waypoint distance + as path origin
 FACE_RECOGNITION_SERVICE = '/face_recognition/start'
 WAYPOINT_NAVIGATION_SERVICE = 'generate_bezier_path'
 MANUAL_TOGGLE_TOPIC = '/manual_toggle'
@@ -39,27 +46,31 @@ class MissionNode(Node):
         self.position = None
         self.orientation = None
         self.linear_vel = None
-        
+
+        self.current_lat = None
+        self.current_lon = None
+
         self.waypoint1_time = None
         self.waypoint2_time = None
         self.waypoint3_time = None
 
         self.waypoint2_done = False # waypoint2 completion flag
+        self._send_goal_future = None  # must exist before cancel_waypoint_navigation can be called
 
         self.state_topic_publisher = self.create_publisher(UInt8, STATE_TOPIC, 10)
-        
+
         # Instantiate clients in constructor
         self.face_recognition_client = self.create_client(SetBool, FACE_RECOGNITION_SERVICE)
 
-        self.waypoint_navigation_client = self._action_client = ActionClient(self,
-                                                                GenerateBezierPath,
-                                                                WAYPOINT_NAVIGATION_SERVICE
-                                                                )
+        self._action_client = ActionClient(self,
+                                            GenerateBezierPath,
+                                            WAYPOINT_NAVIGATION_SERVICE
+                                            )
 
         self._declare_fetch_variables()
 
         self.state = State.MANUAL # Initial state is manual control for all modes
-        
+
         if self.mode == Mode.AUTO:
             self.manual_toggle_server = self.create_service(
                 SetBool,
@@ -74,6 +85,13 @@ class MissionNode(Node):
             10
         )
 
+        self.gps_subscriber = self.create_subscription(
+            NavSatFix,
+            GPS_TOPIC,
+            self.gps_callback,
+            10
+        )
+
         self.create_timer(0.05, self._control_loop)
 
     def _control_loop(self):
@@ -82,45 +100,44 @@ class MissionNode(Node):
 
         elif self.state == State.AUTO_LANES:
             if self.is_at_waypoint(1):
-                self.state = State.AUTO_WAYPOINTS
-                self.waypoint1_time = self.get_clock().now()
-                self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINTS.value))
-                self.navigate_to_waypoint(2)
+                self.reached_waypoint1()
                 return
-            
+
             self.state_topic_publisher.publish(UInt8(data=State.AUTO_LANES.value))
 
         elif self.state == State.AUTO_WAYPOINTS:
             is_timed_out1 = False
-            if self.waypoint1_time is not None: 
+            # Only relevant while we're still trying to reach waypoint 2 -- once waypoint2_done
+            # is True this must stop being evaluated, otherwise it fires on every tick forever
+            # (waypoint1_time is old by the time we're heading to waypoint 3) and blocks the
+            # is_at_waypoint(3) check below from ever being reached.
+            if self.waypoint1_time is not None and not self.waypoint2_done:
                 is_timed_out1 = (self.get_clock().now() - self.waypoint1_time) >= Duration(seconds=WAYPOINT_TIMEOUT)
-            
+
             is_timed_out3 = False
             if self.waypoint3_time is not None:
                 is_timed_out3 = (self.get_clock().now() - self.waypoint3_time) >= Duration(seconds=WAYPOINT_TIMEOUT * 2) # double timeout for waypoint 3 since it is the last waypoint and we want to give it more time to reach
 
-            if self.is_at_waypoint(2) and not self.waypoint2_done:
-                self.state = State.AUTO_WAYPOINT2
-                self.waypoint2_time = self.get_clock().now()
-                self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINT2.value))
-                self.start_waypoint2()
-                return
-            elif is_timed_out1:
-                self.get_logger().error("Timeout reached at waypoint 2.go to waypoint 3")
+            if is_timed_out1:
+                self.get_logger().error("Timeout reached at waypoint 2. Skipping to waypoint 3.")
+                self.waypoint2_done = True   # skip face recognition, we never reached waypoint 2
+                self.waypoint1_time = None   # stop re-triggering this branch
                 self.waypoint3_time = self.get_clock().now()
-                self.cancel_waypoint_navigation(self.navigate_to_waypoint(3))
+                self.cancel_waypoint_navigation(lambda f: self.navigate_to_waypoint(3))
             elif self.is_at_waypoint(3) or is_timed_out3:
-                self.state = State.AUTO_LANES
+                self.reached_waypoint3()
                 if is_timed_out3:
                     self.get_logger().error("Timeout reached at waypoint 3. Returning to lane following.")
-            
+                
+                return
+
             self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINTS.value))
-        
+
         elif self.state == State.AUTO_WAYPOINT2:
-            is_timed_out2 = None
+            is_timed_out2 = False
             if self.waypoint2_time is not None:
                 is_timed_out2 = (self.get_clock().now() - self.waypoint2_time) >= Duration(seconds=WAYPOINT2_TIMEOUT)
-            
+
             done = False # placeholder for future feedback as mentioned in TODO below
             if is_timed_out2 or done:
                 self.call_face_recognition_service(False, "Stopping face recognition after 45 seconds")
@@ -136,12 +153,31 @@ class MissionNode(Node):
 
             self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINT2.value))
 
+    def reached_waypoint1(self):
+        self.state = State.AUTO_WAYPOINTS
+        self.waypoint1_time = self.get_clock().now()
+        self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINTS.value))
+        self.navigate_to_waypoint(2)
+        self.get_logger().info("Reached waypoint 1, navigating to waypoint 2.")
+
+    def reached_waypoint2(self):
+        self.state = State.AUTO_WAYPOINT2
+        self.waypoint2_time = self.get_clock().now()
+        self.state_topic_publisher.publish(UInt8(data=State.AUTO_WAYPOINT2.value))
+        self.start_waypoint2()
+        self.get_logger().info("Reached waypoint 2, starting face recognition.")
+
+    def reached_waypoint3(self):
+        self.state = State.AUTO_LANES
+        self.get_logger().info("Reached waypoint 3, returning to lane following.")
+
 # ===== helper functions ================================================================================
 
+# ===== Initialize
     def _declare_fetch_variables(self):
         self.declare_parameter('mode', 0)  # 0: manual, 1: auto
         mode_value = self.get_parameter('mode').get_parameter_value().integer_value
-        
+
         # in case of manual mode, State = MANUAL and no switching
         if mode_value not in [0, 1]:
             self.get_logger().error("Invalid mode parameter. Must be 0 (manual) or 1 (auto).")
@@ -152,43 +188,116 @@ class MissionNode(Node):
         self.mode = Mode.AUTO
 
         # waypoint coordinates (only used in auto mode)
-        self.declare_parameter('waypoint1.x', 0.0)
-        self.declare_parameter('waypoint1.y', 0.0)
-        self.declare_parameter('waypoint2.x', 1.0)
-        self.declare_parameter('waypoint2.y', 1.0)
-        self.declare_parameter('waypoint3.x', 2.0)
-        self.declare_parameter('waypoint3.y', 2.0)
-        
-        self.waypoints = [
-            (self.get_parameter('waypoint1.x').value, self.get_parameter('waypoint1.y').value),
-            (self.get_parameter('waypoint2.x').value, self.get_parameter('waypoint2.y').value),
-            (self.get_parameter('waypoint3.x').value, self.get_parameter('waypoint3.y').value)
-        ]
+        self.waypoints = {}
+
+        # Loop over 1, 2, 3 to match the exact names in your YAML file (wp1, wp2, wp3)
+        for wp in range(1, 4):
+            # 1. Properly declare the flattened parameters based on YAML keys (waypoints.1.latitude, etc.)
+            self.declare_parameter(f'waypoints.wp{wp}.latitude', 0.0)
+            self.declare_parameter(f'waypoints.wp{wp}.longitude', 0.0)
+
+            # 2. Shift the dictionary storage index back by 1 (e.g., waypoint 1 stores at index 0)
+            storage_index = wp - 1
+
+            self.waypoints[storage_index] = {
+                'latitude': self.get_parameter(f'waypoints.wp{wp}.latitude').value,
+                'longitude': self.get_parameter(f'waypoints.wp{wp}.longitude').value
+            }
+
+# ===== waypoint navigation helpers
 
     def odom_callback(self, msg: Odometry):
         self.position = msg.pose.pose.position
         self.orientation = msg.pose.pose.orientation
         self.linear_vel = msg.twist.twist.linear
 
+    def gps_callback(self, msg: NavSatFix):
+        self.current_lat = msg.latitude
+        self.current_lon = msg.longitude
+
+    @staticmethod
+    def _haversine_distance(lat1, lon1, lat2, lon2):
+        """Great-circle distance in meters between two lat/lon points."""
+        phi1, phi2 = math.radians(lat1), math.radians(lat2)
+        dphi = math.radians(lat2 - lat1)
+        dlambda = math.radians(lon2 - lon1)
+        a = math.sin(dphi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0) ** 2
+        return 2 * EARTH_RADIUS_M * math.asin(math.sqrt(a))
+
     def is_at_waypoint(self, waypoint_number):
-        if self.position is None:
+        """True if the robot's current GPS fix is within WAYPOINT_ERROR meters of the
+        given waypoint (1-indexed, matching self.waypoints keys 0..2)."""
+        if self.current_lat is None or self.current_lon is None:
             return False
-        
-        distance = ((self.position.x - self.waypoints[waypoint_number-1][0]) ** 2 + 
-                    (self.position.y - self.waypoints[waypoint_number-1][1]) ** 2) ** 0.5
-        return distance <= WAYPOINT_ERROR
+
+        target = self.waypoints[waypoint_number - 1]
+        dist = self._haversine_distance(
+            self.current_lat, self.current_lon,
+            target['latitude'], target['longitude']
+        )
+        return dist <= WAYPOINT_ERROR
+
+    # def gps_to_xy(self, lat, lon, origin_lat, origin_lon):
+    #     """
+    #         Convert GPS coordinates to local Cartesian coordinates (x, y) in meters.
+    #         x is the Easting (longitude), y is the Northing (latitude).
+    #     """
+    #     phi1, phi2 = math.radians(origin_lat), math.radians(lat)
+    #     dphi = math.radians(lat - origin_lat)
+    #     dlambda = math.radians(lon - origin_lon)
+
+    #     a = math.sin(dphi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0) ** 2
+    #     c = 2 * math.asin(math.sqrt(a))
+    #     distance = EARTH_RADIUS_M * c
+
+    #     # Calculate bearing from origin to target
+    #     y = math.sin(dlambda) * math.cos(phi2)
+    #     x = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(dlambda)
+    #     bearing = math.atan2(y, x)
+
+    #     # Convert polar coordinates (distance, bearing) to Cartesian (x, y)
+    #     x_local = distance * math.cos(bearing)
+    #     y_local = distance * math.sin(bearing)
+
+    #     return x_local, y_local
     
+    # def is_at_waypoint(self, waypoint_number):
+    #     """True if the robot's current GPS fix is within WAYPOINT_ERROR meters of the
+    #     given waypoint (1-indexed, matching self.waypoints keys 0..2)."""
+    #     if self.current_lat is None or self.current_lon is None:
+    #         return False
+
+    #     target = self.waypoints[waypoint_number - 1]
+    #     x_local, y_local = self.gps_to_xy(
+    #         START_LAT, START_LON,
+    #         target['latitude'], target['longitude']
+    #     )
+    #     distance = ((x_local-self.position.x)**2 + (y_local-self.position.y)**2)**0.5  # Calculate Euclidean distance in local frame
+    #     return distance <= WAYPOINT_ERROR
+
     #waypoint navigation
     def navigate_to_waypoint(self, waypoint_number):
+        if self.current_lat is None or self.current_lon is None:
+            self.get_logger().error("No GPS fix yet -- cannot start waypoint navigation.")
+            return
+
         gps_path_msg = Path()
         gps_path_msg.header.frame_id = "wgs84"
         gps_path_msg.header.stamp = self.get_clock().now().to_msg()
 
-        waypoint = PoseStamped()
-        waypoint.pose.position.x = float(self.waypoints[waypoint_number-1][0])
-        waypoint.pose.position.y = float(self.waypoints[waypoint_number-1][1])
-        waypoint.pose.position.z = 0.0
-        gps_path_msg.poses.append(waypoint)
+        # The Bezier server needs >= 2 points: the current position (used as the local-frame
+        # origin) and the target waypoint. Sending only the target gets the goal REJECTED.
+        start_pose = PoseStamped()
+        start_pose.pose.position.x = float(self.current_lat)
+        start_pose.pose.position.y = float(self.current_lon)
+        start_pose.pose.position.z = 0.0
+        gps_path_msg.poses.append(start_pose)
+
+        target_pose = PoseStamped()
+        target_pose.pose.position.x = float(self.waypoints[waypoint_number - 1]['latitude'])
+        target_pose.pose.position.y = float(self.waypoints[waypoint_number - 1]['longitude'])
+        target_pose.pose.position.z = 0.0
+        gps_path_msg.poses.append(target_pose)
 
         goal_msg = GenerateBezierPath.Goal()
         goal_msg.raw_gps_path = gps_path_msg
@@ -224,7 +333,7 @@ class MissionNode(Node):
             self.get_logger().info(
                 f"Total dense points built and published: {result.total_generated_points}"
             )
-    
+
             if result.leg_start_indices:
                 self.get_logger().info(
                     f"Leg start indices: {list(result.leg_start_indices)}"
@@ -232,23 +341,26 @@ class MissionNode(Node):
                 self.get_logger().info(
                     f"Leg point counts:  {list(result.leg_point_counts)}"
                 )
+            
+            self.reached_waypoint2()
+            
         else:
             self.get_logger().error(f"[Failed]: {result.message}")
 
+    def cancel_waypoint_navigation(self, callback=None):
+        if self._send_goal_future is None or not self._send_goal_future.done():
+            self.get_logger().info("No active goal to cancel.")
+            return
 
-    def cancel_waypoint_navigation(self, callback = None):
-        if self._send_goal_future is not None:
-            goal_handle = self._send_goal_future.result()
-            if goal_handle.accepted:
-                cancel_future = goal_handle.cancel_goal_async()
-                cancel_future.add_done_callback(callback)
-            else:
-                self.get_logger().info("No active goal to cancel.")
+        goal_handle = self._send_goal_future.result()
+        if goal_handle.accepted:
+            cancel_future = goal_handle.cancel_goal_async()
+            cancel_future.add_done_callback(callback if callback is not None else (lambda f: None))
         else:
             self.get_logger().info("No active goal to cancel.")
-    
-    # WAYPOINT 2: Face recognition Functions
-    def start_waypoint2(self):        
+
+# ===== WAYPOINT 2: Face recognition Functions
+    def start_waypoint2(self):
         self.call_face_recognition_service(True, "Starting face recognition for waypoint 2")
 
     def call_face_recognition_service(self, state: bool, reason: str = ""):
@@ -271,6 +383,8 @@ class MissionNode(Node):
         except Exception as e:
             self.get_logger().error(f"Service call failed: {e}")
 
+# ===== Manual Toggle Service Callback
+
     def manual_toggle_callback(self, request, response):
         if request.data:
             self.state = State.MANUAL
@@ -288,6 +402,7 @@ class MissionNode(Node):
                 response.message = "Already in autonomous mode"
                 self.get_logger().info("Already in autonomous mode")
         return response
+
 
 def main(args=None):
     rclpy.init(args=args)

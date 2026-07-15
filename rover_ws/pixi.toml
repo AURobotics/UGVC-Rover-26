@@ -42,6 +42,10 @@ ros-jazzy-cv-bridge = ">=4.1.0,<5"
 ros-jazzy-gz-ros2-control = "*"
 ros-jazzy-ros2-control = "*"
 ros-jazzy-ros2-controllers = "*"
+# cv dependencies
+ultralytics = "*"
+torchvision = "=0.25"
+numpy = "*"
 
 [target.win-64.activation]
 scripts = ["install\\setup.bat"]
@@ -52,3 +56,4 @@ libgl-devel = "*"
 [pypi-dependencies]
 requests = ">=2.34.2, <3"
 adbutils = ">=2.12.0, <3"
+pyserial = ">=3.5, <4"

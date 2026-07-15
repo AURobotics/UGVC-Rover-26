@@ -37,7 +37,15 @@ def generate_launch_description():
         ],
     )
 
+    auto_led_node = Node(
+        package='mission',
+        executable='auto_led',
+        name='auto_led',
+        output='screen',
+    )
+
     return LaunchDescription([
         declare_params_file,
         mission_node,
+        auto_led_node,
     ])

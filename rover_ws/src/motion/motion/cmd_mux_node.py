@@ -112,10 +112,6 @@ class CmdMuxNode(Node):
         # MANUAL: compute v/ω from joystick axes
         if self.state == State.MANUAL:
             if self.joy_msg is None:
-                self.get_logger().warn(
-                    'MANUAL state but no joy message received, outputting zero.',
-                    throttle_duration_sec=1.0
-                )
                 return 0.0, 0.0
             # Joy timeout:
             # Check if joy message is stale (>0.5s old)
@@ -142,10 +138,10 @@ class CmdMuxNode(Node):
         if topic is not None:
             cmd = self.latest_cmds.get(topic)
             if cmd is None:
-                self.get_logger().warn(
-                    f'{self.state.name} state but no command received on {topic}, outputting zero.',
-                    throttle_duration_sec=1.0
-                )
+                # self.get_logger().warn(
+                #     f'{self.state.name} state but no command received on {topic}, outputting zero.',
+                #     throttle_duration_sec=1.0
+                # )
                 return 0.0, 0.0
             return cmd.linear.x, cmd.angular.z
 
