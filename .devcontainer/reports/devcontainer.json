@@ -1,0 +1,25 @@
+{
+    "name": "Reports (MiKTeX Basic)",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/reports",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:latest": {
+            "configureZshAsDefaultShell": true,
+            "username": "miktex"
+        }
+    },
+    "remoteUser": "miktex",
+    "mounts": [
+        "source=miktex-packages-cache,target=/var/lib/miktex,type=volume"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "James-Yu.latex-workshop"
+            ]
+        }
+    },
+    "postCreateCommand": "bash /workspaces/${localWorkspaceFolderBasename}/.devcontainer/reports/post-install.sh"
+}

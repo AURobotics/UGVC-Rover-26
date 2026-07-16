@@ -1,0 +1,855 @@
+\documentclass[12pt,a4paper,twocolumn]{article}
+\usepackage{preamble} % all preamble code is located in preamble.sty
+\usepackage{microtype}
+\hyphenpenalty=10
+
+\begin{document}
+\pagenumbering{gobble}  
+\includepdf[]{assets/cover.pdf} 
+
+\newpage
+
+\title{Rover Technical Documentation}
+\author{AU-Robotics}
+
+\renewcommand{\contentsname}{}
+
+
+
+\newcommand{\university}{\textbf{Alexandria University\\Faculty of Engineering}}
+\newcommand{\teamname}{\textbf{Alexandria University Robotics}}
+\newcommand{\vehiclename}{\textbf{Rover Name: Phoenix}}
+\newcommand{\leadername}{\textbf{Team Leader: Youssef Samy}}
+\newcommand{\email}{\textbf{Email: office.youssefkassem@gmail.com }}
+
+\begin{titlepage}
+    \centering
+    {\LARGE \university \par}
+    \vspace{0.3cm}
+    
+    {\Large \teamname \par}
+    \vspace{0.1cm}
+    
+    {\Large \vehiclename \par}
+    \vspace{0.3cm}
+    
+    \includegraphics[width=0.7\textwidth]{assets/Rover.png} 
+
+    {\large \leadername \par}
+    {\large \email \par}
+
+    {\large \today \par}
+\section*{Contents}
+\begin{multicols}{2}
+    \tableofcontents
+\end{multicols}
+
+\end{titlepage}
+
+\newpage
+\pagenumbering{arabic}   % Restart page numbers
+\setcounter{page}{1}     % Explicitly set page number to 1
+\section{Introduction}
+
+\subsection{Overview}
+
+Founded by a group of engineering students at Alexandria University, our team was formed with the vision of applying theoretical knowledge to real-world robotics challenges through a collaborative, hands-on approach.
+
+We are proudly participating in the \textbf{International Competition of the Military Technical College: Unmanned Ground Vehicle Challenge of 2026 (UGVC)}.
+We aim to strengthen our experience with reliable rover technologies and produce a better performing rover compared to our attempt last year.
+
+\subsection{Team Organization}
+
+Our team is organized into four core technical departments: \textbf{Software}, \textbf{Firmware}, \textbf{Hardware}, and \textbf{Mechanical}.
+Each department is led by a Head and supported by a Vice Head and a dedicated team of engineers. This structure ensures clear task distribution, streamlined communication, and high-performance coordination across disciplines.
+
+\textbf{Executive Board:}
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item \textbf{Habiba Abdulhameed} -- Supervisor \& COO
+    \item \textbf{Ahmad Zaki} (4th Year) -- CEO
+    \item \textbf{Youssef Samy} (3rd Year) -- CTO
+    \item \textbf{Shahd Yasser} (4th Year) -- CFO
+\end{itemize}
+
+\textbf{Software Team:}
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item \textbf{Head:} Abdelaziz Islam (3rd Year)
+    \item \textbf{Vice Head:} Mohamed ElTahhan (3rd Year)
+    \item \textbf{Team Members:}
+    \begin{itemize}
+        \setlength{\itemsep}{1pt}
+        \setlength{\parskip}{0pt}
+        \setlength{\parsep}{0pt}
+        \item Yahya Hussein (2nd Year)
+        \item Yassin Awad (2nd Year)
+        \item Nada Osama (2nd Year)
+        \item Yassin Salhin (3rd Year)
+        \item Yassin Ezzat (4th Year)
+        \item Mohab Tantawy (3rd Year)
+    \end{itemize}
+\end{itemize}
+
+\textbf{Firmware Team:}
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item \textbf{Head:} Ahmed Motawe (3rd Year)
+    \item \textbf{Vice Head:} Rowan Mokhtar (4th Year)
+    \item \textbf{Team Members:}
+    \begin{itemize}
+        \setlength{\itemsep}{1pt}
+        \setlength{\parskip}{0pt}
+        \setlength{\parsep}{0pt}
+        \item Ahmed Elmasry (3rd Year)
+        \item Youssra Farghaly (2nd Year)
+        \item Dania Ahmed (4th Year)
+        \item Abdulrahman Khaled (2nd Year)
+        \item Zeyad Ayman (3rd Year)
+        \item Abdullah Kassem (2nd Year)
+    \end{itemize}
+\end{itemize}
+
+\textbf{Hardware Team:}
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item \textbf{Head:} Asser Maged (3rd Year)
+    \item \textbf{Vice Head:} Youssef Nasser (2nd Year)
+\end{itemize}
+
+\textbf{Mechanical Team:}
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item \textbf{Head:} Khaled Gado (4th Year)
+    \item \textbf{Team Members:}
+    \begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+        \item Alaa Hossam (3rd Year)
+        \item Seif ul Islam (4th Year)
+        \item Mohamed Hawash (3rd Year)
+    \end{itemize}
+\end{itemize}
+
+\section{Design Process}
+
+\subsection{Requirement Definition}
+
+Aided by our prior experience and knowledge of constraints, it was identified that the design must:
+
+\begin{itemize}
+    \setlength{\itemsep}{1.2pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item Withstand impacts from rocky and sandy terrain
+    \item Maintain traction and stability during sharp turns
+    \item Be manufacturable using accessible local resources
+    \item Have zero-error emergency access mechanisms
+    \item Have responsive navigation via performant compute
+\end{itemize}
+
+\subsection{Software Tools}
+
+The rover's design and development followed an iterative, modular, prototype-aided, test-driven approach.
+The following software suite that allowed testing, simulation, design and telemetry plotting was used:
+
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item \textbf{Gazebo + RViz:} For simulating sensors, testing navigation, and visual debugging
+    \item \textbf{MATLAB + Simulink:} For control system design, PID tuning, and motor modeling using the System Identification Toolbox
+    \item \textbf{OpenCV + YOLO:} For all computer vision-based modules including lane, obstacle, and pothole detection
+    \item \textbf{Git Monorepo:} For collaborative version control and agile task tracking
+    \item \textbf{Docker \& Pixi:} Used to standardize development environments across the software team
+    \item \textbf{Python (pySerial, adbutils, Qt6):} For serial communication, sensor parsing, and real-time plotting during testing
+\end{itemize}
+
+This toolset enabled parallel development across subsystems.
+
+\subsection{Budget Management}
+Phoenix was designed within a tightly constrained budget. Chosen components had to be reliable in a cost-effective way. Our budgeting practices included:
+
+\begin{itemize}
+    \item \textbf{Modular PCBs:} Separated logic, power, and motor
+    boards for reusability and easier debugging
+    \item \textbf{Software Spending:} Leveraged ROS 2, Gazebo, OpenCV, along with MATLAB and Solidworks with student licenses
+    \item \textbf{Component prioritization:} Focused spending on mission-critical components like IMU (\texttt{BNO055}), GPS (\texttt{NEO-6M}), and motor encoders
+    \item \textbf{Efficient power delivery:} Dual battery packs (2x12V in series) with DC-DC buck converters ensured safe power distribution without needing expensive power modules
+    \item \textbf{Local sourcing \& salvaging:} Some structural and passive components were recycled from past projects or obtained from local vendors at reduced cost
+    \item \textbf{Contingency Planning:} $\approx 10\%$ of the budget was reserved for hardware replacements due to risk of burnouts during testing
+\end{itemize}
+
+All financials and payments were tracked using shared spreadsheets with saved history for tracking iterations and pricing fluctuations.
+
+\subsection{Safety Measures}
+
+Safety was a core principle in all aspects and stages of design.
+
+\paragraph{Mechanical Safety:}
+
+\begin{itemize}
+    \item No exposed sharp edges
+\end{itemize}
+
+\paragraph{Hardware Safety:}
+
+\begin{itemize}
+    \item Mechanical E-Stop: A hardwired emergency stop switch connected to the power board, cutting off motor power instantly
+    \item Wireless Kill Switch: Implemented using NRF24L01 module. If signal is received, it ets motor speed to zero
+    \item Power Filtering: Voltage regulators and filtering capacitors were integrated to protect sensitive electronics from ripple and noise
+    \item Voltage Scaling for Monitoring: ADCs only read scaled battery values using precision resistive dividers to avoid damage
+    \item Protection Components: fuses to prevent overcurrent; flyback diodes to prevent backwards EMF; Zener diodes to prevent overvoltage
+\end{itemize}
+
+\paragraph{Software Safety:}
+
+\begin{itemize}
+    \item Status Feedback Loop: All critical systems (battery, IMU, navigation mode) are monitored and reported to the GUI. Warnings are issued if thresholds are exceeded or sensors are unhealthy
+    \item Command Timeout: Motors automatically stop if no valid command is received within a certain timeframe
+    \item Mode Isolation: Manual mode overrides all autonomous actions to ensure immediate user control in unsafe scenarios
+    \item USB CDC \& Safety: Keeps communication robust and reduces latency to ensure integrity in command dispatch. Allows swift recovery on link-loss, and stopping motors while disconnected
+\end{itemize}
+
+\section{Technical Innovation}
+
+\subsection{Mechanical Innovations}
+\label{sec:mechanical-innovations} 
+\paragraph{Rocker-Bogie Suspension Mechanism}
+A key design decision for this year's rover was the adoption of a fully passive Rocker-bogie suspension system, consciously opting against conventional active suspension components. While the Rocker-Bogie mechanism itself originates from NASA's Mars rover program, its selection over a more conventional suspension approach was a deliberate engineering decision made after careful analysis of the competition's specific terrain requirements. This choice was driven by several converging factors:
+
+\begin{itemize}
+\item \textbf{Simplicity and reliability:} Fewer moving parts reduce the number of potential failure points that are common in traditional suspension systems.
+\item \textbf{Mass optimization:} Eliminating shock absorbers and springs removes significant parasitic weight, improving battery life and maneuverability without sacrificing stability.
+\item \textbf{Terrain conformity and traction:} The geometry inherently maintains ground contact for all six wheels, even when scaling obstacles equal to or larger than the wheel radius.
+\item \textbf{Cost and manufacturing complexity:} Reduced material cost relative to active systems and manufacturing complexity, while simplifying testing and calibration.
+\end{itemize}
+
+\subsection{Software Innovations}
+
+\paragraph{Health Monitor with GUI Feedback}
+A self-check system continuously monitors battery voltage, IMU calibration, and control modes.
+Alerts are pushed live to the GUI, offering real-time insight and fault warnings similar to automotive CAN systems.
+
+\paragraph{Rover-Seeking Router}
+Using GPS coordinates and heading of each of the rover and the router station-side, an automated servo motor points the router at the rover by rotating the pole that holds the router.
+
+\paragraph{Dual-Layer Sensor Fusion}
+We implemented a two-stage UKF architecture: a primary filter fuses IMU and wheel encoders for driftresistant local estimation, while a secondary UKF integrates GPS via \texttt{navsat\_transform} for long-term accuracy.
+This hybrid design provides short-term responsiveness and global consistency.
+
+\paragraph{Interactive Debug Console}
+An embedded console supports real-time telemetry, command input, and live reconfiguration of controller parameters.
+A debug policy ensures safe activation of print hooks without interrupting real-time execution, supporting in-field diagnostics and tuning.
+
+\paragraph{Embedded Autotuning and System ID}
+Motor controllers perform real-time system identification using encoder logs, with MATLAB used to model transfer functions and autotune PID gains.
+The tuned parameters are flashed to the MCU, reducing manual effort and improving control stability.
+
+\textbf{ROS $ \leftrightarrow $ Embedded Abstraction}
+A stable CDC USB protocol bridges ROS 2 and \texttt{STM32} microcontroller.
+Messages are parsed asynchronously, and embedded nodes implement a minimal ROS-like structure.
+This enables scalable, modular communication resembling DDS pub/sub over serial.
+
+\textbf{Custom Messaging System with Flow Control}
+A modular, RTOS-compatible messaging system was developed with software flow control, hardware parity checks, and per-port mutex protection.
+
+\textbf{Angle-Constrained B\'ezier Planner}
+The B\'ezier path planner was extended to support heading constraints at start and end points, enabling smoother and curvature-limited paths. By planning over ($x,y,\theta$) state vectors, the system supports tighter turns and better integration with controllers like Pure Pursuit.
+
+
+\section{Mechanical Design}
+
+The mechanical design followed a small set of integral principles -- the rover should be durable, robust, spaceious and internally stable. Portability and ease of modification were prioritized over strict modularity.
+
+\subsection{Frame Design}
+The rover frame was designed in compliance with UGVC competition dimensional constraints (90--200 cm length, 60--120 cm width, 120 cm max height), with a focus on modularity, weight optimization, and ease of assembly.
+The primary structural skeleton is constructed from 20$\times$20mm aluminum V-slot profiles, with the profiles' T-slot geometry enabling rapid assembly and adjustment using flat nuts and extrusion hardware which proved essential during prototyping and iterative testing. This choice provides:
+
+\begin{itemize}
+\item Structural adaptability \& rigidity
+\item Modular subsystem mounting \& repositioning without requiring a complete structural redesign
+\item Simplified maintenance and inspection, allowing rapid access to internal components
+\item Greater internal volume for mounting critical components
+\item Balanced weight distribution across the wheels, improving stability during motion
+\end{itemize}
+
+The frame was modeled in SolidWorks as shown in Figure \ref{fig:frame-cad} with mounting provisions integrated directly into the design for motors, suspension arms, electronics enclosures, batteries, and control modules. 
+Finite Element Analysis (FEA) was performed in SolidWorks to validate the structural integrity of the frame under anticipated mechanical loads, confirming minimal deflection and a sufficient safety factor.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{assets/frame_1.jpeg}
+    \caption{Frame CAD Model}
+    \label{fig:frame-cad}
+\end{figure}
+\subsection{Rocker Bogie Suspension}
+The core of the rover's mobility system is based on the Rocker-Bogie mechanism, a passive suspension architecture selected for its reliability and terrain-handling advantages (Section~\ref{sec:mechanical-innovations}).\\
+The system's architecture features a main rocker arm on each side, linked via a differential bar. Each rocker arm is articulated to a rear bogie carrying two wheels, with the front wheel mounted directly to the rocker arm itself as shown in figure \ref{fig:rocker-bogie}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{assets/rocker_bogie_1.jpeg}
+    \caption{Rocker-Bogie Suspension Mechanism}
+    \label{fig:rocker-bogie}
+\end{figure}
+This articulation allows each wheel to adapt independently to variations in the ground plane, maintaining continuous ground contact across uneven terrain.
+
+\subsection{Material Selection}
+\paragraph{Main Frame Material}
+The primary structural skeleton of the chassis was constructed using 20$\times$20mm aluminum V-slot profiles.
+\subsection{Manufacturing and Assembly}
+\paragraph{Fabrication Methods}
+Two primary fabrication methods were used: laser cutting and hydraulic V-bending.
+\begin{enumerate}
+    \item \textbf{Laser Cutting:} was  used on 6~mm aluminum sheets for components requiring tight tolerances and intricate geometries, minimizing heat-affected zones (HAZ) and ensuring repeatability. Components fabricated via laser cutting include:
+\begin{itemize}
+\item \textbf{Gears:} Precision-cut profile teeth for smooth engagement and minimal backlash.
+\item \textbf{Suspension links:} Structural links withstanding dynamic operational loads with precise geometric alignment.
+\item \textbf{Wheel couplings:} Interface hubs bridging drive shafts to wheel assemblies.
+\end{itemize}
+\item \textbf{Hydraulic V-bending:} was used for components requiring multi-planar rigidity without the weight or failure points of welding, including the main chassis brackets and structural reinforcement plates.
+%  Bend allowances and K-factors were calculated during the CAD phase to account for material springback.
+\end{enumerate}
+
+\paragraph{Assembly Process}
+\begin{enumerate}
+\item \textbf{Main frame assembly:} Chassis skeleton assembled from V-slot profiles, joined with corner brackets and gussets, fasteners threaded into flat nuts within the V-grooves. Frame verified square before final torqueing.
+\item \textbf{Suspension linkage:} Deep groove ball bearings press-fit into laser-cut suspension links, mounted using threaded rod pivot axles secured with locking hardware and spacers.
+\item \textbf{Wheel hub integration:} Bearing blocks mounted to suspension uprights; drive shafts inserted through bearings; wheel couplings and gears fixed onto shafts.
+\end{enumerate}
+
+\subsection{Laser Pointer}
+The laser pointer is mounted on a 2-degree-of-freedom (2-DoF) pan-tilt gimbal, moving independently along a pan axis (left/right) and a tilt axis (up/down) as shown in Figure \ref{fig:laser-pointer}. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\linewidth]{assets/laser_pointer.png}
+    \caption{Laser Pointer Pan-Tilt Gimbal}
+    \label{fig:laser-pointer}
+\end{figure}
+
+The gimbal is designed to be lightweight, compact, and capable of precise angular positioning for accurate laser pointing.
+\paragraph{Actuation}
+Both axes are actuated by \textbf{MG996R} high-torque servos. 
+% Each servo has a 25-tooth spline output, a 180\textdegree{} rotation range, and delivers approximately 9.4~kg$\cdot$cm torque at 4.8~V.
+Motor brackets attach across multiple arms of the servos' stock 6-arm plastic horns to distribute torsional load and prevent stripping under sudden stops.
+\paragraph{Bracket Structure \& Manufacturing}
+The pan-axis servo forms the base, carrying the combined weight of the tilt servo, brackets, and laser via a recessed bracket secured at four points on the servo horn. The tilt-axis laser holder uses a reinforced single-side cantilever mount to resist deflection under the laser's weight.
+Brackets are 3D-printed via FDM using PLA filament, with load-bearing walls held to a minimum 4~mm thickness to prevent layer delamination under high-speed movement.
+
+\pagebreak{}
+\section{Electronic \& Power Design}
+\subsection{Main Control Board}
+The main board serves as the central unit integrating the components required for navigation, communication, and control, built around an STM32F401RCT6 (ARM Cortex-M4) microcontroller for its real-time performance and wide industry adoption.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\columnwidth]{assets/main_board.png}
+\hfill
+\includegraphics[width=0.48\columnwidth]{assets/main_board_2.png}
+\caption{3D render and PCB layout of the main control board.}
+\label{fig:main-board}
+\end{figure}
+
+\paragraph{Power Management and Protection}
+The board provides 5~V and 3.3~V rails, each protected against reverse polarity (P-channel MOSFET) and overvoltage transients (Zener diode clamp).
+
+\paragraph{Motion Control and Safety Systems}
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item \textbf{Encoder Interfaces (×4):} Four encoder inputs along the board edges (Fig.~\ref{fig:main-board}), each with an RC low-pass filter to suppress bounce before reaching the STM32's hardware timer pins.
+\item \textbf{PCA9685 Motor Control Header:} A dedicated I2C header drives an external PCA9685 16-channel PWM driver, offloading motor control from the STM32's limited PWM channels.
+\end{itemize}
+
+\paragraph{Communication and Sensor Telemetry}
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item \textbf{NRF Wireless Module:} Provides long-range wireless communication for remote control.
+\item \textbf{IMU Interface:} A 4-pin I2C header connects to an external IMU (e.g., BNO055) for orientation tracking and stabilization.
+\item \textbf{PDB Sensor Header:} An IDC connector receives telemetry from the power distribution board, including motor current draw and battery voltage.
+\end{itemize}
+\subsection{Power Distribution Board}
+The Power Distribution Board (PDB) is the central power-management node of the rover.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\columnwidth]{assets/power_1.jpeg}
+\hfill
+\includegraphics[width=0.48\columnwidth]{assets/power_2.jpeg}
+\caption{3D render and PCB layout of the power distribution board.}
+\label{fig:power-board}
+\end{figure}
+\vspace{-25pt}
+\paragraph{Battery Architecture}
+The rover uses three independent battery packs:
+\begin{itemize}
+    \item \textbf{Two 24~V traction packs} (front and rear) — each dedicated to one pair of motors
+    \item \textbf{One 12~V control pack} — dedicated to control, sensor, and logic electronics
+\end{itemize}
+The control battery is deliberately isolated from the traction packs, so motor inrush, stall conditions, or a blown drivetrain fuse cannot affect flight-critical electronics. Each battery input also has its own reverse-polarity MOSFET, fuse, and filtering stage, so a fault on one battery cannot propagate to the others.
+
+\paragraph{Input Protection}
+Each battery input uses a P-channel MOSFET as a high-side reverse-polarity switch instead of a diode, giving lower voltage drop and heat at high current while still protecting against reversed connections.
+
+\paragraph{Motor and System Rails}
+\begin{itemize}
+    \item \textbf{Four independently fused 24~V outputs} feed the four motor drivers : two channels from each traction battery
+    \item Each motor channel has a \textbf{two-stage filter} consisting of Ceramic and Electrolytic capacitors to suppress switching noise and absorb ripple respectively.
+    \item A separate, lower-current \textbf{12~V rail} supplies logic and sensor systems
+    \item All 5~V/3.3~V regulation is done \textbf{off-board}, keeping switching-regulator heat and noise away from the PDB's current- and voltage-sensing circuitry
+\end{itemize}
+\paragraph{Diagnostics}
+Each fuse has a paired LED that lights on failure, giving instant visual fault indication. Each protected rail also has a "power present" LED distinguishing "no battery connected" from "fuse failed" at a glance.
+
+\paragraph{Current and Voltage Telemetry}
+Motor current is measured per-channel with an onboard Hall-effect sensor, avoiding extra connectors. 
+Battery voltage is measured via a resistive divider, Zener-clamped to protect the control board's ADC. Telemetry runs to the control board on a dedicated ribbon connector, separate from high-current wiring.
+
+% \paragraph{Grounding}
+% All return paths converge at a single star-ground point on the PDB, bonded to the chassis, preventing ground loops between motor return currents and analog sense signals.
+
+\subsection{Motor Drivers}
+Motor actuation is handled by H-bridge driver circuits built around IR2104 gate drivers, controlled directly by the main STM32F401RCT6 controller. The firmware enforces strict timing and sequencing rules to protect the gate drivers and motor FETs from damage during operation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\linewidth]{assets/motor_driver_pcb.jpeg}
+\caption{3D rendering of the H-bridge motor driver board.}
+\label{fig:motor-driver-pcb}
+\end{figure}
+\vspace{-15pt}
+\begin{figure}[H]   
+    \centering  
+    \includegraphics[width=0.75\linewidth]{assets/motor_driver_doc.jpeg}
+    \caption{Motor driver schematic and PCB layout.}
+\end{figure}
+
+\paragraph{PWM Configuration}
+The controller's timer peripheral is configured to generate a PWM signal at a switching frequency suitable for reliable operation with the IR2104 driver, balancing switching efficiency against audible noise and control precision.
+
+\paragraph{Dead-Time Protection}
+Switching the H-bridge directly between forward and reverse can cause a shoot-through condition, where both sides of the bridge conduct simultaneously and short-circuit the supply. To prevent this, the firmware enforces a mandatory dead-time delay on every direction change, disabling both driver channels before the new direction is enabled. This software interlock supplements the IR2104's internal dead-time protection.
+
+\paragraph{Acceleration Ramping}
+To avoid inrush current spikes and mechanical stress, motor speed is ramped up gradually in small increments with only one direction driven at a time.
+\subsection{Emergency Stop Systems}
+The rover implements two independent emergency stop mechanisms, ensuring motors can be halted even if one method is inaccessible or fails.
+
+\begin{itemize}
+    \item \textbf{Physical E-Stop Button:} A dedicated emergency-stop button on the main control board immediately halts all motors and triggers a warning light when pressed.
+    \item \textbf{Wireless Kill Switch:} A remote stop command can be sent over the NRF wireless link based on hardware interrupt, allowing an operator or safety official to halt the rover without requiring physical access.
+\end{itemize}
+\subsection{Cooling \& Ventilation System}
+Thermal management is provided by two brushless DC fans, which ventilates the hardware electronics box, preventing heat buildup during sustained operation.
+\section{Software Design}
+
+\subsection{Architecture Overview}
+The system is built up on a ROS 2 base with multiple peripheral nodes producing feedback for the navigation controllers.
+
+A main finite state machine controller presides over the whole system, managing when services and nodes start and stop according to the rover's current state within the run.
+It also manages the transition between manual and autonomous modes.
+
+For manual navigation, a remote connection is established via ROS 2 to the station to receive motion commands.
+
+\subsection{Core Functionalities}
+\subsubsection{Lane Detection and Navigation}
+\paragraph{Detection:}
+A detection node equipped with a YOLOv8-based model is responsible for outputting a steering error percentage -- a lateral error offset from the lane center -- to the navigation nodes.
+
+\paragraph{Dataset \& Model Training:}
+
+The lane detection dataset was created by extracting frames from multiple recorded UGVC competition videos and another videos.
+The selected videos include different geometries , lighting conditions and camera viewpoints to improve the model's performance.
+The videos that were used in the training:
+\begin{itemize}
+    \item SCR IGVC 2024
+    \item SCR IGVC 2023
+    \item Self-driving car videos
+\end{itemize}
+
+After collecting the data, each frame was manually annotated using Roboflow.
+The lane boundaries were labeled with bounding box to create the training dataset used by YOLOv8 model, as shown in Figure \ref{fig:annotated-lanes}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{assets/Annotated Lane Dataset.jpeg}
+    \caption{Annotated lane dataset sample}
+    \label{fig:annotated-lanes}
+\end{figure}
+
+Shown in Figure \ref{fig:detected-lanes} are bounding boxes after lane detection.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{assets/Lane Detection Test.jpeg}
+    \caption{Lane detection bounding boxes}
+    \label{fig:detected-lanes}
+\end{figure}
+
+\paragraph{Navigation}
+The rover's lateral offset from the lane center, output by the \texttt{lane\_detection\_node}, is consumed by the lane navigation module as its error input. Lane navigation is handled by a PID control loop that converts this error into a corrective angular velocity command, while maintaining a constant forward velocity.
+
+The PID controller is tuned to provide a balance between responsiveness and stability in MATLAB's Simulink as shown in Figure \ref{fig:pid-tuning}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{assets/lane_control_loop.jpeg}
+    \caption{PID Tuning }
+    \label{fig:pid-tuning}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{assets/lane_control_response.jpeg}
+    \caption{PID step response for lane navigation control}
+    \label{fig:lane-control-response}
+\end{figure}
+\textbf{Safety and Stability Considerations:} 
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item Integral windup protection: The accumulated integral term is bounded to ±1.0, preventing the integral component from growing unbounded during sustained non-zero error.
+    \item Angular velocity saturation:  The final steering command is clamped to a max angular velocity, ensuring the rover cannot issue a steering command beyond necessary limits.
+\end{itemize}
+The lane navigation node then publishes the steering commands to the respective topic to be processed along with the obstacle avoidance node's output to generate a final angular velocity command for the rover.
+
+\subsubsection{Pothole Detection}
+Using a YOLOv8-based model, the vision system provides the autonomous rover with real-time pothole detection.
+The information is later fused with lane detection results to estimate steering error percentage.
+After detecting pothols, the detection node publishes a lateral offset error \% to the \texttt{/hole/error} topic.
+
+\paragraph{Dataset:}
+The hole detection dataset was created by extracting frames from multiple recorded UGVC competition videos and another videos and gazebo simulation.
+The selected videos include different geometries, lighting conditions and camera viewpoints to improve the model's performance.
+Among other sources, SCR IGVC 2025 videos were used to extract and annotate pothole images.
+
+\begin{figure}[H]
+    \includegraphics[width=0.45\textwidth]{assets/Potholes Dataset Real.jpeg}
+    \caption{Examples of holes under different conditions}
+\end{figure}
+
+\paragraph{Training:}
+After collecting the data, each frame was manually annotated using Roboflow .
+The hole was labeled with bounding box to create the training dataset used by YOLOv8 model.
+
+\begin{figure}[H]
+    \includegraphics[width=0.45\textwidth]{assets/Potholes Annotated Dataset.jpeg}
+    \caption{Annotated dataset from videos and simulations}
+\end{figure}
+
+\paragraph{Error Calculation:}
+The pothole center is extracted from the detected bounding box and compared with the horizontal center of the image. The resulting lateral offset is normalized to a percentage and published as the steering error for the topic.
+
+\subsubsection{Obstacle Avoidance}
+The rover utilizes a LiDAR sensor (RPLIDAR A2)  to detect obstacles within the drivable lane corridor and generate a corrected heading that keeps the rover within lane boundaries while avoiding collisions.
+The algorithm is a modified version of the \textbf{Disparity Extender} technique,constrained to an angular Region of Interest (ROI) aligned with the rover's current lane heading, rather than considering the entire 360-degree scan.
+This design ensures that the obstacle avoidance is treated as a local heading correction relative to the lane-following reference, preveting the rover from selecting a safe gap that would take it outside the lane.
+\begin{figure}[H]
+    
+    \centering
+    \includegraphics[width=0.75\linewidth]{assets/lidar_avoid.png}
+    \caption{Obstacle Avoidance Algorithm}
+    \label{fig:obstacle-avoidance}
+\end{figure}
+
+At each scan cycle, the system executes the following sequence:
+\begin{enumerate}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item \textbf{Scan Acquisition:} The LiDAR provides distance readings across its full field of view.
+    \item \textbf{Region of Interest Restriction:} The system receives the lane information and limits further processing to a defined angular window around that heading.
+    \item \textbf{Obstacle Edge Detection:} Within this window, the system identifies significant discontinuities between adjacent distance readings. These discontinuities indicate the physical edges of obstacles
+    \item \textbf{Boundary Expansion:} Each detected obstacle edge is extended outward by a distance corresponding to the rover's physical width plus an additional safety margin. This prevents the selection of a path that appears clear but would be insufficient for the rover to pass through safely.
+    \item \textbf{Heading Selection:} Following boundary expansion, select the direction within the permitted window that offers the greatest unobstructed distance and publish this as the corrected heading command.
+\end{enumerate}
+\subsubsection{Waypoint Navigation}
+Waypoint navigation is handled by two cooperating components: a trajectory generator, which converts a list of GPS waypoints into a smooth, heading-continuous drivable path, and a path-following controller, which follows that path using the Pure Pursuit path-tracking algorithm.
+
+\paragraph{Trajectory Generation}
+On receiving the first odometry message, the trajectory generator loads a list of GPS waypoints from a YAML configuration file. Each waypoint is converted from GPS coordinates into a local Cartesian frame relative to the rover's starting position using an equirectangular projection, then offset by the rover's actual starting position to produce world-frame coordinates.
+
+A smooth path is then constructed by fitting a cubic B\'{e}zier curve between each consecutive pair of waypoints. Heading constraints at each waypoint are computed from the direction of its neighboring segments -- interior waypoints use the averaged direction of the incoming and outgoing segments, ensuring the path transitions smoothly through each point rather than forming a sharp corner. 
+% Consecutive B\'{e}zier segments are then concatenated into a single continuous path, published once as a \texttt{nav\_msgs/Path} message on \texttt{/controller/path}. Waypoints are also published as an RViz \texttt{MarkerArray} on \texttt{/controller/waypoints} for visualization during testing, with the robot's starting position marked distinctly from the loaded waypoints.
+
+\paragraph{Path Following Controller}
+The path-following controller operates as a finite state machine with four states:
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item \textbf{Waiting for Path:} Idle until a path is received from the trajectory generator.
+\item \textbf{Aligning to Start:} If the rover's current position is not sufficiently close to the start of the received path, the rover rotates in place using a proportional heading controller until it is facing the path's start point.
+\item \textbf{Navigating:} The rover follows the path using the Pure Pursuit algorithm.
+\item \textbf{Goal Reached:} The final waypoint has been reached within the configured goal threshold; the rover is commanded to stop.
+\end{itemize}
+
+
+\subsubsection{Face Recognition and Detection}
+\paragraph{Models:}
+The system uses two pre-trained OpenCV deep learning models. YuNet is used for real-time face detection, while SFace extracts facial features and performs face recognition by comparing the detected face with a stored target feature using cosine similarity. The target feature is cached after the first extraction to improve runtime performance.
+
+\paragraph{Architecture:}
+The system implements a real-time face recognition pipeline that processes live camera frames. It first detects faces in each frame, then recognizes the target person by comparing the detected face with a stored facial representation. The output indicates whether the detected face matches the target or is an unknown person.
+
+For a recognized target, the system also estimates the face position relative to the center of the image by computing horizontal and vertical offsets. This information can be used for real-time tracking or robot navigation while continuously updating the visual output.
+
+\begin{figure}[H]
+    \includegraphics[width=0.45\textwidth]{assets/Face Recognition Pipeline.png}
+    \caption{Face Recognition Pipeline}
+\end{figure}
+
+\paragraph{ROS Integration:}
+The face recognition node subscribes to the video stream to process each frame, and publishes the annotated frame for optional debugging along with a coordinate offset for laser pointing.
+
+\subsection{Communication Systems}
+For transfering high-speed, high-bandwidth data between the onboard computer and the station, the existing ROS 2 system with its Data Distribution Service was used, to leverage descriptive topics, concurrent querying, real-time streaming and fault-tolerant connection.
+
+For station-rover communication, the onboard computer has an exposed 6 dBi unidirectional antenna, which is connected via a USB-A adapter directly to a PCIe bus rather than the shared USB bus for cameras to prevent internal bus congestion.
+By tuning the QoS profile for each telemetry topic, high-throughput non-critical streams like the camera streams have a reduced error-recovery load on the DDS.
+The station's router is configured to have a narrower wireless bandwidth (5-20 MHz) and shortened range (250m) for a robust, focused signal.
+
+\subsection{Auxiliary Systems}
+\subsubsection{Motor Control}
+\label{sec:motor-control} 
+The traction framework is powered by a 250 W, 24 V brushed DC motor, modeled as a second-order LTI state-space system with state vector $x = [\omega \quad i]^T$ (angular velocity and armature current):
+\begin{equation}
+\dot{x} = \begin{bmatrix} -b/J & k/J \\ -k/L & -R/L \end{bmatrix}x + \begin{bmatrix} 0 \\ 1/L \end{bmatrix}u, \quad y = \begin{bmatrix} 0 & 1 \end{bmatrix}x
+\end{equation}
+where $J = 0.01$ kg$\cdot$m$^2$, $b = 0.1$ N$\cdot$m$\cdot$s, $k = 0.1$ V$\cdot$s/rad, $R = 1\ \Omega$, $L = 0.5$ H. 
+% System identification was performed using MATLAB's grey-box framework (\texttt{greyest}) against a step-response test on the physical plant.
+\\ The full system model was modeled in MATLAB's Simulink and used to tune the PID controller for the inner velocity loop, as shown in Figure \ref{fig:full-control-loop}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{assets/Full System Model.jpeg}
+    \caption{Full system model for motor control loop}
+    \label{fig:full-control-loop}
+\end{figure}
+
+\paragraph{State Estimation \& Sensor Fusion}
+A Luenberger observer reconstructs velocity $\omega$ from measured armature current $y = i$:
+\begin{equation}
+\dot{\hat{x}} = A\hat{x} + Bu + K_e(y - C\hat{x})
+\end{equation}
+The gain $K_e$ is synthesized via LQR duality ($K_e = \text{lqr}(A^T, C^T, Q_o, R_o)^T$) with $Q_o = \text{diag}(10, 5)$, $R_o = 0.1$. The observer's estimate $\hat{\omega}$ is fused with the encoder reading $\omega_{\text{enc}}$ using a complementary filter at crossover $\omega_c = 5$ rad/s:
+\begin{equation}
+\omega_{\text{fused}}(s) = \left(\frac{s}{s+\omega_c}\right)\omega_{\text{obs}}(s) + \left(\frac{\omega_c}{s+\omega_c}\right)\omega_{\text{enc}}(s)
+\end{equation}
+The encoder anchors low-frequency DC tracking (eliminating observer drift from Coulomb drag and thermal shifts), while the observer handles high-frequency transients, bypassing encoder quantization latency.
+
+\paragraph{2-DOF Control Architecture and Loop Shaping}
+A Two-Degree-of-Freedom structure decouples disturbance rejection from command tracking.
+
+\paragraph{Reference Prefilter}
+A first-order prefilter smooths the reference outside the feedback loop:
+\begin{equation}
+F_{\text{ref}}(s) = \frac{\omega_n}{s + \omega_n}, \quad \omega_n = 5 \text{ rad/s}
+\end{equation}
+bounding rise time to $t_{\text{rise}} \approx 0.44$ s, limiting inrush current and wheel slip.
+
+\paragraph{Series Compensator Loop Shaping}
+The inner loop is shaped in the frequency domain via a 2-pole 2-zero compensator:
+\begin{equation}
+K_c(s) = K_g \cdot K_b(s) \cdot K_l(s) \cdot K_r(s)
+\end{equation}
+\begin{itemize}
+    \item \textbf{Gain ($K_g$):} Sets crossover frequency $W_l = 25$ rad/s.
+    \item \textbf{Low-Frequency Boost ($K_b(s) = \frac{B_b s + W_l}{s}$, $B_b=3$):} Ensures tight steady-state tracking.
+    \item \textbf{Lead Compensator ($K_l(s) = \frac{B_l s + W_l}{s + B_l W_l}$, $B_l=3$):} Recovers phase margin lost to transport delay.
+    \item \textbf{Roll-Off Filter ($K_r(s) = \frac{W_l \sqrt{B_r^2 + 1}}{s + B_r W_l}$, $B_r=10$):} Attenuates high-frequency gain by $>20$ dB against sensor noise.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{assets/loop_transfer_function.jpeg}
+    \caption{Open-loop frequency response $L(j\omega)$ mapping plant and cascade controllers.}
+    \label{fig:loop_gain}
+\end{figure}
+
+\subsubsection{Robustness Verification and Digital Mapping}
+A hierarchical bandwidth separation prevents coupling between control layers:
+\begin{equation}
+\omega_{\text{Nav}} < \omega_{\text{ref}} \ll W_l \le \frac{\pi}{5 T_s}
+\end{equation}
+with $\omega_{\text{Nav}} < 5$ rad/s (ROS 2/Pure Pursuit), $\omega_{\text{ref}} = 5$ rad/s (prefilter), $W_l = 25$ rad/s (inner loop), bounded by the 100 Hz MCU sampling limit ($F_s/10 \approx 62.8$ rad/s).
+
+Structured sensitivity analysis bounds peak sensitivity below 5 dB ($M_s \le 1.78$), guaranteeing Gain Margin $\ge 7.2$ dB and Phase Margin $\ge 32.6^\circ$ — absorbing the $\approx 14.3^\circ$ digital phase drop from ZOH delay ($T_s/2 = 5$ ms).
+
+The compensator $K_c(s)$ is discretized via prewarped Tustin transform:
+\begin{equation}
+s = K \frac{z - 1}{z + 1}, \quad K = \frac{W_l}{\tan\left(\frac{W_l T_s}{2}\right)}
+\end{equation}
+matching $K$ to crossover frequency $W_l$ preserves exact phase and gain characteristics at the tracking crossover within the 100 Hz execution loop.
+\subsubsection{Sensor Fusion}
+To achieve reliable and accurate localization across both short-range and long-range scenarios, the rover uses a multi-layered sensor fusion approach based on the \texttt{robot\_localization} package in ROS 2. Two instances of the Unscented Kalman Filter (UKF) node are launched, each tailored for a different type of navigation.
+
+\paragraph{Primary UKF Node:}
+Fuses continuous high-frequency sensor data from the IMU and wheel encoders, producing precise short-term odometry optimized for short-distance waypoint navigation, and is published on the \texttt{/odometry/filtered} topic.
+The high update rate ensures responsive motion control with minimal latency.
+
+\paragraph{Secondary UKF Node:}
+Integrates the filtered odometry output from the primary UKF with GPS position data from the NEO-6M v2 module via the \texttt{navsat\_transform} node. This creates a drift-resistant long-term odometry solution suitable for long-distance navigation and GPS coordinate-based waypoint following. The GPS integration corrects accumulated drift from dead reckoning, ensuring accurate global positioning over extended operation periods. This fused estimate is crucial for long-distance autonomous navigation and waypoint tracking. This is shown in the figure below.
+
+In addition to the filtered odometry outputs, the system also publishes unfiltered odometry data to dedicated topics (\texttt{/odometry/unfiltered}). These represent the raw position estimates from individual sensors before fusion. This separation allows for easier debugging, sensor fault detection, and fallback logic in case one sensor stream becomes unreliable.
+
+To improve the accuracy of IMU data, a zeroing and calibration routine is executed at startup.
+
+
+\subsubsection{Vehicle Monitoring}
+
+Using a station-side user interface made in Qt with QML-based widgets for the telemetry and system statistics, we can display in real-time vital information about the system including:
+
+\begin{itemize}
+    \item \textbf{Battery Status:} Two floating-point values reporting the voltage of the traction and control battery rails.
+    \item \textbf{Linear Velocity:} The rover's current linear speed, in m/s.
+    \item \textbf{Yaw / Compass:} Current heading, derived from the onboard IMU.
+    \item \textbf{Motor Currents:} Four individual current readings (FL, FR, BL, BR), one per motor channel.
+    \item \textbf{Position (X, Y):} The rover's estimated 2D position on the field.
+\end{itemize}
+
+In case the ROS-based remote communication fails for any reason, the onboard computer can be accessed directly via \texttt{ssh}, allowing nodes, topics, and system vitals to be inspected and debugged.
+% In case the ROS-based remote communication fails for any reason, we can directly \texttt{ssh} into the onboard computer and directly view nodes and debug them and their topics and check system vitals.
+
+\subsection{System Integration}
+
+To integrate all the components of the system with the different ROS nodes and topics, a set of strategies are deployed to ensure reliable communication.
+
+The main entry point and the emergency access hatch is \texttt{ssh} access to the onboard computer to debug, test, monitor and deploy the system.
+
+Once the main orchestrator node that is resposible for state transitions and state tracking is spun, the peripheral and auxiliary are started and put under the supervision of that main node.
+
+A graphic summarizing all inter-node communications is shown in Figure \ref{fig:ros-auto-overview}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{assets/ROS Autonomous System Overview.png}
+    \caption{ROS 2 node integration summary}
+    \label{fig:ros-auto-overview}
+\end{figure}
+
+
+\subsection{Software Testing \& Bug Tracking}
+
+Software validation relied on a combination of visualization and debugging tools alongside a structured team workflow for tracking progress and resolving issues throughout development.
+
+\paragraph{Testing and Debugging Tools}
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item \textbf{RViz:} Used extensively to visualize sensor data, planned paths, waypoints, and the rover's estimated position in real time, allowing issues in perception and navigation to be identified before field testing.
+\item \textbf{rqt\_graph:} Used to inspect the live communication graph between running components.
+% \item \textbf{ROS Bags:} Used to record and replay sensor and topic data, allowing real-world sensor readings to be replayed against the software stack or in simulators such as Gazebo without requiring the physical rover, which significantly sped up debugging of intermittent issues.
+\end{itemize}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{assets/rqt_graph.png}
+    \caption{rqt\_graph visualization of ROS node communication}
+    \label{fig:rqt-graph}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{assets/waypoint.jpeg}
+\caption{Rvizz visualization of waypoint navigation}
+\label{fig:manual-control-test}
+\end{figure}
+
+
+\section{Simulation \& Testing}
+
+Our team followed a strict test or simulate requirement before marking any task as completed.
+For simulated tests, we used industry standard software tools and techniques.
+
+\subsection{Simulations}
+
+\paragraph{Vision Models:}
+Simulations were done using Gazebo and static images as well as online video recordings of other competitions.
+By recreating the same quality constraints that would be present in our cameras and communication stacks using software filters and Gazebo configurations, as well as testing in manually taken pictures and videos of tracks and faces,
+we brought as much of a realistic environment to our simulations as possible.
+
+\paragraph{Navigation \& Control:}
+
+Using RViz and Gazebo, we were able to visualize what the rover ``sees'' as well as how responsive the navigation system is to sensor feedback. See Figure \ref{fig:rviz-gazebo}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{assets/rviz_gazebo_vision.png}
+    \caption{RViz-Gazebo Vision \& Navigation Simulation}
+    \label{fig:rviz-gazebo}
+\end{figure}
+
+For the navigation approach we settled on, the PID controller developed(See section \ref{sec:motor-control}) then  tested ,tuned ,and simulated in MATLAB.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{assets/step_response.jpeg}
+\caption{Closed-loop step response showing settling to the reference speed with minimal overshoot.}
+\label{fig:step-response}
+\end{figure}
+
+\subsection{Testing}
+
+\paragraph{Latency \& Performance}
+Using two laptops in an open field along with the router and its pointing system, we tested the ranges at which communication remains stable and latency remains low
+-- which allowed us to configure the router and the communication settings as well as rework our concurrency implementation in ROS 2.
+
+\paragraph{Navigation \& Localization}
+A miniature prototype robot was equipped with the same hardware and software that is used in the main rover, and was tested in a smaller testing environment with painted lanes and big obstacles.
+
+For navigation, the cameras were raised to their expected heights and their offset-from-center parameters were temporarily used in the navigation code to provide an accurate environment.
+
+\paragraph{PCB, PID \& Signal Analysis}
+
+Using a frequency and logic analyzer, as well as debuggers and multimeters, all electronic and control systems were tested on the workbench with software-simulated sensor readings.
+
+\paragraph{Risks \& Safety}
+For power board and motor response analyses, the necessary safety gear was worn and all sharp parts were covered or removed. Electrical testing configurations were set prior to powering on the electronics, and the boards were disconnected between every testing configuration.
+
+
+\section{Future Work}
+
+We have a few planned improvements, limited by the team's budget, which we hope to implement in future participations -- not in this year's competition.
+
+\textbf{The mechanical team} aims to implement:
+
+\begin{enumerate}[label=\textbf{\alph*.}, itemsep=1pt, parsep=0pt]
+    \item \textbf{Lightweighting:} FEA and topology optimization to reduce mass without sacrificing strength.
+    \item \textbf{Sealed Joints:} Sand-proof bearing housings and maintenance-friendly component designs.
+    \item \textbf{Integrated Drive Units:} Compact gearboxes with aligned shafts, improved torque, and shock resistance.
+    \item \textbf{Adjustable Frame Geometry:} Tunable suspension height, wheelbase, and CG for better terrain adaptability.
+    \item \textbf{Manufacturing:} CNC bending, jig expansion, and QA protocols for consistency and precision.
+\end{enumerate}
+
+\textbf{For electrical improvements}, the team plans to:
+
+\begin{itemize}[itemsep=1pt]
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item Design custom integrated microcontroller boards tailored to system needs
+    \item Enhance subsystem coordination and autonomy via smarter control algorithms
+    \item Make use of sensored brushless motor for enhanced control and more accurate localization support
+    \item Develop in-house ESC
+\end{itemize}
+
+These changes aim to deepen hardware understanding, boost customization, and improve adaptability for complex tasks and terrains.
+
+\textbf{For software improvements}, the team aims to utilize a stereo camera setup to simplify and improve the efficiency of lane detection and obstacle avoidance.
+
+\addcontentsline{toc}{section}{References}
+\nocite{*}
+\bibliographystyle{plain}
+\small
+\bibliography{references}
+
+
+\end{document}
