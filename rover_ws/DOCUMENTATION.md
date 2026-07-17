@@ -18,7 +18,7 @@ src </br>
 ├── [rover_interfaces](src/rover_interfaces/README.md) </br>
 ├── [waypoint_nav](src/waypoint_nav/README.md) </br>
 
-## autonomous code approaches:
+## autonomous code approaches
 
 ### approach 1
 
