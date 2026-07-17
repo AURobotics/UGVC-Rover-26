@@ -79,7 +79,7 @@ uses the  `sensor_msgs/Image` messages for easy processing in other ROS 2 nodes.
 
 Subscribes to two camera topics and displays each feed in its own OpenCV window.
 
-**Subscribed Topics**
+Subscribed Topics:
 
 | Topic                | Type                | QoS                                        |
 | -------------------- | ------------------- | ------------------------------------------ |
@@ -124,7 +124,8 @@ Launch launch file according to the mode you want to run the camera feed in
 
 ## TESTING
 
-both launchs/nodes where testing separately and works as intended.
+both launchs/nodes logic where testing separately and works as intended. </br>
+Note: file names was changed without testing after; **tiny error due to renamming is possible**
 
 > ‼️CARE‼️: </br>
 > the launch file did not handle the case when the modes are switched </br>
