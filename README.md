@@ -22,7 +22,7 @@ It is **not** recommended to directly open the monorepo root folder in your text
 | [network](./network/)   | `network/dev`      | configuration and scripts for network setup                             |
 | [reports](./reports/)   | `reports/dev`      | deliverable documents required by the competition                       |
 | [rover_ws](./rover_ws/) | `ros/dev`          | ROS2 project for on-board control, navigation, vision and communication |
-| [station](./station/)   | `station/dev`      | router configuration and firmware for the direction controller          |
+| [field](./field/)       | `field/dev`      | firmware & configuration for on-field devices, ex: router & killswitch  |
 
 
 ### Branch Strategies

@@ -1,29 +1,46 @@
 # Dual USB Camera ROS 2 Package
 
-A ROS 2 package that captures and displays video from two USB cameras simultaneously. Designed as a foundation for road detection and other computer vision pipelines.
+A ROS 2 package that captures and displays video from USB connected cameras.
+
+- [Dual USB Camera ROS 2 Package](#dual-usb-camera-ros-2-package)
+  - [Package Structure](#package-structure)
+  - [Nodes](#nodes)
+    - [for both `external_camera_node.py` and `internal_camera_node.py`](#for-both-external_camera_nodepy-and-internal_camera_nodepy)
+      - [Parameters](#parameters)
+      - [QoS Profile](#qos-profile)
+    - [`external_camera_node.py` speciality](#external_camera_nodepy-speciality)
+    - [`internal_camera_node.py` speciality](#internal_camera_nodepy-speciality)
+    - [`viewer_node.py` — Viewer (used for testing purposes)](#viewer_nodepy--viewer-used-for-testing-purposes)
+  - [Launch File](#launch-file)
+    - [`auto_camera_launch.py`](#auto_camera_launchpy)
+    - [`gui_camera_launch.py`](#gui_camera_launchpy)
+  - [Running the package](#running-the-package)
+  - [TESTING](#testing)
 
 ---
 
 ## Package Structure
 
-```
+``` graph
 cameras/
 ├── launch/
-|   └── launch.py # Launch file for both camera nodes (conatins parameters)
+|   ├── auto_camera_launch.py # Launch file for camera feed in auto mode
+|   └── gui_camera_launch.py # Launch file for camera feed in GUI mode  
 └── cameras/
-    ├── camera_node.py # USB camera publisher node
-    └── viewer_node.py # Dual-camera viewer node
+    ├── external_camera_node.py # camera publisher for feed through router
+    ├── internal_camera_node.py # camera publisher for internal use of feed
+    └── viewer_node.py # Dual-camera viewer node (testing purposes)
 ```
 
 ---
 
 ## Nodes
 
-### `camera_node.py` — `UsbCameraPublisher`
+### for both `external_camera_node.py` and `internal_camera_node.py`
 
-Opens a USB camera via OpenCV and publishes frames as ROS 2 `sensor_msgs/Image` messages.
+opens a camera via OpenCV and publishes frames as ROS 2 type message
 
-**Parameters**
+#### Parameters
 
 | Parameter      | Type   | Default               | Description                         |
 | -------------- | ------ | --------------------- | ----------------------------------- |
@@ -32,19 +49,37 @@ Opens a USB camera via OpenCV and publishes frames as ROS 2 `sensor_msgs/Image` 
 | `frame_id`     | string | `"camera"`            | TF frame ID stamped on each message |
 | `topic`        | string | `"/camera/image_raw"` | Topic to publish images on          |
 
-**Published Topics**
+#### QoS Profile
 
-| Topic                              | Type                | QoS                                        |
-| ---------------------------------- | ------------------- | ------------------------------------------ |
-| Configurable via `topic` parameter | `sensor_msgs/Image` | Best Effort, Volatile, Keep Last (depth 1) |
+```python
+qos_profile = QoSProfile(
+            reliability=QoSReliabilityPolicy.RELIABLE,
+            durability=QoSDurabilityPolicy.VOLATILE,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=1
+        )
+```
 
----
+optimised for efficient data transmission, especially over WiFi.
+> ⚠️ WARNING: make sure that the subscriber uses a compatible QoS profile
 
-### `viewer_node.py` — `Viewer`
+### `external_camera_node.py` speciality
+
+uses the `sensor_msgs.msg.CompressedImage` type and compresses the image to only **40%** of the original size before publishing. This is useful for sending camera feed over a network reliably.
+
+> used for external processing of camera feed; aka GUI run
+
+### `internal_camera_node.py` speciality
+
+uses the  `sensor_msgs/Image` messages for easy processing in other ROS 2 nodes.
+
+> used for internal processing of camera feed; aka autonomous run
+
+### `viewer_node.py` — Viewer (used for testing purposes)
 
 Subscribes to two camera topics and displays each feed in its own OpenCV window.
 
-**Subscribed Topics**
+Subscribed Topics:
 
 | Topic                | Type                | QoS                                        |
 | -------------------- | ------------------- | ------------------------------------------ |
@@ -55,60 +90,44 @@ Subscribes to two camera topics and displays each feed in its own OpenCV window.
 
 ## Launch File
 
-`launch.py` starts two `camera_node` instances with the following configuration:
+### `auto_camera_launch.py`
 
-| Node name | `device_index` | `topic`              | `frame_id` |
-| --------- | -------------- | -------------------- | ---------- |
-| `camera1` | `0`            | `/camera1/image_raw` | `camera1`  |
-| `camera2` | `2`            | `/camera2/image_raw` | `camera2`  |
+starts the `internal_camera_node` with the following configuration:
 
-Both nodes publish at **30 Hz**.
-
----
-
-## Running
-
-### Launch both cameras
-
-```bash
-ros2 launch cameras launch.py
+``` python
+parameters=[{
+                'device_index': 4,
+                'publish_rate': 15.0,
+                'topic': '/camera/image_raw',
+                'frame_id': 'camera',
+            }],
 ```
 
-### Run the viewer (TESTING)
+### `gui_camera_launch.py`
 
-```bash
-ros2 run cameras viewer_node
-```
+starts the `external_camera_node` with the following configuration:
 
-### Run a single camera node manually
-
-```bash
-ros2 run cameras camera_node --ros-args \
-  -p device_index:=0 \
-  -p publish_rate:=30.0 \
-  -p topic:=/camera1/image_raw \
-  -p frame_id:=camera1
+``` python
+parameters=[{
+                'device_index': 4,
+                'publish_rate': 15.0,
+                'topic': '/camera1/image_raw',
+                'frame_id': 'camera1',
+            }],
 ```
 
 ---
 
-## Notes
+## Running the package
 
-- Camera indices map to `/dev/videoN` on Linux. Run `ls /dev/video*` to list available devices.
-- Optimized QoS profile for efficient data transmission. Ensure subscribers use a compatible QoS profile.
-- The viewer uses `passthrough` encoding when converting images, preserving the original color format published by the camera node (`bgr8`).
+Launch launch file according to the mode you want to run the camera feed in
 
-## IMPORTANT
+## TESTING
 
-**When subscribing to camera topics, you need to set the qos of the subscriber to match the publisher or else data will silently not get recieved**
+both launchs/nodes logic where testing separately and works as intended. </br>
+Note: file names was changed without testing after; **tiny error due to renamming is possible**
 
-qos by subscriber:
-
-```python
-qos_profile = QoSProfile(
-            reliability=QoSReliabilityPolicy.RELIABLE,
-            durability=QoSDurabilityPolicy.VOLATILE,
-            history=QoSHistoryPolicy.KEEP_LAST,
-            depth=1
-        )
-```
+> ‼️CARE‼️: </br>
+> the launch file did not handle the case when the modes are switched </br>
+> in the competition we did not switch the modes </br>
+> to switch modes with correct handling camera feed publishing the logic must be revised and re-tested!!
