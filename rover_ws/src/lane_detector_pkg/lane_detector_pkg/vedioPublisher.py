@@ -118,7 +118,7 @@ class CameraPublisher(Node):
         frame,
         (self.lane_target, look_ahead_y),
         8,
-        (255, 0, 0),   # أزرق
+        (255, 0, 0),   
         -1
     )
        # cv2.imshow("Rover Test", frame)
