@@ -51,3 +51,106 @@ Important methods:
 ## How they work together
 
 `RoadFeatureDetector` uses `HomographyBEV` to convert detected lane and obstacle features from image coordinates into real-world distances and positions. This enables the rover to estimate lane geometry and obstacle offsets in meters rather than pixels.
+
+## `errors_percentage.py`
+
+`ObstacleDetector` is the main perception node responsible for detecting lanes , obstacles and circular holes from the camera stream. it combines classical computer vision with YOLO model to estimate the safest direction for rover and publish navigation errors for control nodes.
+
+The node performs the following tasks : 
+- Detect lane boundaries using classic image processing(`get_lane_data`) for `RoadFeatureDetector` class
+- Detect obstacles using trained YOLO model(`ModelForObstacle.pt`)
+- Detect circular holes on the road for `RoadFeatureDetector`
+- Compute lane error(`lane/error`)
+- Compute obstacle errror(`obstacle/errot`)
+- Compute circular holes error(`circle/error`)
+- Compute final error based on largest free space inside the lane
+- Publish a visualization image for debugging
+
+`Navigation Error Calculations`
+after indentifying all obstacles and lane boundaries , the algorithm computes the `lagerst free gap` inside the lane . the rover is guided the center of that gap 
+- The center of the selected gap calculated as : 
+`target center = (Gap Start + Gap End) / 2​`
+- The camera center calculated as :
+`frame center = image width / 2`
+- The navigation error calculated as :
+`total error = target center - frame center`
+- The published error calculated as : 
+`published error = (total error / frame center) * 54`
+- -54<= published error <=54
+positive values -> steer right
+negative values -> steer left
+- The normalized error is multiplied by 54 to map it back to the camera image coordinates, where the image width is 108 pixels and the center is located at x = 54 pixels
+
+- `Subcribes Topic`
+ - `camera/image/raw` : receives
+ the live camera image
+  `reasons` : 
+   - used as main input for lane detection
+   - performs YOLO obstacle model 
+   - detect circular holes
+
+- `Published Topics`
+ - `camera/publish` : publish the processed image after drawing :
+  - detect lanes 
+  - obstacles
+  - circles
+  - target center 
+  - frame center 
+  `reasons` :
+   - used for debugging
+ - `lane/error` : publish the lane center error 
+  `reasons` : 
+   - allow the controller to keep the rover between lanes 
+ - `obstacle/error` : publish the steering error to avoid the detected obstacles
+  `reasons` : 
+   - provides the controller with  the safest direction around obstacles 
+ - `obstacle/detected` : indicate whether any obstacle exists inside the lane 
+  `reasons` : 
+   - allows other nodes to know when obstacle avoidance should become active
+ - `circle/error` : publish the steering error to avoid the circular holes
+  `reasons` : 
+    - provides the controller with  the safest direction around circular holes 
+ - `circle/detected` : indicate whether any obstacle exists inside the lane 
+  `reasons` : 
+    - allows other nodes to know  when circular holes should become active
+ - `total/error` : publish the final navigation error
+  `reasons` : 
+   - represents the final navigation error after combining lane error , obstacle error and circle error
+
+- `Services` 
+ - `/obstacle_detector/start` : start and stop the obstacle detector
+ when the service receives :
+ `true` -> detection start 
+ `false` -> detection stop
+  `reasons` :
+   - Allows external nodes to enable or disable perception during different mission stages
+
+## `lanes_obstacles_error.py`
+
+this node performs the same perception pipline as the previous implemention, including : 
+- lane detection
+- obstacle detection using YOLO model
+- circular holes detection 
+- safe gap calculation
+- navigation error calculation
+
+`difference between error_percentage.py`
+- lane error is published in meters instead pixels using BEV homography
+- obstacle error is computed in meters using BEV homography
+- total navigation error represents the rover's lateral distance in meteres 
+
+## `Testing`
+The node was tested in both simulations and real-world scenarios
+
+## `another unused model`
+`ModelForLanes.pt` : trained YOLO model to detect lanes and make boxes about lanes after that follow the same previous algorithms
+
+`ModelForHoles.pt` : trained YOLO model to detect circular holes and make boxes about circles after that follow the same previous algorithms
+
+`how to get the data` : collect the data from vedios similar to the competion and another self driving vedios after that train the models on google colab
+
+
+
+
+
+
