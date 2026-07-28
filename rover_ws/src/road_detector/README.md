@@ -54,30 +54,84 @@ road_detector/
 ## Nodes
 
 ### `lane_follower_node.py`
+Subscribes to the lane pointcloud produced by `road_detector_node.py` (`lane_topic`, default `/road_detector/lanes`) and drives the robot by publishing `geometry_msgs/Twist` on `cmd_vel_topic` (default `/cmd_vel`).
+
+State machine per cloud:
+- **Both walls visible** → steer to keep the corridor centered.
+- **Only one wall visible** → hug that wall at `wall_hug_distance`, slowed by `single_wall_speed_multiplier`.
+- **No walls for a few frames** → coast forward at half speed.
+- **No walls for `max_coast_frames`+** → stop and spin in place to re-acquire the lane.
+- If any point falls closer than 0.25 m, the robot halts until the obstacle clears.
+
+**Params file:** `config/lane_follower_params.yaml` (loaded via the `params_file` launch argument in `lane_follower_launch.py` / `all.launch.py`).
 
 ### `mock_test_node.py`
+Dev/test utility — publishes a synthetic, perfectly straight corridor (two parallel walls) as a `PointCloud2` on `/lane_pointcloud`, letting `lane_follower_node.py` be exercised (e.g. checking steering sign when `offset` is set) without the camera pipeline running. Has no ROS parameters; the simulated drift `offset` is set directly in `main()`.
 
 ### `pointcloud_logger_node.py`
+Subscribes to a `PointCloud2` topic and writes every received cloud — header, field names, dimensions, per-point XYZ, and min/max/mean stats — to a plain-text log file so the output of `road_detector_node.py` can be inspected by hand.
+
+**Params file:** `config/pointcloud_logger_params.yaml` (loaded via the `pcl_params_file` argument in `road_detector_test_launch.py`).
 
 ### `road_detector_node.py`
+The main perception node. Subscribes to `camera_topic` (default `/camera/image_raw`) and runs the CV pipeline (`cv_code/`) to detect lane markings and pothole circles from a bird's-eye-view projection.
+
+Publishes:
+- `output_pointcloud_topic` / `output_lane_topic` (default `/road_detector/pointcloud`, `/road_detector/lanes`) — lane points.
+- `output_potholes_topic` (default `/road_detector/potholes`) — pothole points.
+- `output_lane_mask_topic` / `output_bev_topic` (default `/road_detector/debug/lane_mask`, `/road_detector/debug/bev_image`) — debug images, only if `publish_debug_images` is true.
+- `output_stats_topic` (default `/road_detector/stats`) — processing stats, only if `publish_performance_stats` is true.
+
+Also exposes a `/road_detector/enable` service (`std_srvs/SetBool`) to enable/disable processing at runtime.
+
+**Params file:** `config/params.yaml` for real-life runs, `config/params_sim.yaml` for simulation (choose the right one via the `params_file` launch argument), or `config/params_test.yaml` for the pointcloud test harness — see [`road_detector_test_launch.py`](#road_detector_test_launchpy). Key parameters include camera extrinsics (`camera_height`, `pitch_deg`, `yaw_deg`, `roll_deg`), camera intrinsics (`fx`, `fy`, `cx`, `cy`, `dist_coeffs`), detection tuning (`min_radius`, `max_radius`, `horizon_margin_px`, `max_forward_range`), and `max_points_per_cloud`. Most of these (plus `publish_debug_images` / `publish_performance_stats`) are dynamically reconfigurable at runtime without restarting the node.
+
+>NOTE: dynamically reconfiguration for the parameters is **not tested** and may not work as intended. </br>
 
 ### `video_publisher_node.py`
+Reads a recorded video file and republishes its frames as `sensor_msgs/Image` on `image_topic` (default `/camera/image_raw`) — the same topic `road_detector_node.py` subscribes to — so recorded footage can be replayed for offline testing.
+
+**Params file:** `config/video_publisher_params.yaml` (loaded via the `vp_params_file` argument in `road_detector_test_launch.py`).
 
 ### `video_viewer.py`
+Debug viewer — opens three OpenCV windows showing the raw camera feed (`/camera/image_raw`), the lane mask debug image (`/road_detector/debug/lane_mask`), and the BEV debug image (`/road_detector/debug/bev_image`) side by side. Has no declared parameters or params file; topics are hardcoded and only produce output when `road_detector_node.py` is run with `publish_debug_images:=true`.
 
 ## Launch Files
 
 ### `all.launch.py`
+Brings up the "lane follower" driving approach end-to-end: `road_detector_node` (parameters from `config/params.yaml`) plus `lane_follower_node` (parameters from `config/lane_follower_params.yaml`).
+
+> ⚠️ **Note:** both nodes' parameter files are exposed through a launch argument named `params_file`. Because a launch argument name must be unique, declaring it twice means both nodes actually resolve `LaunchConfiguration('params_file')` to the **same** value — whichever default is registered first. If you need to override one node's params file independently, either pass distinct argument names (as done in `road_detector_test_launch.py`) or launch the two files separately. </br>
+> 2lly fo2 dah kalam claude 2na m4 fahmoh :) </br>
+> ⚠️ **NOTE: NOTE TESTED**
 
 ### `lane_follower_launch.py`
+Launches only `lane_follower_node`, with parameters from `config/lane_follower_params.yaml` (overridable via the `params_file` launch argument), plus a `topic_tools/relay` node that forwards `/cmd_vel_stamped` to `/diff_drive_controller/cmd_vel` so the follower's commands reach a simulated diff-drive controller.
+
+>TESTED in simulation and works as intended.
 
 ### `road_detector_launch.py`
+Launches only `road_detector_node` on its own, with parameters from `config/params.yaml` (overridable via the `params_file` launch argument). Use this for the "pointcloud" approach or when `lane_follower_node` is run separately/not needed.
+
+> TESTED in simulation and works as intended.
 
 ### `road_detector_test_launch.py`
+The pointcloud-verification test harness. Launches four nodes together so recorded footage can be replayed and the resulting pointcloud inspected without a live camera or robot:
+- `video_publisher_node` — replays a video file (params from `config/video_publisher_params.yaml`, argument `vp_params_file`).
+- `road_detector_node` — processes the replayed frames (params from `config/params_test.yaml`, argument `rd_params_file` — see the outdated note on this file in [Package Structure](#package-structure)).
+- `pointcloud_logger_node` — logs the resulting pointcloud to a text file for manual verification (params from `config/pointcloud_logger_params.yaml`, argument `pcl_params_file`).
+- `video_viewer_node` — displays the camera feed and debug images live (no params file).
+
+> TESTED with recorded footage and works as intended.
 
 ---
 
 ## Running the package
+Choose the approach you want to run:
+   - Full lane-following stack: `ros2 launch road_detector all.launch.py`
+   - Road/pointcloud detection only: `ros2 launch road_detector road_detector_launch.py`
+   - Lane follower only (e.g. against a separately-launched detector or simulation): `ros2 launch road_detector lane_follower_launch.py`
+   - Offline pointcloud verification against recorded video: `ros2 launch road_detector road_detector_test_launch.py`
 
 ---
 
@@ -85,4 +139,3 @@ road_detector/
 was only done via simulation:</br>
 both road detector pointclouds and lane follower node were tested in simulation and are working very well. </br>
 None tested in real life except that the pointclound values has been very poorly real life tested
-
