@@ -35,31 +35,32 @@ graph TD
     subgraph ProjectTrack ["Contributions Pipeline"]
         direction TB
         subgraph ReviewerSyncSub ["Maintainers + Reviewers"]
-            MainStart2["main"] -->|New Branch &lpar;Maintainers&rpar; or Sync &lpar;Reviewers&rpar;| ProjDev1["&lt;project&gt;/dev"]
+            MainStart2["main"] -->|"New Branch (Maintainers) or Sync (Reviewers)"| ProjDev1["&lt;project&gt;/dev"]
         end
-        ProjDev1 -->|New Feature Branch| ProjFeature["&lt;project&gt;/&lt;FEATURE&gt;"]
-        ProjFeature -->|Open| PRStep["Feature PR"]
+        ProjDev1 -->|"New Feature Branch"| ProjFeature["&lt;project&gt;/&lt;FEATURE&gt;"]
+        ProjFeature -->|"Open"| PRStep["Feature PR"]
         
         subgraph ReviewerPrSub ["Reviewers"]
             direction TB
-            ReviewStep["Feature Code Review"] -->|Approve & Merge| ProjDev2["&lt;project&gt;/dev"]
+            ReviewStep["Feature Code Review"] -->|"Approve & Merge"| ProjDev2["&lt;project&gt;/dev"]
             IntegrationPR["Integration PR"]
-        end ReviewerPrSub
+        end
         
         subgraph DevMaintainers ["Maintainers"]
             direction TB
-            IntegrationPR -->|Trigger| FinalReview["Final Review"]
-            FinalReview -->|Approve & Final Merge| MainEnd2["main"]
+            IntegrationPR -->|"Trigger"| FinalReview["Final Review"]
+            FinalReview -->|"Approve & Final Merge"| MainEnd2["main"]
         end
 
-        PRStep -->|Trigger| ReviewStep
+        PRStep -->|"Trigger"| ReviewStep
         
         %% Flow from project dev branch into the main integration pipeline
-        ProjDev2 -->|Open PR to main| IntegrationPR
+        ProjDev2 -->|"Open PR to main"| IntegrationPR
     end
 
     classDef mainBranch fill:#070707,stroke:#373737,stroke-width:2px,color:#EDEFF0;
     classDef devBranch fill:#FA5F6C,stroke:#DD1F44,stroke-width:2px,color:#FEDFDF;
+    classDef featureBranch fill:#DD1F44,stroke:#FA5F6C,stroke-width:2px,color:#FFFFFF;
     classDef reviewNode fill:#FCA6A7,stroke:#FEDFDF,stroke-width:2px,color:#070707;
 
     class MainStart2,MainEnd2 mainBranch
